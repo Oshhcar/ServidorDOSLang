@@ -1,0 +1,425 @@
+package analizador;
+
+import java_cup.runtime.Symbol;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+
+
+parser code
+{:
+	//private Ast ast;
+	
+	//public Ast getAST(){
+	//	return ast;
+	//}
+	
+        private ArrayList<ErrorC> errores = new ArrayList<>();
+
+        public ArrayList<ErrorC> getErrores(){
+            return this.errores;
+        }
+
+    @Override
+    public void syntax_error(Symbol s){
+        System.out.println("Error Sintactico en la Linea " + s.left +" Columna "+ s.right + ". Identificador " +s.value + " no reconocido." );
+                ErrorC error = new ErrorC();
+                error.setTipo("Sintáctico");
+                error.setLinea(s.left+1);
+                error.setColumna(s.right+1);
+                error.setValor(s.value.toString());
+                error.setDescripcion("Identificador " +s.value + " no reconocido.");
+                this.errores.add(error);
+    }
+
+    @Override
+    public void unrecovered_syntax_error(Symbol s){
+        System.out.println("Error Sintactico Fatal en la Linea " + s.left + " Columna "+ s.right +". Identificador " + s.value + " no reconocido.");
+		//report_fatal_error("Error sintactico: <"+s.value+">", cur_token);
+                ErrorC error = new ErrorC();
+                error.setTipo("Sintáctico");
+                error.setLinea(s.left+1);
+                error.setColumna(s.right+1);
+                error.setValor(s.value.toString());
+                error.setDescripcion("Identificador " +s.value + " no reconocido.");
+                this.errores.add(error);
+	}
+:}
+
+action code
+{:
+
+:}
+
+terminal String tstring, tchar, entero, decimal, id, nil_, true_, false_;
+terminal puntoycoma, coma, puntos3, puntos2, igual, parIzquierda, parDerecha;
+terminal corcheteIzquierda, corcheteDerecha, dospuntos, asignacion, punto;
+terminal mas, menos, asterisco, diagonal, potencia, modulo;
+terminal mayorque, menorque, mayorigual, menorigual, diferente;
+terminal and, nand, nor, or, not;
+terminal char_, integer_, real_, string_, word_, boolean_;
+terminal program_, uses_, type_, array_, of_, var_, const_, function_, begin_, end_;
+terminal procedure_, record_, break_, if_, then_, else_, with_, do_, continue_, exit_;
+terminal case_, default_, while_, repeat_, until_, for_, to_, downto_, write_, writeln_, read_;
+
+non terminal INICIO;
+non terminal PROGRAM;
+non terminal PROGRAM_NAME;
+non terminal USES;
+non terminal ID_LIST;
+non terminal TYPE_PRIMITIVE;
+non terminal TYPEDEF;
+non terminal TYPE_LIST;
+non terminal TYPE;
+non terminal TYPE_VALUE;
+non terminal TYPE_SPECIFIER;
+non terminal DIM_LIST;
+non terminal DIM;
+non terminal VARDEF;
+non terminal VAR_LIST;
+non terminal VAR;
+non terminal CONSTDEF;
+non terminal CONST_LIST;
+non terminal CONST;
+non terminal PROCEDUREDEF;
+non terminal METHOD_LIST;
+non terminal METHOD;
+non terminal FUNDEF;
+non terminal PARAMETERS;
+non terminal PARAMETERS_LIST;
+non terminal PARAMETER;
+non terminal PROCDEF;
+non terminal BLOQUE;
+non terminal SENTENCIAS;
+non terminal SENTENCIA;
+non terminal STATEMENT;
+non terminal WITH_STMT;
+non terminal ASSIGNMENT_STMT;
+non terminal TARGET;
+non terminal BREAK_STMT;
+non terminal CONTINUE_STMT;
+non terminal EXIT_STMT;
+non terminal IF_STMT;
+non terminal CASE_STMT;
+non terminal CASE_LIST;
+non terminal CASE;
+non terminal WHILE_STMT;
+non terminal REPEAT_STMT;
+non terminal FOR_STMT;
+non terminal WRITE_STMT;
+non terminal READ_STMT;
+non terminal EXPRESSION_STMT;
+non terminal EXPRESSION_LIST;
+non terminal EXPRESSION;
+non terminal OR_EXPR;
+non terminal AND_EXPR;
+non terminal NANDNOR_EXPR;
+non terminal COMPARISON_EQ;
+non terminal COMPARISON;
+non terminal COMP_OPERATOR;
+non terminal A_EXPR;
+non terminal M_EXPR;
+non terminal U_EXPR;
+non terminal PRIMARY;
+non terminal ATOM;
+non terminal LITERAL;
+non terminal ENCLOSURE;
+non terminal PARENTH_FORM;
+non terminal ATTRIBUTEREF;
+non terminal ACCESS;
+non terminal CALL;
+//non terminal /*Expresion*/ E;
+
+precedence left else_;
+
+start with INICIO;
+
+INICIO ::= PROGRAM
+        {: 
+            System.out.println("DOCUMENTO OK"); 
+        :}
+;
+
+PROGRAM ::= PROGRAM_NAME USES TYPEDEF CONSTDEF VARDEF PROCEDUREDEF BLOQUE punto
+;
+
+PROGRAM_NAME ::= program_ id:a puntoycoma
+        {:
+            System.out.println("programa "+a);
+        :}
+;
+
+USES ::= uses_ ID_LIST puntoycoma
+        | {: :}
+;
+
+ID_LIST ::= ID_LIST coma id
+            | id
+;
+
+
+TYPE_PRIMITIVE ::= char_
+                | integer_
+                | real_
+                | string_
+                | word_
+                | boolean_
+;
+
+TYPEDEF ::= type_ TYPE_LIST
+        | {: :}
+;
+
+TYPE_LIST ::= TYPE_LIST TYPE
+            | TYPE
+;
+
+TYPE ::= ID_LIST igual TYPE_VALUE puntoycoma
+;
+
+TYPE_VALUE ::= TYPE_SPECIFIER
+            | parIzquierda ID_LIST parDerecha
+            //| LITERAL puntos3 LITERAL
+            | LITERAL puntos3 LITERAL
+;
+
+TYPE_SPECIFIER ::= TYPE_PRIMITIVE
+                | array_ corcheteIzquierda DIM_LIST corcheteDerecha of_ TYPE_SPECIFIER
+                | id
+                | record_ VAR_LIST end_
+;
+
+DIM_LIST ::= DIM_LIST coma DIM
+            | DIM
+;
+
+DIM ::= LITERAL puntos2 LITERAL
+        //| id puntos2 id
+        | id
+;
+
+VARDEF ::= var_ VAR_LIST
+        | {: :}
+;
+
+VAR_LIST ::= VAR_LIST VAR
+        | VAR;
+
+VAR ::= ID_LIST dospuntos TYPE_SPECIFIER puntoycoma
+        | ID_LIST dospuntos TYPE_SPECIFIER asignacion EXPRESSION puntoycoma
+;
+
+CONSTDEF ::= const_ CONST_LIST
+        | {: :} 
+;
+
+CONST_LIST ::= CONST_LIST CONST
+        | CONST;
+
+CONST ::= ID_LIST igual EXPRESSION puntoycoma
+;
+
+PROCEDUREDEF ::= {: :}
+            | METHOD_LIST
+;
+
+METHOD_LIST ::= METHOD_LIST METHOD 
+            | METHOD
+;
+
+METHOD ::= FUNDEF puntoycoma
+        | FUNDEF
+        | PROCDEF puntoycoma
+        | PROCDEF
+;
+
+FUNDEF ::= function_ id PARAMETERS dospuntos TYPE_SPECIFIER puntoycoma VARDEF PROCEDUREDEF BLOQUE 
+;
+
+PARAMETERS ::= parIzquierda PARAMETERS_LIST parDerecha
+            | {: :}
+;
+
+PARAMETERS_LIST ::= PARAMETERS_LIST puntoycoma PARAMETER
+                | PARAMETER
+;
+
+PARAMETER ::= ID_LIST dospuntos TYPE_SPECIFIER
+            | var_ ID_LIST dospuntos TYPE_SPECIFIER
+;
+
+PROCDEF ::= procedure_ id PARAMETERS puntoycoma VARDEF PROCEDUREDEF BLOQUE
+;
+
+BLOQUE ::= begin_ SENTENCIAS end_
+        | begin_ end_
+;
+
+STATEMENT ::= BLOQUE puntoycoma
+            | BLOQUE
+            | SENTENCIA
+;
+
+SENTENCIAS ::= SENTENCIAS SENTENCIA
+            | SENTENCIA 
+;
+
+SENTENCIA ::= WITH_STMT puntoycoma
+            | WITH_STMT
+            | ASSIGNMENT_STMT puntoycoma
+            | BREAK_STMT puntoycoma
+            | CONTINUE_STMT puntoycoma
+            | EXIT_STMT puntoycoma
+            | IF_STMT
+            | CASE_STMT
+            | CASE_STMT puntoycoma
+            | WHILE_STMT
+            | REPEAT_STMT puntoycoma
+            | FOR_STMT
+            | WRITE_STMT puntoycoma
+            | READ_STMT puntoycoma
+            | EXPRESSION_STMT puntoycoma
+;
+
+WITH_STMT ::= with_ ID_LIST do_ SENTENCIAS end_ 
+            | with_ ID_LIST do_ end_
+;
+
+TARGET ::= id
+        | ATTRIBUTEREF
+        | ACCESS
+;
+
+ASSIGNMENT_STMT ::= TARGET asignacion EXPRESSION
+;
+
+BREAK_STMT ::= break_
+;
+
+CONTINUE_STMT ::= continue_
+;
+
+EXIT_STMT ::= exit_
+;
+
+IF_STMT ::= if_ EXPRESSION then_ STATEMENT else_ STATEMENT
+          | if_ EXPRESSION then_ STATEMENT
+;
+
+CASE_STMT ::= case_ EXPRESSION of_ CASE_LIST default_ STATEMENT end_ /*VERIFICAR SI ES ELSE*/
+            | case_ EXPRESSION of_ CASE_LIST end_
+;
+
+CASE_LIST ::= CASE_LIST CASE
+            | CASE
+;
+
+CASE ::= EXPRESSION_LIST dospuntos STATEMENT
+;
+
+WHILE_STMT ::= while_ EXPRESSION do_ STATEMENT
+;
+
+REPEAT_STMT ::= repeat_ SENTENCIAS until_ EXPRESSION
+;
+
+FOR_STMT ::= for_ TARGET asignacion EXPRESSION to_ EXPRESSION do_ STATEMENT
+            | for_ TARGET asignacion EXPRESSION downto_ EXPRESSION do_ STATEMENT
+;
+
+WRITE_STMT ::= write_ parIzquierda EXPRESSION_LIST parDerecha
+            | writeln_ parIzquierda EXPRESSION_LIST parDerecha
+;
+
+READ_STMT ::= read_ parIzquierda EXPRESSION parDerecha
+;
+
+EXPRESSION_STMT ::= CALL 
+                | id
+;
+
+EXPRESSION_LIST ::= EXPRESSION_LIST coma EXPRESSION
+                | EXPRESSION
+;
+
+EXPRESSION ::= OR_EXPR
+;
+
+OR_EXPR ::= NANDNOR_EXPR 
+        | OR_EXPR or NANDNOR_EXPR
+;
+
+NANDNOR_EXPR ::= AND_EXPR
+                | NANDNOR_EXPR nand AND_EXPR
+                | NANDNOR_EXPR nor AND_EXPR
+;
+
+AND_EXPR ::= COMPARISON_EQ 
+            | AND_EXPR and COMPARISON_EQ
+;
+
+COMPARISON_EQ ::= COMPARISON
+            | COMPARISON_EQ igual COMPARISON
+            | COMPARISON_EQ diferente COMPARISON
+;
+
+COMPARISON ::= A_EXPR
+            | COMPARISON COMP_OPERATOR  A_EXPR
+;
+
+COMP_OPERATOR ::= mayorque
+                | menorque
+                | mayorigual
+                | menorigual
+;
+
+A_EXPR ::= M_EXPR 
+        | A_EXPR mas M_EXPR
+        | A_EXPR menos M_EXPR
+;
+
+M_EXPR ::= U_EXPR
+        | M_EXPR asterisco U_EXPR
+        | M_EXPR diagonal U_EXPR
+        | M_EXPR modulo U_EXPR
+        | M_EXPR potencia U_EXPR
+;
+
+U_EXPR ::= PRIMARY
+        | mas PRIMARY
+        | menos PRIMARY
+        | not PRIMARY
+;
+
+PRIMARY ::= ATOM | ATTRIBUTEREF | ACCESS | CALL
+;
+
+ATOM ::= id /*esto puede ser una llamada*/
+        | LITERAL
+        | ENCLOSURE
+;
+
+LITERAL ::= tstring:a {: :} 
+     | tchar:a {: :}
+     | entero
+     | decimal
+     | nil_
+     | true_
+     | false_
+;
+
+ENCLOSURE ::= PARENTH_FORM
+;
+
+PARENTH_FORM ::= parIzquierda EXPRESSION parDerecha
+;
+
+ATTRIBUTEREF ::= PRIMARY punto id
+;
+
+ACCESS ::= PRIMARY corcheteIzquierda EXPRESSION_LIST corcheteDerecha
+;
+
+CALL ::=  id parIzquierda parDerecha
+        | id parIzquierda EXPRESSION_LIST parDerecha
+;
