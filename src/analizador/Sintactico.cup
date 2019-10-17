@@ -5,14 +5,19 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
+import analizador.ast.*;
+import analizador.ast.entorno.Tipo;
+import analizador.ast.entorno.Type;
+import analizador.ast.expresion.*;
+import analizador.ast.instruccion.*;
 
 parser code
 {:
-	//private Ast ast;
+	private AST ast;
 	
-	//public Ast getAST(){
-	//	return ast;
-	//}
+	public AST getAST(){
+		return ast;
+	}
 	
         private ArrayList<ErrorC> errores = new ArrayList<>();
 
@@ -90,8 +95,8 @@ non terminal PARAMETERS_LIST;
 non terminal PARAMETER;
 non terminal PROCDEF;
 non terminal BLOQUE;
-non terminal SENTENCIAS;
-non terminal SENTENCIA;
+non terminal ArrayList<NodoAST> SENTENCIAS;
+non terminal NodoAST SENTENCIA;
 non terminal STATEMENT;
 non terminal WITH_STMT;
 non terminal ASSIGNMENT_STMT;
@@ -106,36 +111,36 @@ non terminal CASE;
 non terminal WHILE_STMT;
 non terminal REPEAT_STMT;
 non terminal FOR_STMT;
-non terminal WRITE_STMT;
+non terminal Write WRITE_STMT;
 non terminal READ_STMT;
 non terminal EXPRESSION_STMT;
-non terminal EXPRESSION_LIST;
-non terminal EXPRESSION;
-non terminal OR_EXPR;
-non terminal AND_EXPR;
-non terminal NANDNOR_EXPR;
-non terminal COMPARISON_EQ;
-non terminal COMPARISON;
-non terminal COMP_OPERATOR;
-non terminal A_EXPR;
-non terminal M_EXPR;
-non terminal U_EXPR;
-non terminal PRIMARY;
-non terminal ATOM;
-non terminal LITERAL;
-non terminal ENCLOSURE;
-non terminal PARENTH_FORM;
-non terminal ATTRIBUTEREF;
-non terminal ACCESS;
-non terminal CALL;
-//non terminal /*Expresion*/ E;
+non terminal ArrayList<Expresion> EXPRESSION_LIST;
+non terminal Expresion EXPRESSION;
+non terminal Expresion OR_EXPR;
+non terminal Expresion AND_EXPR;
+non terminal Expresion NANDNOR_EXPR;
+non terminal Expresion COMPARISON_EQ;
+non terminal Expresion COMPARISON;
+non terminal Expresion COMP_OPERATOR;
+non terminal Expresion A_EXPR;
+non terminal Expresion M_EXPR;
+non terminal Expresion U_EXPR;
+non terminal Expresion PRIMARY;
+non terminal Expresion ATOM;
+non terminal Expresion LITERAL;
+non terminal Expresion ENCLOSURE;
+non terminal Expresion PARENTH_FORM;
+non terminal Expresion ATTRIBUTEREF;
+non terminal Expresion ACCESS;
+non terminal Expresion CALL;
 
 precedence left else_;
 
 start with INICIO;
 
-INICIO ::= PROGRAM
+INICIO ::= SENTENCIAS:a //PROGRAM
         {: 
+            parser.ast = new AST(a); 
             System.out.println("DOCUMENTO OK"); 
         :}
 ;
@@ -260,8 +265,16 @@ STATEMENT ::= BLOQUE puntoycoma
             | SENTENCIA
 ;
 
-SENTENCIAS ::= SENTENCIAS SENTENCIA
-            | SENTENCIA 
+SENTENCIAS ::= SENTENCIAS:a SENTENCIA:b
+                {:
+                    RESULT = a;
+                    RESULT.add(b);
+                :}
+            | SENTENCIA:a
+                {:
+                    RESULT = new ArrayList<>();
+                    RESULT.add(a);
+                :}
 ;
 
 SENTENCIA ::= WITH_STMT puntoycoma
@@ -276,7 +289,7 @@ SENTENCIA ::= WITH_STMT puntoycoma
             | WHILE_STMT
             | REPEAT_STMT puntoycoma
             | FOR_STMT
-            | WRITE_STMT puntoycoma
+            | WRITE_STMT:a puntoycoma {: RESULT = a; :}
             | READ_STMT puntoycoma
             | EXPRESSION_STMT puntoycoma
 ;
@@ -327,8 +340,10 @@ FOR_STMT ::= for_ TARGET asignacion EXPRESSION to_ EXPRESSION do_ STATEMENT
             | for_ TARGET asignacion EXPRESSION downto_ EXPRESSION do_ STATEMENT
 ;
 
-WRITE_STMT ::= write_ parIzquierda EXPRESSION_LIST parDerecha
-            | writeln_ parIzquierda EXPRESSION_LIST parDerecha
+WRITE_STMT ::= write_:a parIzquierda EXPRESSION_LIST:b parDerecha  //agregar en la llamada write y writeln sin nada
+                {: RESULT = new Write(false, b, aleft, aright); :}
+            | writeln_:a parIzquierda EXPRESSION_LIST:b parDerecha
+                {: RESULT = new Write(true, b, aleft, aright); :}
 ;
 
 READ_STMT ::= read_ parIzquierda EXPRESSION parDerecha
@@ -338,32 +353,32 @@ EXPRESSION_STMT ::= CALL
                 | id
 ;
 
-EXPRESSION_LIST ::= EXPRESSION_LIST coma EXPRESSION
-                | EXPRESSION
+EXPRESSION_LIST ::= EXPRESSION_LIST:a coma EXPRESSION:b {: RESULT = a; RESULT.add(b); :}
+                | EXPRESSION:a {: RESULT = new ArrayList<>(); RESULT.add(a); :}
 ;
 
-EXPRESSION ::= OR_EXPR
+EXPRESSION ::= OR_EXPR:a {: RESULT = a; :}
 ;
 
-OR_EXPR ::= NANDNOR_EXPR 
+OR_EXPR ::= NANDNOR_EXPR:a {: RESULT = a; :}
         | OR_EXPR or NANDNOR_EXPR
 ;
 
-NANDNOR_EXPR ::= AND_EXPR
+NANDNOR_EXPR ::= AND_EXPR:a {: RESULT = a; :}
                 | NANDNOR_EXPR nand AND_EXPR
                 | NANDNOR_EXPR nor AND_EXPR
 ;
 
-AND_EXPR ::= COMPARISON_EQ 
+AND_EXPR ::= COMPARISON_EQ:a {: RESULT = a; :} 
             | AND_EXPR and COMPARISON_EQ
 ;
 
-COMPARISON_EQ ::= COMPARISON
+COMPARISON_EQ ::= COMPARISON:a {: RESULT = a; :}
             | COMPARISON_EQ igual COMPARISON
             | COMPARISON_EQ diferente COMPARISON
 ;
 
-COMPARISON ::= A_EXPR
+COMPARISON ::= A_EXPR:a {: RESULT = a; :}
             | COMPARISON COMP_OPERATOR  A_EXPR
 ;
 
@@ -373,39 +388,42 @@ COMP_OPERATOR ::= mayorque
                 | menorigual
 ;
 
-A_EXPR ::= M_EXPR 
+A_EXPR ::= M_EXPR:a {: RESULT = a; :} 
         | A_EXPR mas M_EXPR
         | A_EXPR menos M_EXPR
 ;
 
-M_EXPR ::= U_EXPR
+M_EXPR ::= U_EXPR:a {: RESULT = a; :}
         | M_EXPR asterisco U_EXPR
         | M_EXPR diagonal U_EXPR
         | M_EXPR modulo U_EXPR
         | M_EXPR potencia U_EXPR
 ;
 
-U_EXPR ::= PRIMARY
+U_EXPR ::= PRIMARY:a {: RESULT = a; :}
         | mas PRIMARY
         | menos PRIMARY
         | not PRIMARY
 ;
 
-PRIMARY ::= ATOM | ATTRIBUTEREF | ACCESS | CALL
+PRIMARY ::= ATOM:a {: RESULT = a; :}
+        | ATTRIBUTEREF:a {: RESULT = a; :} 
+        | ACCESS:a {: RESULT = a; :} 
+        | CALL :a {: RESULT = a; :}
 ;
 
 ATOM ::= id /*esto puede ser una llamada*/
-        | LITERAL
-        | ENCLOSURE
+        | LITERAL:a {: RESULT = a; :}
+        | ENCLOSURE:a {: RESULT = a; :}
 ;
 
-LITERAL ::= tstring:a {: :} 
-     | tchar:a {: :}
-     | entero
-     | decimal
-     | nil_
-     | true_
-     | false_
+LITERAL ::= tstring:a {: RESULT = new Literal(new Tipo(Type.STRING), a, aleft, aright); :} 
+     | tchar:a {: RESULT = new Literal(new Tipo(Type.CHAR), a, aleft, aright); :} 
+     | entero:a {: RESULT = new Literal(new Tipo(Type.INTEGER), a, aleft, aright); :}
+     | decimal:a {: RESULT = new Literal(new Tipo(Type.REAL), a, aleft, aright); :}
+     | nil_:a {: RESULT = new Literal(new Tipo(Type.NIL), null, aleft, aright); :}
+     | true_:a {: RESULT = new Literal(new Tipo(Type.BOOLEAN), 1, aleft, aright); :}
+     | false_:a {: RESULT = new Literal(new Tipo(Type.BOOLEAN), 0, aleft, aright); :}
 ;
 
 ENCLOSURE ::= PARENTH_FORM
