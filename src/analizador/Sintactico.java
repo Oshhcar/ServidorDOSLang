@@ -843,12 +843,7 @@ public class Sintactico extends java_cup.runtime.lr_parser {
     @Override
     public void syntax_error(Symbol s){
         System.out.println("Error Sintactico en la Linea " + s.left +" Columna "+ s.right + ". Identificador " +s.value + " no reconocido." );
-                ErrorC error = new ErrorC();
-                error.setTipo("Sintáctico");
-                error.setLinea(s.left+1);
-                error.setColumna(s.right+1);
-                error.setValor(s.value.toString());
-                error.setDescripcion("Identificador " +s.value + " no reconocido.");
+                ErrorC error = new ErrorC(2, s.left+1, s.right+1, "Identificador " +s.value + " no reconocido.");
                 this.errores.add(error);
     }
 
@@ -856,12 +851,7 @@ public class Sintactico extends java_cup.runtime.lr_parser {
     public void unrecovered_syntax_error(Symbol s){
         System.out.println("Error Sintactico Fatal en la Linea " + s.left + " Columna "+ s.right +". Identificador " + s.value + " no reconocido.");
 		//report_fatal_error("Error sintactico: <"+s.value+">", cur_token);
-                ErrorC error = new ErrorC();
-                error.setTipo("Sintáctico");
-                error.setLinea(s.left+1);
-                error.setColumna(s.right+1);
-                error.setValor(s.value.toString());
-                error.setDescripcion("Identificador " +s.value + " no reconocido.");
+                ErrorC error = new ErrorC(2, s.left+1, s.right+1, "Identificador " +s.value + " no reconocido.");
                 this.errores.add(error);
 	}
 

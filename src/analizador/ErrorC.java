@@ -16,31 +16,38 @@ package analizador;
  * @author oscar
  */
 public class ErrorC {
-    private String tipo;
+    private int tipo; //1:Lexico, 2:Sintáctico, 3:Semántico
     private int linea;
     private int columna;
-    private String valor;
     private String descripcion;
 
     public ErrorC() {
-        tipo = "";
+        tipo = 0;
         linea = 0;
         columna = 0;
-        valor = "";
         descripcion = "";
     }
+
+    public ErrorC(int tipo, int linea, int columna, String descripcion) {
+        this.tipo = tipo;
+        this.linea = linea;
+        this.columna = columna;
+        this.descripcion = descripcion;
+    }
+    
+    
 
     /**
      * @return the tipo
      */
-    public String getTipo() {
+    public int getTipo() {
         return tipo;
     }
 
     /**
      * @param tipo the tipo to set
      */
-    public void setTipo(String tipo) {
+    public void setTipo(int tipo) {
         this.tipo = tipo;
     }
 
@@ -73,20 +80,6 @@ public class ErrorC {
     }
 
     /**
-     * @return the valor
-     */
-    public String getValor() {
-        return valor;
-    }
-
-    /**
-     * @param valor the valor to set
-     */
-    public void setValor(String valor) {
-        this.valor = valor;
-    }
-
-    /**
      * @return the descripcion
      */
     public String getDescripcion() {
@@ -99,7 +92,6 @@ public class ErrorC {
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
-    
     
     
 }
