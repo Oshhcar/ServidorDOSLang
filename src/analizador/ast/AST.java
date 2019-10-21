@@ -11,6 +11,7 @@ import analizador.ast.entorno.Result;
 import analizador.ast.expresion.Expresion;
 import analizador.ast.instruccion.Instruccion;
 import java.util.ArrayList;
+import servidordoslang.File;
 
 /**
  *
@@ -24,7 +25,7 @@ public class AST {
         this.Sentencias = Sentencias;
     }
 
-    public String GenerarCuadruplos(ArrayList<ErrorC> errores){
+    public String GenerarCuadruplos(ArrayList<ErrorC> errores, ArrayList<File> files){
         NodoAST.Etiquetas = 0;
         NodoAST.Temporales = 0;
         NodoAST.H = 0;
