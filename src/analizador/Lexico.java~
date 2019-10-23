@@ -610,12 +610,7 @@ public class Lexico implements java_cup.runtime.Scanner {
 
         public void addError(){
             if(this.isError){
-                ErrorC error = new ErrorC();
-                error.setTipo("Léxico");
-                error.setLinea(yyline+1);
-                error.setColumna(this.columnaError);
-                error.setValor(this.valorError);
-                error.setDescripcion("Carácter no reconocido.");
+                ErrorC error = new ErrorC(1, yyline+1, this.columnaError, "Carácter no reconocido.");
                 this.errores.add(error);
                 this.isError = false;
                 this.columnaError = 0;

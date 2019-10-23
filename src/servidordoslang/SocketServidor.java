@@ -92,6 +92,7 @@ public class SocketServidor extends Thread {
                 }
 
                 //Si hay archivo principal, se ejecuta:
+                ArrayList<ErrorC> errores = new ArrayList<>();
                 if (main != null) {
                     if (!(main.getContent().isEmpty() && main.getContent().isBlank())) {
                         Lexico lexico = new Lexico(new StringReader(main.getContent()));
@@ -100,9 +101,11 @@ public class SocketServidor extends Thread {
                         try {
                             sintactico.parse();
                             AST ast = sintactico.getAST();
+                            
+                            errores.addAll(lexico.getErrores());
+                            errores.addAll(sintactico.getErrores());
 
                             if (ast != null) {
-                                ArrayList<ErrorC> errores = new ArrayList<>();
                                 respuesta = ast.GenerarCuadruplos(errores, files);
                             }
 
@@ -120,13 +123,27 @@ public class SocketServidor extends Thread {
                 //salida se envia los mensajes al cliente
                 DataOutputStream salida = new DataOutputStream((socket.getOutputStream()));
                 PrintWriter pw = new PrintWriter(salida);
+                
+                JSONArray errArray = new JSONArray();
+                
+                for(ErrorC e: errores){
+                    JSONObject errObj = new JSONObject();
+                    errObj.put("descripcion", e.getDescripcion());
+                    errObj.put("columna", e.getColumna()+"");
+                    errObj.put("linea", e.getLinea()+"");
+                    errObj.put("valor", e.getTipo());
+                    errArray.add(errObj);
+                }
+                
+                //System.out.println("Errores: "+errArray.toJSONString());
 
                 JSONObject objFile = new JSONObject();
                 objFile.put("content", respuesta);
+                objFile.put("errors", errArray);
                 //objFile.put("table", "<table><tr><th>id<th></tr><tr><td>id1<td></tr><tr><td>id2<td></tr><table>");
                 StringWriter out = new StringWriter();
                 objFile.writeJSONString(out);
-
+                
                 //salida.writeUTF("{\"foo-bar\": 12345}");
                 pw.println(out.toString());
 

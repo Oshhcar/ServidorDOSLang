@@ -34,12 +34,44 @@ public class AST {
         
         Result result = new Result();
         result.setCodigo("");
+        global.setTmpInicio(1);
+        
+        //Primera pasada para saber numero temporales
+        for(NodoAST nodo: Sentencias){
+            //Result rsNodo = null;
+            
+            if(nodo instanceof Instruccion){
+                /*rsNodo =*/ ((Instruccion) nodo).GetCuadruplos(global, new ArrayList<>());
+            } else if(nodo instanceof Expresion) {
+                /*rsNodo =*/ ((Expresion) nodo).GetCuadruplos(global, new ArrayList<>());
+            }
+            
+            //if(rsNodo != null){
+            //    if(rsNodo.getCodigo() != null){
+            //        result.setCodigo(result.getCodigo() + rsNodo.getCodigo());
+            //    }
+            //}
+        }
+        
+        //Variables locales
+        global.setSize(global.getPos());
+        //Temporales en ambito
+        global.setTmpFin(NodoAST.Temporales);
+        
+        System.out.println("inicio: "+global.getTmpInicio()+" fin "+global.getTmpFin());
+        
+        //Reinicio el contador de las variables locales y tmp etc
+        global.setPos(0);
+        NodoAST.Etiquetas = 0;
+        NodoAST.Temporales = 0;
+        NodoAST.H = 0;
         
         for(NodoAST nodo: Sentencias){
-            Result rsNodo;
+            Result rsNodo = null;
+            
             if(nodo instanceof Instruccion){
                 rsNodo = ((Instruccion) nodo).GetCuadruplos(global, errores);
-            } else {
+            } else if(nodo instanceof Expresion) {
                 rsNodo = ((Expresion) nodo).GetCuadruplos(global, errores);
             }
             

@@ -29,6 +29,10 @@ public class Tipo {
     public boolean IsNil(){ return this.Tipo == Type.NIL; }
     public boolean IsUndefined(){ return this.Tipo == Type.UNDEFINED; }
     
+    public boolean IsNumeric(){
+        return IsInteger() || IsReal() || IsChar();
+    }
+    
     /**
      * @return the Tipo
      */

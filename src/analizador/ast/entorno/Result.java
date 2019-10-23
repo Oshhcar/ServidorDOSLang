@@ -11,7 +11,7 @@ package analizador.ast.entorno;
  */
 public class Result {
     
-    private String Valor;
+    private int Valor; //numero temporal del valor
     private String Codigo;
     private String EtiquetaV;
     private String EtiquetaF;
@@ -21,19 +21,20 @@ public class Result {
 
     public Result() {
         this.Tipo = new Tipo(Type.UNDEFINED);
+        Valor = 0;
     }
 
     /**
      * @return the Valor
      */
-    public String getValor() {
+    public int getValor() {
         return Valor;
     }
 
     /**
      * @param Valor the Valor to set
      */
-    public void setValor(String Valor) {
+    public void setValor(int Valor) {
         this.Valor = Valor;
     }
 

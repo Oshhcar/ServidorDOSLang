@@ -19,6 +19,8 @@ public class Entorno {
     private Entorno Padre;
     private String EtiquetaSalida;
     private int Size;
+    private int TmpInicio;
+    private int TmpFin;
     private String EtiquetaCiclo;
     private String EtiquetaSalidaCiclo;
 
@@ -28,6 +30,8 @@ public class Entorno {
         this.Ambito = Ambito;
         Padre = null;
         Size = 0;
+        TmpInicio = 0;
+        TmpFin = 0;
     }
 
     public Entorno(String Ambito, Entorno Padre) {
@@ -36,6 +40,8 @@ public class Entorno {
         this.Ambito = Ambito;
         this.Padre = Padre;
         Size = 0;
+        TmpInicio = 0;
+        TmpFin = 0;
     }
 
     public void Add(Simbolo s) {
@@ -71,17 +77,19 @@ public class Entorno {
     public void Recorrer() {
 
         for (Simbolo s : Simbolos) {
-            System.out.println(s.getId() + ", " + s.getTipo().getTipo().toString() + ", " + s.getRol().toString() + 
-                    ", " + s.getTam() + ", "+s.getPos()+", "+ s.getAmbito() +", "+s.getNumParam()+", "+s.getTipoParam());
-            
-            if(s.getEntorno() != null)
+            System.out.println(s.getId() + ", " + s.getTipo().getTipo().toString() + ", " + s.getRol().toString()
+                    + ", " + s.getTam() + ", " + s.getPos() + ", " + s.getAmbito() + ", " + s.getNumParam() + ", " + s.getTipoParam());
+
+            if (s.getEntorno() != null) {
                 s.getEntorno().Recorrer();
+            }
         }
 
-        if(Padre != null) 
+        if (Padre != null) {
             Padre.Recorrer();
+        }
     }
-    
+
     /**
      * @return the Simbolos
      */
@@ -159,11 +167,43 @@ public class Entorno {
         return Size;
     }
 
+    public int getSizeTotal(){
+        return Size+(TmpFin - TmpInicio);
+    }
+    
     /**
      * @param Size the Size to set
      */
     public void setSize(int Size) {
         this.Size = Size;
+    }
+    
+    /**
+     * @return the TmpInicio
+     */
+    public int getTmpInicio() {
+        return TmpInicio;
+    }
+
+    /**
+     * @param TmpInicio the TmpInicio to set
+     */
+    public void setTmpInicio(int TmpInicio) {
+        this.TmpInicio = TmpInicio;
+    }
+
+    /**
+     * @return the TmpFin
+     */
+    public int getTmpFin() {
+        return TmpFin;
+    }
+
+    /**
+     * @param TmpFin the TmpFin to set
+     */
+    public void setTmpFin(int TmpFin) {
+        this.TmpFin = TmpFin;
     }
 
     /**

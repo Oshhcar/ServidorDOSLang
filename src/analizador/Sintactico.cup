@@ -9,6 +9,7 @@ import analizador.ast.*;
 import analizador.ast.entorno.Tipo;
 import analizador.ast.entorno.Type;
 import analizador.ast.expresion.*;
+import analizador.ast.expresion.operacion.*;
 import analizador.ast.instruccion.*;
 
 parser code
@@ -28,7 +29,7 @@ parser code
     @Override
     public void syntax_error(Symbol s){
         System.out.println("Error Sintactico en la Linea " + s.left +" Columna "+ s.right + ". Identificador " +s.value + " no reconocido." );
-                ErrorC error = new ErrorC(2, s.left+1, s.right+1, "Identificador " +s.value + " no reconocido.");
+                ErrorC error = new ErrorC("Sintáctico", s.left+1, s.right+1, "Identificador " +s.value + " no reconocido.");
                 this.errores.add(error);
     }
 
@@ -36,7 +37,7 @@ parser code
     public void unrecovered_syntax_error(Symbol s){
         System.out.println("Error Sintactico Fatal en la Linea " + s.left + " Columna "+ s.right +". Identificador " + s.value + " no reconocido.");
 		//report_fatal_error("Error sintactico: <"+s.value+">", cur_token);
-                ErrorC error = new ErrorC(2, s.left+1, s.right+1, "Identificador " +s.value + " no reconocido.");
+                ErrorC error = new ErrorC("Sintáctico", s.left+1, s.right+1, "Identificador " +s.value + " no reconocido.");
                 this.errores.add(error);
 	}
 :}
@@ -379,21 +380,21 @@ COMP_OPERATOR ::= mayorque
 ;
 
 A_EXPR ::= M_EXPR:a {: RESULT = a; :} 
-        | A_EXPR mas M_EXPR
-        | A_EXPR menos M_EXPR
+        | A_EXPR:a mas:b M_EXPR:c {: RESULT = new Aritmetica(a, c, Operador.SUMA, bleft, bright); :}
+        | A_EXPR:a menos:b M_EXPR:c {: RESULT = new Aritmetica(a, c, Operador.RESTA, bleft, bright); :}
 ;
 
 M_EXPR ::= U_EXPR:a {: RESULT = a; :}
-        | M_EXPR asterisco U_EXPR
-        | M_EXPR diagonal U_EXPR
-        | M_EXPR modulo U_EXPR
-        | M_EXPR potencia U_EXPR
+        | M_EXPR:a asterisco:b U_EXPR:c {: RESULT = new Aritmetica(a, c, Operador.MULTIPLICACION, bleft, bright); :}
+        | M_EXPR:a diagonal:b U_EXPR:c {: RESULT = new Aritmetica(a, c, Operador.DIVISION, bleft, bright); :}
+        | M_EXPR:a modulo:b U_EXPR:c {: RESULT = new Aritmetica(a, c, Operador.MODULO, bleft, bright); :}
+        | M_EXPR:a potencia:b U_EXPR:c {: RESULT = new Aritmetica(a, c, Operador.POTENCIA, bleft, bright); :}
 ;
 
 U_EXPR ::= PRIMARY:a {: RESULT = a; :}
-        | mas PRIMARY
-        | menos PRIMARY
-        | not PRIMARY
+        | mas:b PRIMARY:a {: RESULT = new Unario(a, null, Operador.SUMA, bleft, bright); :}
+        | menos:b PRIMARY:a {: RESULT = new Unario(a, null, Operador.RESTA, bleft, bright); :}
+        | not:b PRIMARY
 ;
 
 PRIMARY ::= ATOM:a {: RESULT = a; :}

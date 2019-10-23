@@ -10,8 +10,8 @@ package analizador.ast;
  * @author oscar
  */
 public class NodoAST {
-    private final int Linea;
-    private final int Columna;
+    protected final int Linea;
+    protected final int Columna;
 
     public static int Etiquetas;
     public static int Temporales;
@@ -32,8 +32,8 @@ public class NodoAST {
     /**
      * @return NuevoTemporal
      */
-    public String NuevoTemporal(){
-        return "t"+(++Temporales);
+    public int NuevoTemporal(){
+        return ++Temporales;
     }
 
     /**

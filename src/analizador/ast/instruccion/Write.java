@@ -34,28 +34,35 @@ public class Write extends Instruccion {
 
         for (Expresion E : Exprs) {
             Result rsExp = E.GetCuadruplos(e, errores);
-            Tipo tipoExp = E.GetTipo();
+            Tipo tipoExp = E.getTipo();
 
             if (!tipoExp.IsUndefined()) {
-                if (rsExp.getValor() != null) {
-                    String tmpCiclo;
+                if (rsExp.getValor() != 0) {
+                    int tmpCiclo;
                     
                     switch (tipoExp.getTipo()) {
                         case CHAR:
                             codigo += rsExp.getCodigo();
-                            codigo += "print(%c, " + rsExp.getValor() + ")\n";
+                            
+                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            codigo += "print(%c, t" + rsExp.getValor() + ")\n";
                             break;
                         case INTEGER:
                             codigo += rsExp.getCodigo();
-                            codigo += "print(%e, " + rsExp.getValor() + ")\n";
+                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            codigo += "print(%e, t" + rsExp.getValor() + ")\n";
                             break;
                         case REAL:
                             codigo += rsExp.getCodigo();
-                            codigo += "print(%d, " + rsExp.getValor() + ")\n";
+
+                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            codigo += "print(%d, t" + rsExp.getValor() + ")\n";
                             break;
                         case STRING:
                         case WORD:
                             codigo += rsExp.getCodigo();
+                            
+                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
                             
                             result.setEtiquetaV(NuevaEtiqueta());
                             result.setEtiquetaF(NuevaEtiqueta());
@@ -63,12 +70,12 @@ public class Write extends Instruccion {
                             tmpCiclo = NuevoTemporal();
                             
                             codigo += etqCiclo + ":\n";
-                            codigo += "=, heap, " + rsExp.getValor() +", " + tmpCiclo+"\n";
-                            codigo += "je, " + tmpCiclo +", 0, " + result.getEtiquetaV()+"\n";
+                            codigo += "=, heap, t" + rsExp.getValor() +", t" + tmpCiclo+"\n";
+                            codigo += "je, t" + tmpCiclo +", 0, " + result.getEtiquetaV()+"\n";
                             codigo += "jmp, , , " + result.getEtiquetaF()+"\n";
                             codigo += result.getEtiquetaF() + ":\n";
-                            codigo += "print(%c, " + tmpCiclo + ")\n";
-                            codigo += "+, " + rsExp.getValor() +", 1, " + rsExp.getValor() + "\n";
+                            codigo += "print(%c, t" + tmpCiclo + ")\n";
+                            codigo += "+, t" + rsExp.getValor() +", 1, t" + rsExp.getValor() + "\n";
                             codigo += "jmp, , , " + etqCiclo + "\n";
                             codigo += result.getEtiquetaV() + ":\n";
                             
@@ -76,12 +83,13 @@ public class Write extends Instruccion {
                         case BOOLEAN:
                             codigo += rsExp.getCodigo();
                             
+                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            
                             result.setEtiquetaV(NuevaEtiqueta());
                             result.setEtiquetaF(NuevaEtiqueta());
                             String etqSalida = NuevaEtiqueta();
-                            tmpCiclo = NuevoTemporal();
                             
-                            codigo += "je, " + rsExp.getValor() + ", 0, " + result.getEtiquetaV() + "\n";
+                            codigo += "je, t" + rsExp.getValor() + ", 0, " + result.getEtiquetaV() + "\n";
                             codigo += "jmp, , , " + result.getEtiquetaF()+"\n";
                             codigo += result.getEtiquetaV() + ":\n";
                             //false
@@ -102,12 +110,14 @@ public class Write extends Instruccion {
                         case NIL:
                             codigo += rsExp.getCodigo();
                             
+                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            
                             codigo += "print(%c, 78)\n";
                             codigo += "print(%c, 73)\n";
                             codigo += "print(%c, 76)\n";
                             break;
                         default:
-                            errores.add(new ErrorC(3, this.getLinea(), this.getColumna(), "Valor no se puede imprimir."));
+                            errores.add(new ErrorC("Semántico", this.getLinea(), this.getColumna(), "Valor no se puede imprimir."));
                             break;
                     }
                 }

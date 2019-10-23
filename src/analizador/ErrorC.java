@@ -16,19 +16,19 @@ package analizador;
  * @author oscar
  */
 public class ErrorC {
-    private int tipo; //1:Lexico, 2:Sintáctico, 3:Semántico
+    private String tipo;
     private int linea;
     private int columna;
     private String descripcion;
 
     public ErrorC() {
-        tipo = 0;
+        tipo = "";
         linea = 0;
         columna = 0;
         descripcion = "";
     }
 
-    public ErrorC(int tipo, int linea, int columna, String descripcion) {
+    public ErrorC(String tipo, int linea, int columna, String descripcion) {
         this.tipo = tipo;
         this.linea = linea;
         this.columna = columna;
@@ -40,14 +40,14 @@ public class ErrorC {
     /**
      * @return the tipo
      */
-    public int getTipo() {
+    public String getTipo() {
         return tipo;
     }
 
     /**
      * @param tipo the tipo to set
      */
-    public void setTipo(int tipo) {
+    public void setTipo(String tipo) {
         this.tipo = tipo;
     }
 
