@@ -12,6 +12,7 @@ import analizador.ast.expresion.*;
 import analizador.ast.expresion.operacion.*;
 import analizador.ast.instruccion.*;
 import analizador.ast.instruccion.condicionales.*;
+import analizador.ast.instruccion.ciclos.*;
 
 parser code
 {:
@@ -331,7 +332,7 @@ CASE_LIST ::= CASE_LIST:a CASE:b
 CASE ::= EXPRESSION_LIST:a dospuntos:b STATEMENT:c {: RESULT = new Case(a, c, bleft, bright); :}
 ;
 
-WHILE_STMT ::= while_ EXPRESSION do_ STATEMENT
+WHILE_STMT ::= while_:a EXPRESSION:b do_ STATEMENT:c {: RESULT = new While(b, c, aleft, aright); :}
 ;
 
 REPEAT_STMT ::= repeat_ SENTENCIAS until_ EXPRESSION
