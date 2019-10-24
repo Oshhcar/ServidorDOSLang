@@ -15,5 +15,16 @@ public enum Operador {
     MULTIPLICACION,
     DIVISION,
     MODULO,
-    POTENCIA
+    POTENCIA,
+    MAYOR,
+    MENOR,
+    MAYORIGUAL,
+    MENORIGUAL,
+    IGUAL,
+    DIFERENTE,
+    AND,
+    OR, 
+    NAND,
+    NOR,
+    NOT
 }

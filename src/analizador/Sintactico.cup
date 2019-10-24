@@ -112,7 +112,7 @@ non terminal Expresion AND_EXPR;
 non terminal Expresion NANDNOR_EXPR;
 non terminal Expresion COMPARISON_EQ;
 non terminal Expresion COMPARISON;
-non terminal Expresion COMP_OPERATOR;
+non terminal Operador COMP_OPERATOR;
 non terminal Expresion A_EXPR;
 non terminal Expresion M_EXPR;
 non terminal Expresion U_EXPR;
@@ -352,31 +352,31 @@ EXPRESSION ::= OR_EXPR:a {: RESULT = a; :}
 ;
 
 OR_EXPR ::= NANDNOR_EXPR:a {: RESULT = a; :}
-        | OR_EXPR or NANDNOR_EXPR
+        | OR_EXPR:a or:b NANDNOR_EXPR:c {: RESULT = new Logica(a, c, Operador.OR, bleft, bright); :}
 ;
 
 NANDNOR_EXPR ::= AND_EXPR:a {: RESULT = a; :}
-                | NANDNOR_EXPR nand AND_EXPR
-                | NANDNOR_EXPR nor AND_EXPR
+                | NANDNOR_EXPR:a nand:b AND_EXPR:c {: RESULT = new Logica(a, c, Operador.NAND, bleft, bright); :}
+                | NANDNOR_EXPR:a nor:b AND_EXPR:c {: RESULT = new Logica(a, c, Operador.NOR, bleft, bright); :}
 ;
 
 AND_EXPR ::= COMPARISON_EQ:a {: RESULT = a; :} 
-            | AND_EXPR and COMPARISON_EQ
+            | AND_EXPR:a and:b COMPARISON_EQ:c {: RESULT = new Logica(a, c, Operador.AND, bleft, bright); :}
 ;
 
 COMPARISON_EQ ::= COMPARISON:a {: RESULT = a; :}
-            | COMPARISON_EQ igual COMPARISON
-            | COMPARISON_EQ diferente COMPARISON
+            | COMPARISON_EQ:a igual:b COMPARISON:c {: RESULT = new Relacional(a, c, Operador.IGUAL, bleft, bright); :}
+            | COMPARISON_EQ:a diferente:b COMPARISON:c {: RESULT = new Relacional(a, c, Operador.DIFERENTE, bleft, bright); :}
 ;
 
 COMPARISON ::= A_EXPR:a {: RESULT = a; :}
-            | COMPARISON COMP_OPERATOR  A_EXPR
+            | COMPARISON:a COMP_OPERATOR:b  A_EXPR:c {: RESULT = new Relacional(a, c, b, bleft, bright); :}
 ;
 
-COMP_OPERATOR ::= mayorque
-                | menorque
-                | mayorigual
-                | menorigual
+COMP_OPERATOR ::= mayorque {: RESULT = Operador.MAYOR; :}
+                | menorque {: RESULT = Operador.MENOR; :}
+                | mayorigual {: RESULT = Operador.MAYORIGUAL; :}
+                | menorigual {: RESULT = Operador.MENORIGUAL; :}
 ;
 
 A_EXPR ::= M_EXPR:a {: RESULT = a; :} 
@@ -392,9 +392,9 @@ M_EXPR ::= U_EXPR:a {: RESULT = a; :}
 ;
 
 U_EXPR ::= PRIMARY:a {: RESULT = a; :}
-        | mas:b PRIMARY:a {: RESULT = new Unario(a, null, Operador.SUMA, bleft, bright); :}
-        | menos:b PRIMARY:a {: RESULT = new Unario(a, null, Operador.RESTA, bleft, bright); :}
-        | not:b PRIMARY
+        | mas:b PRIMARY:a {: RESULT = new Unario(a,Operador.SUMA, bleft, bright); :}
+        | menos:b PRIMARY:a {: RESULT = new Unario(a, Operador.RESTA, bleft, bright); :}
+        | not:b PRIMARY:a {: RESULT = new Unario(a, Operador.NOT, bleft, bright); :}
 ;
 
 PRIMARY ::= ATOM:a {: RESULT = a; :}
@@ -417,10 +417,10 @@ LITERAL ::= tstring:a {: RESULT = new Literal(new Tipo(Type.STRING), a, aleft, a
      | false_:a {: RESULT = new Literal(new Tipo(Type.BOOLEAN), 0, aleft, aright); :}
 ;
 
-ENCLOSURE ::= PARENTH_FORM
+ENCLOSURE ::= PARENTH_FORM:a {: RESULT = a; :}
 ;
 
-PARENTH_FORM ::= parIzquierda EXPRESSION parDerecha
+PARENTH_FORM ::= parIzquierda EXPRESSION:a parDerecha {: RESULT = a; :}
 ;
 
 ATTRIBUTEREF ::= PRIMARY punto id
