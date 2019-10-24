@@ -11,6 +11,7 @@ import analizador.ast.entorno.Type;
 import analizador.ast.expresion.*;
 import analizador.ast.expresion.operacion.*;
 import analizador.ast.instruccion.*;
+import analizador.ast.instruccion.condicionales.*;
 
 parser code
 {:
@@ -85,17 +86,17 @@ non terminal PARAMETERS;
 non terminal PARAMETERS_LIST;
 non terminal PARAMETER;
 non terminal PROCDEF;
-non terminal BLOQUE;
+non terminal Bloque BLOQUE;
 non terminal ArrayList<NodoAST> SENTENCIAS;
 non terminal NodoAST SENTENCIA;
-non terminal STATEMENT;
+non terminal NodoAST STATEMENT;
 non terminal WITH_STMT;
 non terminal ASSIGNMENT_STMT;
 non terminal TARGET;
 non terminal BREAK_STMT;
 non terminal CONTINUE_STMT;
 non terminal EXIT_STMT;
-non terminal IF_STMT;
+non terminal If IF_STMT;
 non terminal CASE_STMT;
 non terminal CASE_LIST;
 non terminal CASE;
@@ -247,13 +248,13 @@ PARAMETER ::= ID_LIST dospuntos TYPE_SPECIFIER
 PROCDEF ::= procedure_ id PARAMETERS puntoycoma VARDEF PROCEDUREDEF BLOQUE
 ;
 
-BLOQUE ::= begin_ SENTENCIAS end_
-        | begin_ end_
+BLOQUE ::= begin_:a SENTENCIAS:b end_ {: RESULT = new Bloque(b, aleft, aright); :}
+        | begin_:a end_ {: RESULT = new Bloque(null, aleft, aright); :}
 ;
 
-STATEMENT ::= BLOQUE puntoycoma
-            | BLOQUE
-            | SENTENCIA
+STATEMENT ::= BLOQUE:a puntoycoma {: RESULT = a; :}
+            | BLOQUE:a {: RESULT = a; :}
+            | SENTENCIA:a {: RESULT = a; :}
 ;
 
 SENTENCIAS ::= SENTENCIAS:a SENTENCIA:b
@@ -274,7 +275,7 @@ SENTENCIA ::= WITH_STMT puntoycoma
             | BREAK_STMT puntoycoma
             | CONTINUE_STMT puntoycoma
             | EXIT_STMT puntoycoma
-            | IF_STMT
+            | IF_STMT:a {: RESULT = a; :}
             | CASE_STMT
             | CASE_STMT puntoycoma
             | WHILE_STMT
@@ -306,8 +307,8 @@ CONTINUE_STMT ::= continue_
 EXIT_STMT ::= exit_
 ;
 
-IF_STMT ::= if_ EXPRESSION then_ STATEMENT else_ STATEMENT
-          | if_ EXPRESSION then_ STATEMENT
+IF_STMT ::= if_:a EXPRESSION:b then_ STATEMENT:c else_ STATEMENT:d {: RESULT = new If(b, c, d, aleft, aright); :}
+          | if_:a EXPRESSION:b then_ STATEMENT:c {: RESULT = new If(b, c, aleft, aright); :}
 ;
 
 CASE_STMT ::= case_ EXPRESSION of_ CASE_LIST default_ STATEMENT end_ /*VERIFICAR SI ES ELSE*/
