@@ -97,9 +97,9 @@ non terminal BREAK_STMT;
 non terminal CONTINUE_STMT;
 non terminal EXIT_STMT;
 non terminal If IF_STMT;
-non terminal CASE_STMT;
-non terminal CASE_LIST;
-non terminal CASE;
+non terminal Switch CASE_STMT;
+non terminal ArrayList<Case> CASE_LIST;
+non terminal Case CASE;
 non terminal WHILE_STMT;
 non terminal REPEAT_STMT;
 non terminal FOR_STMT;
@@ -276,8 +276,8 @@ SENTENCIA ::= WITH_STMT puntoycoma
             | CONTINUE_STMT puntoycoma
             | EXIT_STMT puntoycoma
             | IF_STMT:a {: RESULT = a; :}
-            | CASE_STMT
-            | CASE_STMT puntoycoma
+            | CASE_STMT:a {: RESULT = a; :}
+            | CASE_STMT:a puntoycoma {: RESULT = a; :}
             | WHILE_STMT
             | REPEAT_STMT puntoycoma
             | FOR_STMT
@@ -311,15 +311,24 @@ IF_STMT ::= if_:a EXPRESSION:b then_ STATEMENT:c else_ STATEMENT:d {: RESULT = n
           | if_:a EXPRESSION:b then_ STATEMENT:c {: RESULT = new If(b, c, aleft, aright); :}
 ;
 
-CASE_STMT ::= case_ EXPRESSION of_ CASE_LIST default_ STATEMENT end_ /*VERIFICAR SI ES ELSE*/
-            | case_ EXPRESSION of_ CASE_LIST end_
+CASE_STMT ::= case_:a EXPRESSION:b of_ CASE_LIST:c default_ STATEMENT:d end_ {: RESULT = new Switch(b, c, d, aleft, aright); :}
+            | case_:a EXPRESSION:b of_ CASE_LIST:c else_ STATEMENT:d end_ {: RESULT = new Switch(b, c, d, aleft, aright); :}
+            | case_:a EXPRESSION:b of_ CASE_LIST:c end_ {: RESULT = new Switch(b, c, aleft, aright); :}
 ;
 
-CASE_LIST ::= CASE_LIST CASE
-            | CASE
+CASE_LIST ::= CASE_LIST:a CASE:b 
+                {:
+                    RESULT = a;
+                    RESULT.add(b);
+                :}
+            | CASE:a 
+                {:
+                    RESULT = new ArrayList<>();
+                    RESULT.add(a);
+                :}
 ;
 
-CASE ::= EXPRESSION_LIST dospuntos STATEMENT
+CASE ::= EXPRESSION_LIST:a dospuntos:b STATEMENT:c {: RESULT = new Case(a, c, bleft, bright); :}
 ;
 
 WHILE_STMT ::= while_ EXPRESSION do_ STATEMENT
