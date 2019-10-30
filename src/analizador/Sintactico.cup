@@ -102,7 +102,7 @@ non terminal Switch CASE_STMT;
 non terminal ArrayList<Case> CASE_LIST;
 non terminal Case CASE;
 non terminal While WHILE_STMT;
-non terminal REPEAT_STMT;
+non terminal Repeat REPEAT_STMT;
 non terminal FOR_STMT;
 non terminal Write WRITE_STMT;
 non terminal READ_STMT;
@@ -304,7 +304,7 @@ SENTENCIA ::= WITH_STMT puntoycoma
             | CASE_STMT:a {: RESULT = a; :}
             | CASE_STMT:a puntoycoma {: RESULT = a; :}
             | WHILE_STMT:a {: RESULT = a; :}
-            | REPEAT_STMT puntoycoma
+            | REPEAT_STMT:a puntoycoma {: RESULT = a; :}
             | FOR_STMT
             | WRITE_STMT:a puntoycoma {: RESULT = a; :}
             | READ_STMT puntoycoma
@@ -359,7 +359,7 @@ CASE ::= EXPRESSION_LIST:a dospuntos:b STATEMENT:c {: RESULT = new Case(a, c, bl
 WHILE_STMT ::= while_:a EXPRESSION:b do_ STATEMENT:c {: RESULT = new While(b, c, aleft, aright); :}
 ;
 
-REPEAT_STMT ::= repeat_ SENTENCIAS until_ EXPRESSION
+REPEAT_STMT ::= repeat_:a SENTENCIAS:b until_ EXPRESSION:c {: RESULT = new Repeat(b, c, aleft, aright); :}
 ;
 
 FOR_STMT ::= for_ TARGET asignacion EXPRESSION to_ EXPRESSION do_ STATEMENT
