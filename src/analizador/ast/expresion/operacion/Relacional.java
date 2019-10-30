@@ -116,19 +116,24 @@ public class Relacional extends Operacion {
 
             codigo += "=, 0, , t" + result.getValor() + "\n";
 
-            codigo += "=, stack, " + (rsOp1.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp1.getValor() + "\n";
-            codigo += "=, stack, " + (rsOp2.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp2.getValor() + "\n";
+            codigo += "+, P, " + (rsOp1.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, stack, t0, t" + rsOp1.getValor() + "\n";
+            codigo += "+, P, " + (rsOp2.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, stack, t0, t" + rsOp2.getValor() + "\n";
             codigo += op + ", t" + rsOp1.getValor() + ", t" + rsOp2.getValor() + ", " + result.getEtiquetaV() + "\n";
             codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
             codigo += result.getEtiquetaV() + ":\n";
             codigo += "=, 1, , t" + result.getValor() + "\n";
             codigo += result.getEtiquetaF() + ":\n";
 
-            codigo += "=, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + result.getValor() + ", stack\n";
+            codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + result.getValor() + ", stack\n";
         } else {
             
-            codigo += "=, stack, " + (rsOp1.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp1.getValor() + "\n";
-            codigo += "=, stack, " + (rsOp2.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp2.getValor() + "\n";
+            codigo += "+, P, " + (rsOp1.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, stack, t0, t" + rsOp1.getValor() + "\n";
+            codigo += "+, P, " + (rsOp2.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, stack, t0, t" + rsOp2.getValor() + "\n";
             codigo += op + ", t" + rsOp1.getValor() + ", t" + rsOp2.getValor() + ", " + result.getEtiquetaF() + "\n";
             codigo += "jmp, , , " + result.getEtiquetaV() + "\n";
             
@@ -150,30 +155,44 @@ public class Relacional extends Operacion {
         int factor = NuevoTemporal();
 
         codigo += "=, 0, , t" + contador + "\n";
-        codigo += "=, " + (contador - e.getTmpInicio() + e.getSize()) + ", t" + contador + ", stack\n";
+        codigo += "+, P, " + (contador - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, t0, t" + contador + ", stack\n";
         codigo += "=, 1, , t" + factor + "\n";
-        codigo += "=, " + (factor - e.getTmpInicio() + e.getSize()) + ", t" + factor + ", stack\n";
+        codigo += "+, P, " + (factor - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, t0, t" + factor + ", stack\n";
 
         codigo += etqCiclo + ":\n";
-        codigo += "=, stack, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp.getValor() + "\n";
+        codigo += "+, P, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, stack, t0, t" + rsOp.getValor() + "\n";
         codigo += "=, heap, t" + rsOp.getValor() + ", t" + tmpCiclo + "\n";
-        codigo += "=, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t" + tmpCiclo + ", stack\n";
-        codigo += "=, stack, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t" + tmpCiclo + "\n";
+        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+        //codigo += "=, stack, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t" + tmpCiclo + "\n";
         codigo += "je, t" + tmpCiclo + ", 0, " + rsOp.getEtiquetaV() + "\n";
         codigo += "jmp, , , " + rsOp.getEtiquetaF() + "\n";
         codigo += rsOp.getEtiquetaF() + ":\n";
-        codigo += "=, stack, " + (factor - e.getTmpInicio() + e.getSize()) + ", t" + factor + "\n";
-        codigo += "=, stack, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t" + tmpCiclo + "\n";
+        codigo += "+, P, " + (factor - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, stack, t0, t" + factor + "\n";
+        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, stack, t0, t" + tmpCiclo + "\n";
         codigo += "*, t" + tmpCiclo + ", t" + factor + ", t" + tmpCiclo + "\n";
-        codigo += "=, stack, " + (contador - e.getTmpInicio() + e.getSize()) + ", t" + contador + "\n";
+        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+        codigo += "+, P, " + (contador - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, stack, t0, t" + contador + "\n";
         codigo += "+, t" + contador + ", t" + tmpCiclo + ", t" + contador + "\n";
-        codigo += "=, " + (contador - e.getTmpInicio() + e.getSize()) + ", t" + contador + ", stack\n";
-        codigo += "=, stack, " + (factor - e.getTmpInicio() + e.getSize()) + ", t" + factor + "\n";
+        codigo += "+, P, " + (contador - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, t0, t" + contador + ", stack\n";
+        codigo += "+, P, " + (factor - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, stack, t0, t" + factor + "\n";
         codigo += "*, t" + factor + ", 100, t" + factor + "\n";
-        codigo += "=, " + (factor - e.getTmpInicio() + e.getSize()) + ", t" + factor + ", stack\n";
-        codigo += "=, stack, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp.getValor() + "\n";
+        codigo += "+, P, " + (factor - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, t0, t" + factor + ", stack\n";
+        codigo += "+, P, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, stack, t0, t" + rsOp.getValor() + "\n";
         codigo += "+, t" + rsOp.getValor() + ", 1, t" + rsOp.getValor() + "\n";
-        codigo += "=, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp.getValor() + ", stack\n";
+        codigo += "+, P, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, t0, t" + rsOp.getValor() + ", stack\n";
         codigo += "jmp, , , " + etqCiclo + "\n";
         codigo += rsOp.getEtiquetaV() + ":\n";
 

@@ -14,5 +14,6 @@ public enum Rol {
     FUNCION,
     PARAMETER,
     LOCAL,
-    GLOBAL
+    GLOBAL,
+    TYPE
 }

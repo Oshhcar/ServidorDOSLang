@@ -43,26 +43,29 @@ public class Write extends Instruccion {
                     switch (tipoExp.getTipo()) {
                         case CHAR:
                             codigo += rsExp.getCodigo();
-                            
-                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            codigo += "+, P, " + (rsExp.getValor()-e.getTmpInicio()+e.getSize()) + ", t0\n";
+                            codigo += "=, stack, t0, t"+rsExp.getValor()+"\n";
                             codigo += "print(%c, t" + rsExp.getValor() + ")\n";
                             break;
                         case INTEGER:
                             codigo += rsExp.getCodigo();
-                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            codigo += "+, P, " + (rsExp.getValor()-e.getTmpInicio()+e.getSize()) + ", t0\n";
+                            codigo += "=, stack, t0, t"+rsExp.getValor()+"\n";
                             codigo += "print(%e, t" + rsExp.getValor() + ")\n";
                             break;
                         case REAL:
                             codigo += rsExp.getCodigo();
 
-                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            codigo += "+, P, " + (rsExp.getValor()-e.getTmpInicio()+e.getSize()) + ", t0\n";
+                            codigo += "=, stack, t0, t"+rsExp.getValor()+"\n";
                             codigo += "print(%d, t" + rsExp.getValor() + ")\n";
                             break;
                         case STRING:
                         case WORD:
                             codigo += rsExp.getCodigo();
                             
-                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            codigo += "+, P, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t0\n";
+                            codigo += "=, stack, t0, t"+rsExp.getValor()+"\n";
                             
                             result.setEtiquetaV(NuevaEtiqueta());
                             result.setEtiquetaF(NuevaEtiqueta());
@@ -71,6 +74,8 @@ public class Write extends Instruccion {
                             
                             codigo += etqCiclo + ":\n";
                             codigo += "=, heap, t" + rsExp.getValor() +", t" + tmpCiclo+"\n";
+                            codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) +", t0\n";
+                            codigo += "=, t0, t" + tmpCiclo + ", stack\n";
                             codigo += "je, t" + tmpCiclo +", 0, " + result.getEtiquetaV()+"\n";
                             codigo += "jmp, , , " + result.getEtiquetaF()+"\n";
                             codigo += result.getEtiquetaF() + ":\n";
@@ -83,7 +88,8 @@ public class Write extends Instruccion {
                         case BOOLEAN:
                             codigo += rsExp.getCodigo();
                             
-                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            codigo += "+, P, " + (rsExp.getValor()-e.getTmpInicio()+e.getSize()) + ", t0\n";
+                            codigo += "=, stack, t0, t"+rsExp.getValor()+"\n";
                             
                             result.setEtiquetaV(NuevaEtiqueta());
                             result.setEtiquetaF(NuevaEtiqueta());
@@ -110,7 +116,8 @@ public class Write extends Instruccion {
                         case NIL:
                             codigo += rsExp.getCodigo();
                             
-                            codigo += "=, stack, "+(rsExp.getValor()-e.getTmpInicio()+e.getSize())+", t"+rsExp.getValor()+"\n";
+                            codigo += "+, P, " + (rsExp.getValor()-e.getTmpInicio()+e.getSize()) + ", t0\n";
+                            codigo += "=, stack, t0, t"+rsExp.getValor()+"\n";
                             
                             codigo += "print(%c, 78)\n";
                             codigo += "print(%c, 73)\n";

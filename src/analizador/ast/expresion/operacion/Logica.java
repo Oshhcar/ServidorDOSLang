@@ -212,7 +212,8 @@ public class Logica extends Operacion {
 
             codigo += "=, 1, , t" + result.getValor() + "\n";
             codigo += etqSalida + ":\n";
-            codigo += "=, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + result.getValor() + ", stack\n";
+            codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + result.getValor() + ", stack\n";
 
         } else {
             result.setEtiquetaV("");
@@ -262,7 +263,8 @@ public class Logica extends Operacion {
 
             codigo += "=, 0, , t" + result.getValor() + "\n";
             codigo += etqSalida + ":\n";
-            codigo += "=, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + result.getValor() + ", stack\n";
+            codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + result.getValor() + ", stack\n";
 
         } else {
             result.setEtiquetaV("");

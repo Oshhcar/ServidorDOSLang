@@ -53,18 +53,21 @@ public class Unario extends Operacion {
                     Tipo = Op1.getTipo();
                     codigo += rsOp1.getCodigo();
 
-                    codigo += "=, stack, " + (rsOp1.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp1.getValor() + "\n";
+                    codigo += "+, P, " + (rsOp1.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, stack, t0, t" + rsOp1.getValor() + "\n";
 
                     int factor = NuevoTemporal();
                     codigo += "-, 0, 1, t" + factor + "\n";
 
-                    codigo += "=, " + (factor - e.getTmpInicio() + e.getSize()) + ", t" + factor + ", stack\n";
+                    codigo += "+, P, " + (factor - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + factor + ", stack\n";
                     //codigo += "=, stack, "+(factor-e.getTmpInicio()+e.getSize())+", t"+factor+"\n";
 
                     result.setValor(NuevoTemporal());
                     codigo += "*, t" + rsOp1.getValor() + ", t" + factor + ", t" + result.getValor() + "\n";
 
-                    codigo += "=, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + result.getValor() + ", stack\n";
+                    codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + result.getValor() + ", stack\n";
 
                     break;
                 default:
@@ -111,7 +114,8 @@ public class Unario extends Operacion {
 
                     codigo += "=, 0, , t" + result.getValor() + "\n";
                     codigo += etqSalida + ":\n";
-                    codigo += "=, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + result.getValor() + ", stack\n";
+                    codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + result.getValor() + ", stack\n";
 
                 } else {
                     if (rsOp1.getEtiquetaV() != null) {

@@ -12,12 +12,28 @@ package analizador.ast.entorno;
 public class Tipo {
     
     private Type Tipo;
+    private String Id;
+    private Tipo TipoPadre;
     
     public Tipo(Type Tipo){
         this.Tipo = Tipo;
+        this.Id = null;
+        this.TipoPadre = null;
     }
+    
+    /**
+     * Cuando Es un id(subtipo)
+     * @param Id the Id to set
+     */
+    public Tipo(String Id){ 
+        this.Tipo = Type.UNDEFINED;
+        this.Id = Id;
+        this.TipoPadre = null;
+}
 
-    public boolean IsChar(){ return this.Tipo == Type.CHAR; }
+    public boolean IsChar() {
+        return this.Tipo == Type.CHAR;
+    }
     public boolean IsInteger(){ return this.Tipo == Type.INTEGER; }
     public boolean IsReal(){ return this.Tipo == Type.REAL; }
     public boolean IsString(){ return this.Tipo == Type.STRING; }
@@ -33,10 +49,20 @@ public class Tipo {
         return IsInteger() || IsReal() || IsChar();
     }
     
+    @Override
+    public String toString(){
+        if(Id != null){
+            return Id;
+        }
+        return Tipo.name().toLowerCase();
+    }
+    
     /**
      * @return the Tipo
      */
     public Type getTipo() {
+        if(TipoPadre != null)
+            return TipoPadre.getTipo();
         return Tipo;
     }
 
@@ -45,5 +71,33 @@ public class Tipo {
      */
     public void setTipo(Type Tipo) {
         this.Tipo = Tipo;
+    }
+
+    /**
+     * @return the Id
+     */
+    public String getId() {
+        return Id;
+    }
+
+    /**
+     * @param Id the Id to set
+     */
+    public void setId(String Id) {
+        this.Id = Id;
+    }
+
+    /**
+     * @return the TipoPadre
+     */
+    public Tipo getTipoPadre() {
+        return TipoPadre;
+    }
+
+    /**
+     * @param TipoPadre the TipoPadre to set
+     */
+    public void setTipoPadre(Tipo TipoPadre) {
+        this.TipoPadre = TipoPadre;
     }
 }

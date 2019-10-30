@@ -61,16 +61,16 @@ terminal procedure_, record_, break_, if_, then_, else_, with_, do_, continue_, 
 terminal case_, default_, while_, repeat_, until_, for_, to_, downto_, write_, writeln_, read_;
 
 non terminal INICIO;
-non terminal PROGRAM;
-non terminal PROGRAM_NAME;
-non terminal USES;
-non terminal ID_LIST;
-non terminal TYPE_PRIMITIVE;
-non terminal TYPEDEF;
-non terminal TYPE_LIST;
-non terminal TYPE;
-non terminal TYPE_VALUE;
-non terminal TYPE_SPECIFIER;
+non terminal AST PROGRAM;
+non terminal String PROGRAM_NAME;
+non terminal ArrayList<String> USES;
+non terminal ArrayList<String> ID_LIST;
+non terminal Type TYPE_PRIMITIVE;
+non terminal ArrayList<TipoDef> TYPEDEF;
+non terminal ArrayList<TipoDef> TYPE_LIST;
+non terminal TipoDef TYPE;
+non terminal Tipo TYPE_VALUE;
+non terminal Tipo TYPE_SPECIFIER;
 non terminal DIM_LIST;
 non terminal DIM;
 non terminal VARDEF;
@@ -131,59 +131,72 @@ precedence left else_;
 
 start with INICIO;
 
-INICIO ::= SENTENCIAS:a //PROGRAM
+INICIO ::= PROGRAM:a
         {: 
-            parser.ast = new AST(a); 
+            parser.ast = a; 
             System.out.println("DOCUMENTO OK"); 
         :}
 ;
 
-PROGRAM ::= PROGRAM_NAME USES TYPEDEF CONSTDEF VARDEF PROCEDUREDEF BLOQUE punto
+PROGRAM ::= PROGRAM_NAME:a USES:b TYPEDEF:c CONSTDEF:d VARDEF:e PROCEDUREDEF:f BLOQUE:g punto
+        {: RESULT = new AST(a, b, c, g.getSentencias()); :}
 ;
 
-PROGRAM_NAME ::= program_ id:a puntoycoma
-        {:
-            System.out.println("programa "+a);
-        :}
+PROGRAM_NAME ::= program_ id:a puntoycoma {: RESULT = a.toLowerCase(); :}
 ;
 
-USES ::= uses_ ID_LIST puntoycoma
-        | {: :}
+USES ::= uses_ ID_LIST:a puntoycoma {: RESULT = a; :}
+        | {: RESULT = null; :}
 ;
 
-ID_LIST ::= ID_LIST coma id
-            | id
+ID_LIST ::= ID_LIST:a coma id:b
+                {:
+                    RESULT = a;
+                    RESULT.add(b);
+                :}
+            | id:a 
+                {:
+                    RESULT = new ArrayList<>();
+                    RESULT.add(a.toLowerCase());
+                :}
 ;
 
 
-TYPE_PRIMITIVE ::= char_
-                | integer_
-                | real_
-                | string_
-                | word_
-                | boolean_
+TYPE_PRIMITIVE ::= char_ {: RESULT = Type.CHAR; :}
+                | integer_ {: RESULT = Type.INTEGER; :}
+                | real_ {: RESULT = Type.REAL; :}
+                | string_ {: RESULT = Type.STRING; :}
+                | word_ {: RESULT = Type.WORD; :}
+                | boolean_ {: RESULT = Type.BOOLEAN; :}
 ;
 
-TYPEDEF ::= type_ TYPE_LIST
-        | {: :}
+TYPEDEF ::= type_ TYPE_LIST:a {: RESULT = a; :}
+        | {: RESULT = null; :}
 ;
 
-TYPE_LIST ::= TYPE_LIST TYPE
-            | TYPE
+TYPE_LIST ::= TYPE_LIST:a TYPE:b
+                {:
+                    RESULT = a;
+                    RESULT.add(b);
+                :}
+            | TYPE:a 
+                {:
+                    RESULT = new ArrayList<>();
+                    RESULT.add(a);
+                :}
 ;
 
-TYPE ::= ID_LIST igual TYPE_VALUE puntoycoma
+TYPE ::= ID_LIST:a igual:b TYPE_VALUE:c puntoycoma {: RESULT = new TipoDef(a, c, bleft, bright); :}
 ;
 
-TYPE_VALUE ::= TYPE_SPECIFIER
+TYPE_VALUE ::= TYPE_SPECIFIER:a {: RESULT = a; :}
             | parIzquierda ID_LIST parDerecha
-            //| LITERAL puntos3 LITERAL
             | LITERAL puntos3 LITERAL
 ;
 
-TYPE_SPECIFIER ::= TYPE_PRIMITIVE
+TYPE_SPECIFIER ::= TYPE_PRIMITIVE:a {: RESULT = new Tipo(a); :}
                 | array_ corcheteIzquierda DIM_LIST corcheteDerecha of_ TYPE_SPECIFIER
-                | id
+                | id:a {: RESULT = new Tipo(a.toLowerCase()); :}
                 | record_ VAR_LIST end_
 ;
 
@@ -204,7 +217,7 @@ VAR_LIST ::= VAR_LIST VAR
         | VAR;
 
 VAR ::= ID_LIST dospuntos TYPE_SPECIFIER puntoycoma
-        | ID_LIST dospuntos TYPE_SPECIFIER asignacion EXPRESSION puntoycoma
+        | ID_LIST dospuntos TYPE_SPECIFIER igual EXPRESSION puntoycoma
 ;
 
 CONSTDEF ::= const_ CONST_LIST

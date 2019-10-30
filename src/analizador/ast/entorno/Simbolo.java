@@ -35,6 +35,24 @@ public class Simbolo {
         this.Entorno = null;
         this.Nil = false;
     }
+    
+    /**
+     * Constructor para Types
+     * @param Id the Id to set
+     * @param Tipo the Tipo to set
+     */
+    public Simbolo(String Id, Tipo Tipo){
+        this.Id = Id;
+        this.Tipo = Tipo;
+        this.Rol = Rol.TYPE;
+        this.Tam = -1;
+        this.Pos = -1;
+        this.Ambito = "Global";
+        this.NumParam = -1;
+        this.TipoParam = -1;
+        this.Entorno = null;
+        this.Nil = false;
+    }
 
     /**
      * @return the Id

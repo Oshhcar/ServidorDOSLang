@@ -28,19 +28,21 @@ public class Literal extends Expresion {
     @Override
     public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores) {
         Result result = new Result();
-        result.setCodigo("");
+        String codigo = "";
 
         if (Tipo.IsInteger() || Tipo.IsReal() || Tipo.IsBoolean()) {
             result.setValor(NuevoTemporal());
-
-            result.setCodigo("=, " + Valor.toString() + ", , t" + result.getValor() + "\n");
-            result.setCodigo(result.getCodigo() + "=, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + result.getValor() + ", stack\n");
-
+            
+            codigo += "=, " + Valor.toString() + ", , t" + result.getValor()+"\n";
+            codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize())+", t0\n";
+            codigo += "=, t0, t" + result.getValor() +", stack\n";
+            
         } else if (Tipo.IsNil()) {
             result.setValor(NuevoTemporal());
 
-            result.setCodigo("-, 0, 1, t" + result.getValor() + "\n");
-            result.setCodigo(result.getCodigo() + "=, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + result.getValor() + ", stack\n");
+            codigo += "-, 0, 1, t" + result.getValor() + "\n";
+            codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize())+", t0\n";
+            codigo += "=, t0, t" + result.getValor() +", stack\n";
         } else if (Tipo.IsChar()) {
             int val;
 
@@ -55,15 +57,17 @@ public class Literal extends Expresion {
 
             result.setValor(NuevoTemporal());
 
-            result.setCodigo("=, " + val + ", , t" + result.getValor() + "\n");
-            result.setCodigo(result.getCodigo() + "=, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + result.getValor() + ", stack\n");
-
+            codigo += "=, " + val + ", , t" + result.getValor() + "\n";
+            codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize())+", t0\n";
+            codigo += "=, t0, t" + result.getValor() +", stack\n";
+            
         } else {
             result.setValor(NuevoTemporal());
 
-            String codigo = "=, H, , t" + result.getValor() + "\n";
-            codigo += "=, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + result.getValor() + ", stack\n";
-
+            codigo += "=, H, , t" + result.getValor() + "\n";
+            codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize())+", t0\n";
+            codigo += "=, t0, t" + result.getValor() +", stack\n";
+            
             for (int c : Valor.toString().toCharArray()) {
                 codigo += "=, H, " + c + ", " + "heap\n";
                 codigo += "+, H, 1, H\n";
@@ -71,10 +75,9 @@ public class Literal extends Expresion {
 
             codigo += "=, H, 0, " + "heap\n";
             codigo += "+, H, 1, H\n";
-
-            result.setCodigo(codigo);
         }
 
+        result.setCodigo(codigo);
         return result;
     }
 }
