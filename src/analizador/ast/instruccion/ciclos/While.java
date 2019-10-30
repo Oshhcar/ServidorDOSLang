@@ -10,6 +10,10 @@ import analizador.ast.NodoAST;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.expresion.Expresion;
+import analizador.ast.expresion.Literal;
+import analizador.ast.expresion.operacion.Logica;
+import analizador.ast.expresion.operacion.Relacional;
+import analizador.ast.expresion.operacion.Unario;
 import analizador.ast.instruccion.Instruccion;
 import java.util.ArrayList;
 
@@ -32,6 +36,53 @@ public class While extends Instruccion{
     public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         Result result = new Result();
         String codigo = "";
+        
+        if (Condicion instanceof Relacional) {
+            ((Relacional) Condicion).setCortoCircuito(true);
+        } else if (Condicion instanceof Logica) {
+            ((Logica) Condicion).setEvaluar(true);
+        } else if (Condicion instanceof Unario) {
+            ((Unario) Condicion).setEvaluar(true);
+        }
+        
+        Result rsCondicion = Condicion.GetCuadruplos(e, errores);
+        
+        if (Condicion instanceof Literal) {
+            String cod = rsCondicion.getCodigo();
+
+            rsCondicion.setEtiquetaV(NuevaEtiqueta());
+            rsCondicion.setEtiquetaF(NuevaEtiqueta());
+
+            cod += "je, t" + rsCondicion.getValor() + ", 1, " + rsCondicion.getEtiquetaF() + "\n";
+            cod += "jmp, , , " + rsCondicion.getEtiquetaV() + "\n";
+
+            rsCondicion.setEtiquetaV(rsCondicion.getEtiquetaV() + ":\n");
+            rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaF() + ":\n");
+
+            rsCondicion.setCodigo(cod);
+        }
+        
+        if (Condicion instanceof Relacional || Condicion instanceof Literal) {
+            String copy = rsCondicion.getEtiquetaF();
+            rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaV());
+            rsCondicion.setEtiquetaV(copy);
+        }
+
+        String etqCiclo = NuevaEtiqueta();
+        
+        codigo += etqCiclo + ":\n";
+        codigo += rsCondicion.getCodigo();
+        codigo += rsCondicion.getEtiquetaV();
+        
+        if (Sentencia instanceof Instruccion) {
+            codigo += ((Instruccion) Sentencia).GetCuadruplos(e, errores, global).getCodigo();
+        } else if (Sentencia instanceof Expresion) {
+            codigo += ((Expresion) Sentencia).GetCuadruplos(e, errores).getCodigo();
+        }
+        
+        codigo += "jmp, , , " + etqCiclo + "\n";
+        codigo += rsCondicion.getEtiquetaF();
+        
         
         result.setCodigo(codigo);
         return result;

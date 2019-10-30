@@ -12,9 +12,10 @@ package analizador.ast.entorno;
 public class Result {
     
     private int Valor; //numero temporal del valor
-    private String Codigo;
-    private String EtiquetaV;
-    private String EtiquetaF;
+    private String Estructura; //Se utiliza para saber donde asignar
+    private String Codigo; // Código que genera
+    private String EtiquetaV; //Se utiliza en op
+    private String EtiquetaF; //Se utiliza en op
     private int PtrStack;
     private Simbolo Simbolo;
     private Tipo Tipo;
@@ -120,6 +121,20 @@ public class Result {
      */
     public void setTipo(Tipo Tipo) {
         this.Tipo = Tipo;
+    }
+
+    /**
+     * @return the Estructura
+     */
+    public String getEstructura() {
+        return Estructura;
+    }
+
+    /**
+     * @param Estructura the Estructura to set
+     */
+    public void setEstructura(String Estructura) {
+        this.Estructura = Estructura;
     }
     
     

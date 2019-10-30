@@ -92,8 +92,8 @@ non terminal ArrayList<NodoAST> SENTENCIAS;
 non terminal NodoAST SENTENCIA;
 non terminal NodoAST STATEMENT;
 non terminal WITH_STMT;
-non terminal ASSIGNMENT_STMT;
-non terminal TARGET;
+non terminal Asignacion ASSIGNMENT_STMT;
+non terminal Expresion TARGET;
 non terminal BREAK_STMT;
 non terminal CONTINUE_STMT;
 non terminal EXIT_STMT;
@@ -101,7 +101,7 @@ non terminal If IF_STMT;
 non terminal Switch CASE_STMT;
 non terminal ArrayList<Case> CASE_LIST;
 non terminal Case CASE;
-non terminal WHILE_STMT;
+non terminal While WHILE_STMT;
 non terminal REPEAT_STMT;
 non terminal FOR_STMT;
 non terminal Write WRITE_STMT;
@@ -296,14 +296,14 @@ SENTENCIAS ::= SENTENCIAS:a SENTENCIA:b
 
 SENTENCIA ::= WITH_STMT puntoycoma
             | WITH_STMT
-            | ASSIGNMENT_STMT puntoycoma
+            | ASSIGNMENT_STMT:a puntoycoma {: RESULT = a; :}
             | BREAK_STMT puntoycoma
             | CONTINUE_STMT puntoycoma
             | EXIT_STMT puntoycoma
             | IF_STMT:a {: RESULT = a; :}
             | CASE_STMT:a {: RESULT = a; :}
             | CASE_STMT:a puntoycoma {: RESULT = a; :}
-            | WHILE_STMT
+            | WHILE_STMT:a {: RESULT = a; :}
             | REPEAT_STMT puntoycoma
             | FOR_STMT
             | WRITE_STMT:a puntoycoma {: RESULT = a; :}
@@ -315,12 +315,12 @@ WITH_STMT ::= with_ ID_LIST do_ SENTENCIAS end_
             | with_ ID_LIST do_ end_
 ;
 
-TARGET ::= id
+TARGET ::= id:a {: RESULT = new Identificador(a, aleft, aright); :}
         | ATTRIBUTEREF
         | ACCESS
 ;
 
-ASSIGNMENT_STMT ::= TARGET asignacion EXPRESSION
+ASSIGNMENT_STMT ::= TARGET:a asignacion:b EXPRESSION:c {: RESULT = new Asignacion(a, c, bleft, bright); :} 
 ;
 
 BREAK_STMT ::= break_
