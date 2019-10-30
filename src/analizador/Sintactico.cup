@@ -103,7 +103,7 @@ non terminal ArrayList<Case> CASE_LIST;
 non terminal Case CASE;
 non terminal While WHILE_STMT;
 non terminal Repeat REPEAT_STMT;
-non terminal FOR_STMT;
+non terminal For FOR_STMT;
 non terminal Write WRITE_STMT;
 non terminal READ_STMT;
 non terminal EXPRESSION_STMT;
@@ -305,7 +305,7 @@ SENTENCIA ::= WITH_STMT puntoycoma
             | CASE_STMT:a puntoycoma {: RESULT = a; :}
             | WHILE_STMT:a {: RESULT = a; :}
             | REPEAT_STMT:a puntoycoma {: RESULT = a; :}
-            | FOR_STMT
+            | FOR_STMT:a {: RESULT = a; :}
             | WRITE_STMT:a puntoycoma {: RESULT = a; :}
             | READ_STMT puntoycoma
             | EXPRESSION_STMT puntoycoma
@@ -362,8 +362,10 @@ WHILE_STMT ::= while_:a EXPRESSION:b do_ STATEMENT:c {: RESULT = new While(b, c,
 REPEAT_STMT ::= repeat_:a SENTENCIAS:b until_ EXPRESSION:c {: RESULT = new Repeat(b, c, aleft, aright); :}
 ;
 
-FOR_STMT ::= for_ TARGET asignacion EXPRESSION to_ EXPRESSION do_ STATEMENT
-            | for_ TARGET asignacion EXPRESSION downto_ EXPRESSION do_ STATEMENT
+FOR_STMT ::= for_:a TARGET:b asignacion:c EXPRESSION:d to_ EXPRESSION:e do_ STATEMENT:f
+                {: RESULT = new For(new Asignacion(b, d, cleft, cright), e, false, f, aleft, aright); :}
+            | for_:a TARGET:b asignacion:c EXPRESSION:d downto_ EXPRESSION:e do_ STATEMENT:f
+                {: RESULT = new For(new Asignacion(b, d, cleft, cright), e, true, f, aleft, aright); :}
 ;
 
 WRITE_STMT ::= write_:a parIzquierda EXPRESSION_LIST:b parDerecha  //agregar en la llamada write y writeln sin nada

@@ -40,6 +40,10 @@ public class Asignacion extends Instruccion{
         
         Result rsTarget = Target.GetCuadruplos(e, errores);
         
+        if(Target instanceof Identificador){
+            ((Identificador) Target).setAcceso(true);
+        }
+        
         if(rsTarget.getEstructura() != null){
             Result rsValor = Valor.GetCuadruplos(e, errores);
             
