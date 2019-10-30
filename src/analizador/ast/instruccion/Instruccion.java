@@ -21,5 +21,5 @@ public abstract class Instruccion extends NodoAST{
         super(Linea, Columna);
     }
     
-    public abstract Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores);
+    public abstract Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global);
 }

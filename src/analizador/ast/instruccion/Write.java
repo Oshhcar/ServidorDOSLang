@@ -28,7 +28,7 @@ public class Write extends Instruccion {
     }
 
     @Override
-    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores) {
+    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         Result result = new Result();
         String codigo = "";
 

@@ -10,13 +10,14 @@ import analizador.ast.NodoAST;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.expresion.Expresion;
+import analizador.ast.instruccion.Instruccion;
 import java.util.ArrayList;
 
 /**
  *
  * @author oscar
  */
-public class While extends Expresion{
+public class While extends Instruccion{
     
     private Expresion Condicion;
     private NodoAST Sentencia;
@@ -28,7 +29,7 @@ public class While extends Expresion{
     }
     
     @Override
-    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores) {
+    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         Result result = new Result();
         String codigo = "";
         

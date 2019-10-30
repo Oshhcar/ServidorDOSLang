@@ -40,7 +40,7 @@ public class Switch extends Instruccion{
     
     
     @Override
-    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores) {
+    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         Result result = new Result();
         String codigo = "";
         
@@ -49,12 +49,12 @@ public class Switch extends Instruccion{
         for(Case c: Cases){
             c.setExpr(Expresion);
             c.setEtqSalida(etqSalida);
-            codigo += c.GetCuadruplos(e, errores).getCodigo();
+            codigo += c.GetCuadruplos(e, errores, global).getCodigo();
         }
         
         if(SentenciaElse != null){
             if (SentenciaElse instanceof Instruccion) {
-                codigo += ((Instruccion) SentenciaElse).GetCuadruplos(e, errores).getCodigo();
+                codigo += ((Instruccion) SentenciaElse).GetCuadruplos(e, errores, global).getCodigo();
             } else if (SentenciaElse instanceof Expresion) {
                 codigo += ((Expresion) SentenciaElse).GetCuadruplos(e, errores).getCodigo();
             }

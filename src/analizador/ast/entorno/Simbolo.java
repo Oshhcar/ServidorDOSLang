@@ -40,14 +40,35 @@ public class Simbolo {
      * Constructor para Types
      * @param Id the Id to set
      * @param Tipo the Tipo to set
+     * @param Ambito the Ambito to set
      */
-    public Simbolo(String Id, Tipo Tipo){
+    public Simbolo(String Id, Tipo Tipo, String Ambito){
         this.Id = Id;
         this.Tipo = Tipo;
         this.Rol = Rol.TYPE;
         this.Tam = -1;
         this.Pos = -1;
-        this.Ambito = "Global";
+        this.Ambito = Ambito;
+        this.NumParam = -1;
+        this.TipoParam = -1;
+        this.Entorno = null;
+        this.Nil = false;
+    }
+    
+    /**
+     * Constructor para Var
+     * @param Id the Id to set
+     * @param Tipo the Tipo to set
+     * @param Pos the Pos to set
+     * @param Ambito the Ambito to set
+     */
+    public Simbolo(String Id, Tipo Tipo, int Pos, String Ambito){
+        this.Id = Id;
+        this.Tipo = Tipo;
+        this.Rol = Rol.LOCAL;
+        this.Tam = -1;
+        this.Pos = Pos;
+        this.Ambito = Ambito;
         this.NumParam = -1;
         this.TipoParam = -1;
         this.Entorno = null;

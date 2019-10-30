@@ -5,6 +5,8 @@
  */
 package analizador.ast.entorno;
 
+import java.util.Objects;
+
 /**
  *
  * @author oscar
@@ -43,7 +45,13 @@ public class Tipo {
     public boolean IsArray(){ return this.Tipo == Type.ARRAY; }
     public boolean IsRecord(){ return this.Tipo == Type.RECORD; }
     public boolean IsNil(){ return this.Tipo == Type.NIL; }
-    public boolean IsUndefined(){ return this.Tipo == Type.UNDEFINED; }
+    
+    public boolean IsUndefined(){ 
+        if(TipoPadre != null){
+            return TipoPadre.IsUndefined();
+        }
+        return this.Tipo == Type.UNDEFINED; 
+    }
     
     public boolean IsNumeric(){
         return IsInteger() || IsReal() || IsChar();
@@ -55,6 +63,33 @@ public class Tipo {
             return Id;
         }
         return Tipo.name().toLowerCase();
+    }
+    
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof Tipo){
+            Tipo t = (Tipo)o;
+            
+            if(Id != null){
+                if(t.getId() != null){
+                    return Id.equals(t.getId());
+                }
+            } else {
+                if(t.getId() == null){
+                    return Tipo == t.getTipo();
+                }
+            }
+            
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 59 * hash + Objects.hashCode(this.Tipo);
+        hash = 59 * hash + Objects.hashCode(this.Id);
+        return hash;
     }
     
     /**

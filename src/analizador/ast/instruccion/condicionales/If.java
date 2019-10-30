@@ -45,7 +45,7 @@ public class If extends Instruccion {
     }
 
     @Override
-    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores) {
+    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         Result result = new Result();
         String codigo = "";
 
@@ -92,7 +92,7 @@ public class If extends Instruccion {
         
         //Bloque
         if (Sentencia instanceof Instruccion) {
-            codigo += ((Instruccion) Sentencia).GetCuadruplos(e, errores).getCodigo();
+            codigo += ((Instruccion) Sentencia).GetCuadruplos(e, errores, global).getCodigo();
         } else if (Sentencia instanceof Expresion) {
             codigo += ((Expresion) Sentencia).GetCuadruplos(e, errores).getCodigo();
         }
@@ -108,7 +108,7 @@ public class If extends Instruccion {
             }
             
             if (SentenciaElse instanceof Instruccion) {
-                codigo += ((Instruccion) SentenciaElse).GetCuadruplos(e, errores).getCodigo();
+                codigo += ((Instruccion) SentenciaElse).GetCuadruplos(e, errores, global).getCodigo();
             } else if (SentenciaElse instanceof Expresion) {
                 codigo += ((Expresion) SentenciaElse).GetCuadruplos(e, errores).getCodigo();
             }

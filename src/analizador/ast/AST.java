@@ -11,6 +11,7 @@ import analizador.ast.entorno.Result;
 import analizador.ast.expresion.Expresion;
 import analizador.ast.instruccion.Instruccion;
 import analizador.ast.instruccion.TipoDef;
+import analizador.ast.instruccion.VarDef;
 import java.util.ArrayList;
 import servidordoslang.File;
 
@@ -23,81 +24,117 @@ public class AST {
     private String Nombre;
     private ArrayList<String> Uses;
     private ArrayList<TipoDef> Tipos;
+    private ArrayList<VarDef> Variables;
     private ArrayList<NodoAST> Sentencias;
 
-    public AST(String Nombre, ArrayList<String> Uses, ArrayList<TipoDef> Tipos, ArrayList<NodoAST> Sentencias) {
+    public AST(String Nombre, ArrayList<String> Uses, ArrayList<TipoDef> Tipos, ArrayList<VarDef> Variables, ArrayList<NodoAST> Sentencias) {
         this.Nombre = Nombre;
         this.Uses = Uses;
         this.Tipos = Tipos;
+        this.Variables = Variables;
         this.Sentencias = Sentencias;
     }
-    
+
     public String GenerarCuadruplos(Entorno global, ArrayList<ErrorC> errores, ArrayList<File> files) {
+        Result result = new Result();
+        result.setCodigo("");
+
         NodoAST.Etiquetas = 0;
         NodoAST.Temporales = 0;
         NodoAST.H = 0;
 
+        Entorno local = new Entorno(Nombre);
+        local.setTmpInicio(NodoAST.Temporales + 1);
+
+        /*Primera pasada para saber size y total temporales*/
         /**
          * Ejecuto declaracion Tipos
          */
-        if(Tipos != null){
+        if (Tipos != null) {
             Tipos.forEach((tipo) -> {
-                tipo.GetCuadruplos(global, errores);
+                tipo.GetCuadruplos(local, errores, global);
             });
         }
-        //global.Recorrer();
-        
-        Result result = new Result();
-        result.setCodigo("");
-        global.setTmpInicio(NodoAST.Temporales+1);
 
+        /**
+         * Ejecuto declaracion Variables
+         */
+        if (Variables != null) {
+            Variables.forEach((variable) -> {
+                variable.GetCuadruplos(local, errores, global);
+            });
+        }
+
+        /**
+         * Ejecuto Sentencias
+         */
         if (Sentencias != null) {
-            //Primera pasada para saber numero temporales
-            for (NodoAST nodo : Sentencias) {
-                //Result rsNodo = null;
-
+            Sentencias.forEach((nodo) -> {
                 if (nodo instanceof Instruccion) {
-                    /*rsNodo =*/ ((Instruccion) nodo).GetCuadruplos(global, new ArrayList<>());
+                    ((Instruccion) nodo).GetCuadruplos(local, errores, global);
                 } else if (nodo instanceof Expresion) {
-                    /*rsNodo =*/ ((Expresion) nodo).GetCuadruplos(global, new ArrayList<>());
+                    ((Expresion) nodo).GetCuadruplos(local, errores);
                 }
+            });
+        }
 
-                //if(rsNodo != null){
-                //    if(rsNodo.getCodigo() != null){
-                //        result.setCodigo(result.getCodigo() + rsNodo.getCodigo());
-                //    }
-                //}
-            }
+        local.getSimbolos().clear();
+        global.getSimbolos().clear();
+        errores.clear();
 
-            //Variables locales
-            global.setSize(global.getPos());
-            global.setSize(8);
-            //Temporales en ambito
-            global.setTmpFin(NodoAST.Temporales);
+        //Variables locales
+        local.setSize(local.getPos());
 
-            System.out.println("inicio: " + global.getTmpInicio() + " fin " + global.getTmpFin());
+        //Temporales en ambito
+        local.setTmpFin(NodoAST.Temporales);
 
-            //Reinicio el contador de las variables locales y tmp etc
-            //global.setPos(0);
-            NodoAST.Etiquetas = 0;
-            NodoAST.Temporales = 0;
-            NodoAST.H = 0;
+        System.out.println("inicio: " + local.getTmpInicio() + " fin " + local.getTmpFin());
 
-            for (NodoAST nodo : Sentencias) {
+        //Reinicio el contador de las variables locales y tmp etc
+        local.setPos(0);
+        NodoAST.Etiquetas = 0;
+        NodoAST.Temporales = 0;
+        NodoAST.H = 0;
+
+        /*Segunda pasada*/
+        /**
+         * Ejecuto declaracion Tipos
+         */
+        if (Tipos != null) {
+            Tipos.forEach((tipo) -> {
+                tipo.GetCuadruplos(local, errores, global);
+            });
+        }
+
+        /**
+         * Ejecuto declaracion Variables
+         */
+        if (Variables != null) {
+            Variables.forEach((variable) -> {
+                Result rsVar = variable.GetCuadruplos(local, errores, global);
+                if (rsVar != null) {
+                    result.setCodigo(result.getCodigo() + rsVar.getCodigo());
+                }
+            });
+        }
+
+        /**
+         * Ejecuto Sentencias
+         */
+        if (Sentencias != null) {
+            Sentencias.forEach((nodo) -> {
                 Result rsNodo = null;
 
                 if (nodo instanceof Instruccion) {
-                    rsNodo = ((Instruccion) nodo).GetCuadruplos(global, errores);
+                    rsNodo = ((Instruccion) nodo).GetCuadruplos(local, errores, global);
                 } else if (nodo instanceof Expresion) {
-                    rsNodo = ((Expresion) nodo).GetCuadruplos(global, errores);
+                    rsNodo = ((Expresion) nodo).GetCuadruplos(local, errores);
                 }
 
                 if (rsNodo != null) {
-                    if (rsNodo.getCodigo() != null) {
-                        result.setCodigo(result.getCodigo() + rsNodo.getCodigo());
-                    }
+                    result.setCodigo(result.getCodigo() + rsNodo.getCodigo());
                 }
-            }
+            });
         }
 
         return result.getCodigo();
@@ -157,6 +194,20 @@ public class AST {
      */
     public void setTipos(ArrayList<TipoDef> Tipos) {
         this.Tipos = Tipos;
+    }
+
+    /**
+     * @return the Variables
+     */
+    public ArrayList<VarDef> getVariables() {
+        return Variables;
+    }
+
+    /**
+     * @param Variables the Variables to set
+     */
+    public void setVariables(ArrayList<VarDef> Variables) {
+        this.Variables = Variables;
     }
 
 }

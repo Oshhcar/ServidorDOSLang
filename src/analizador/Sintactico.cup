@@ -73,9 +73,9 @@ non terminal Tipo TYPE_VALUE;
 non terminal Tipo TYPE_SPECIFIER;
 non terminal DIM_LIST;
 non terminal DIM;
-non terminal VARDEF;
-non terminal VAR_LIST;
-non terminal VAR;
+non terminal ArrayList<VarDef> VARDEF;
+non terminal ArrayList<VarDef> VAR_LIST;
+non terminal VarDef VAR;
 non terminal CONSTDEF;
 non terminal CONST_LIST;
 non terminal CONST;
@@ -139,7 +139,7 @@ INICIO ::= PROGRAM:a
 ;
 
 PROGRAM ::= PROGRAM_NAME:a USES:b TYPEDEF:c CONSTDEF:d VARDEF:e PROCEDUREDEF:f BLOQUE:g punto
-        {: RESULT = new AST(a, b, c, g.getSentencias()); :}
+        {: RESULT = new AST(a, b, c, e, g.getSentencias()); :}
 ;
 
 PROGRAM_NAME ::= program_ id:a puntoycoma {: RESULT = a.toLowerCase(); :}
@@ -152,7 +152,7 @@ USES ::= uses_ ID_LIST:a puntoycoma {: RESULT = a; :}
 ID_LIST ::= ID_LIST:a coma id:b
                 {:
                     RESULT = a;
-                    RESULT.add(b);
+                    RESULT.add(b.toLowerCase());
                 :}
             | id:a 
                 {:
@@ -209,15 +209,26 @@ DIM ::= LITERAL puntos2 LITERAL
         | id
 ;
 
-VARDEF ::= var_ VAR_LIST
-        | {: :}
+VARDEF ::= var_ VAR_LIST:a {: RESULT = a; :}
+        | {: RESULT = null; :}
 ;
 
-VAR_LIST ::= VAR_LIST VAR
-        | VAR;
+VAR_LIST ::= VAR_LIST:a VAR:b
+                {: 
+                    RESULT = a;
+                    RESULT.add(b);
+                :}
+            | VAR:a
+                {:
+                    RESULT = new ArrayList<>();
+                    RESULT.add(a);
+                :}
+;
 
-VAR ::= ID_LIST dospuntos TYPE_SPECIFIER puntoycoma
-        | ID_LIST dospuntos TYPE_SPECIFIER igual EXPRESSION puntoycoma
+VAR ::= ID_LIST:a dospuntos:b TYPE_SPECIFIER:c puntoycoma 
+            {: RESULT = new VarDef(a, c, bleft, bright); :}
+        | ID_LIST:a dospuntos:b TYPE_SPECIFIER:c igual EXPRESSION:d puntoycoma
+            {: RESULT = new VarDef(a, c, d, bleft, bright); :}
 ;
 
 CONSTDEF ::= const_ CONST_LIST
@@ -427,7 +438,7 @@ PRIMARY ::= ATOM:a {: RESULT = a; :}
         | CALL :a {: RESULT = a; :}
 ;
 
-ATOM ::= id /*esto puede ser una llamada*/
+ATOM ::= id:a {: RESULT = new Identificador(a.toLowerCase(), aleft, aright); :} /*esto puede ser una llamada*/
         | LITERAL:a {: RESULT = a; :}
         | ENCLOSURE:a {: RESULT = a; :}
 ;

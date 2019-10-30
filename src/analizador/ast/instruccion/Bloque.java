@@ -26,14 +26,14 @@ public class Bloque extends Instruccion {
     }
 
     @Override
-    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores) {
+    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         Result result = new Result();
         String codigo = "";
 
         if (Sentencias != null) {
             for (NodoAST nodo : Sentencias) {
                 if (nodo instanceof Instruccion) {
-                    codigo  += ((Instruccion) nodo).GetCuadruplos(e, errores).getCodigo();
+                    codigo  += ((Instruccion) nodo).GetCuadruplos(e, errores, global).getCodigo();
                 } else if (nodo instanceof Expresion) {
                     codigo += ((Expresion) nodo).GetCuadruplos(e, errores).getCodigo();
                 }

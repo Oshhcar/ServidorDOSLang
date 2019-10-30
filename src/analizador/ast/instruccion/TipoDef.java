@@ -28,7 +28,7 @@ public class TipoDef extends Instruccion {
     }
 
     @Override
-    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores) {
+    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
 
         //Si es un tipo definido
         if (Tipo.getId() != null) {
@@ -43,7 +43,8 @@ public class TipoDef extends Instruccion {
 
         Id.forEach((id) -> {
             if (e.Get(id) == null) {
-                e.Add(new Simbolo(id, Tipo));
+                e.Add(new Simbolo(id, Tipo, e.getAmbito()));
+                global.Add(new Simbolo(id, Tipo, e.getAmbito()));
             } else {
                 errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
             }

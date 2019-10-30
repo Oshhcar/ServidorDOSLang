@@ -34,7 +34,7 @@ public class Case extends Instruccion{
     }
 
     @Override
-    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores) {
+    public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         Result result = new Result();
         String codigo = "";
         
@@ -67,7 +67,7 @@ public class Case extends Instruccion{
         codigo += rsCondicion.getEtiquetaV();
         
         if (Sentencia instanceof Instruccion) {
-            codigo += ((Instruccion) Sentencia).GetCuadruplos(e, errores).getCodigo();
+            codigo += ((Instruccion) Sentencia).GetCuadruplos(e, errores, global).getCodigo();
         } else if (Sentencia instanceof Expresion) {
             codigo += ((Expresion) Sentencia).GetCuadruplos(e, errores).getCodigo();
         }

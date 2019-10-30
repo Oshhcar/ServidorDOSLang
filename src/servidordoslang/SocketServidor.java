@@ -110,7 +110,9 @@ public class SocketServidor extends Thread {
                             errores.addAll(sintactico.getErrores());
 
                             if (ast != null) {
-                                respuesta = ast.GenerarCuadruplos(global, errores, files);
+                                ArrayList<ErrorC> erroresCompilacion = new ArrayList<>();
+                                respuesta = ast.GenerarCuadruplos(global, erroresCompilacion, files);
+                                errores.addAll(erroresCompilacion);
                             }
 
                         } catch (Exception ex) {
