@@ -33,9 +33,7 @@ public class Tipo {
         this.TipoPadre = null;
 }
 
-    public boolean IsChar() {
-        return this.Tipo == Type.CHAR;
-    }
+    public boolean IsChar() { return this.Tipo == Type.CHAR; }
     public boolean IsInteger(){ return this.Tipo == Type.INTEGER; }
     public boolean IsReal(){ return this.Tipo == Type.REAL; }
     public boolean IsString(){ return this.Tipo == Type.STRING; }
@@ -45,13 +43,7 @@ public class Tipo {
     public boolean IsArray(){ return this.Tipo == Type.ARRAY; }
     public boolean IsRecord(){ return this.Tipo == Type.RECORD; }
     public boolean IsNil(){ return this.Tipo == Type.NIL; }
-    
-    public boolean IsUndefined(){ 
-        if(TipoPadre != null){
-            return TipoPadre.IsUndefined();
-        }
-        return this.Tipo == Type.UNDEFINED; 
-    }
+    public boolean IsUndefined(){ return this.Tipo == Type.UNDEFINED; }
     
     public boolean IsNumeric(){
         return IsInteger() || IsReal() || IsChar();
@@ -134,5 +126,6 @@ public class Tipo {
      */
     public void setTipoPadre(Tipo TipoPadre) {
         this.TipoPadre = TipoPadre;
+        this.Tipo = TipoPadre.getTipo();
     }
 }

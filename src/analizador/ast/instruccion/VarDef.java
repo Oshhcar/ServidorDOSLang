@@ -64,13 +64,38 @@ public class VarDef extends Instruccion {
                 if (Expr instanceof Literal || Expr instanceof Operacion) {
                     if (Tipo.getTipo() == Expr.getTipo().getTipo()) {
                         bandera = true;
+                    } else {
+                        //Hacer cast
+                        //Solo va a hacer el cast si es literal o operacion (lo demás verifica el tipo)
+                        switch (Tipo.getTipo()) {
+                            case WORD:
+                                if (Expr.getTipo().IsString()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case STRING:
+                                if (Expr.getTipo().IsWord()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case REAL:
+                                if (Expr.getTipo().IsChar() || Expr.getTipo().IsInteger()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case INTEGER:
+                                if (Expr.getTipo().IsChar()) {
+                                    bandera = true;
+                                }
+                                break;
+                        }
                     }
                 } else {
                     if (Tipo.equals(Expr.getTipo())) {
                         bandera = true;
                     }
                 }
-
+                
                 if (bandera) {
                     codigo += rsExpr.getCodigo();
                     result.setValor(rsExpr.getValor());

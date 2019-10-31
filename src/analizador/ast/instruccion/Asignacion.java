@@ -18,7 +18,7 @@ import java.util.ArrayList;
  *
  * @author oscar
  */
-public class Asignacion extends Instruccion{
+public class Asignacion extends Instruccion {
 
     private Expresion Target;
     private Expresion Valor;
@@ -33,46 +33,71 @@ public class Asignacion extends Instruccion{
     public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         Result result = new Result();
         String codigo = "";
-        
-        if(Target instanceof Identificador){
+
+        if (Target instanceof Identificador) {
             ((Identificador) Target).setAcceso(false);
         }
-        
+
         Result rsTarget = Target.GetCuadruplos(e, errores);
-        
-        if(Target instanceof Identificador){
+
+        if (Target instanceof Identificador) {
             ((Identificador) Target).setAcceso(true);
         }
-        
-        if(rsTarget.getEstructura() != null){
+
+        if (rsTarget.getEstructura() != null) {
             Result rsValor = Valor.GetCuadruplos(e, errores);
-            
-            if(!Valor.getTipo().IsUndefined()){
+
+            if (!Valor.getTipo().IsUndefined()) {
                 boolean bandera = false;
-                
+
                 if (Valor instanceof Literal || Valor instanceof Operacion) {
                     if (Target.getTipo().getTipo() == Valor.getTipo().getTipo()) {
                         bandera = true;
+                    } else {
+                        //Hacer cast
+                        //Solo va a hacer el cast si es literal o operacion (lo demás verifica el tipo)
+                        switch (Target.getTipo().getTipo()) {
+                            case WORD:
+                                if (Valor.getTipo().IsString()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case STRING:
+                                if (Valor.getTipo().IsWord()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case REAL:
+                                if (Valor.getTipo().IsChar() || Valor.getTipo().IsInteger()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case INTEGER:
+                                if (Valor.getTipo().IsChar()) {
+                                    bandera = true;
+                                }
+                                break;
+                        }
                     }
                 } else {
                     if (Target.getTipo().equals(Valor.getTipo())) {
                         bandera = true;
                     }
                 }
-                
-                if(bandera){
+
+                if (bandera) {
                     codigo += rsTarget.getCodigo();
                     codigo += rsValor.getCodigo();
-                    
+
                     codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
-                    
+
                 } else {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "El valor de la expresión no corresponde al Tipo de la variable."));
                 }
             }
-            
+
         }
-        
+
         result.setCodigo(codigo);
         return result;
     }
@@ -104,5 +129,5 @@ public class Asignacion extends Instruccion{
     public void setValor(Expresion Valor) {
         this.Valor = Valor;
     }
-    
+
 }
