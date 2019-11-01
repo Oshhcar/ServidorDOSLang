@@ -6,6 +6,7 @@
 package analizador.ast.entorno;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 /**
  *
@@ -17,12 +18,11 @@ public class Entorno {
     private int Pos;
     private String Ambito;
     private Entorno Padre;
-    private String EtiquetaSalida;
     private int Size;
     private int TmpInicio;
     private int TmpFin;
-    private String EtiquetaCiclo;
-    private String EtiquetaSalidaCiclo;
+    private Stack<String> SalidaCiclo;
+    private Stack<String> ContinueCiclo;
 
     public Entorno(String Ambito) {
         Simbolos = new ArrayList<>();
@@ -32,6 +32,8 @@ public class Entorno {
         Size = 0;
         TmpInicio = 0;
         TmpFin = 0;
+        SalidaCiclo = new Stack<>();
+        ContinueCiclo = new Stack<>();
     }
 
     public Entorno(String Ambito, Entorno Padre) {
@@ -147,37 +149,23 @@ public class Entorno {
     }
 
     /**
-     * @return the EtiquetaSalida
-     */
-    public String getEtiquetaSalida() {
-        return EtiquetaSalida;
-    }
-
-    /**
-     * @param EtiquetaSalida the EtiquetaSalida to set
-     */
-    public void setEtiquetaSalida(String EtiquetaSalida) {
-        this.EtiquetaSalida = EtiquetaSalida;
-    }
-
-    /**
      * @return the Size
      */
     public int getSize() {
         return Size;
     }
 
-    public int getSizeTotal(){
-        return Size+(TmpFin - TmpInicio);
+    public int getSizeTotal() {
+        return Size + (TmpFin - TmpInicio);
     }
-    
+
     /**
      * @param Size the Size to set
      */
     public void setSize(int Size) {
         this.Size = Size;
     }
-    
+
     /**
      * @return the TmpInicio
      */
@@ -207,30 +195,30 @@ public class Entorno {
     }
 
     /**
-     * @return the EtiquetaCiclo
+     * @return the SalidaCiclo
      */
-    public String getEtiquetaCiclo() {
-        return EtiquetaCiclo;
+    public Stack<String> getSalidaCiclo() {
+        return SalidaCiclo;
     }
 
     /**
-     * @param EtiquetaCiclo the EtiquetaCiclo to set
+     * @param SalidaCiclo the SalidaCiclo to set
      */
-    public void setEtiquetaCiclo(String EtiquetaCiclo) {
-        this.EtiquetaCiclo = EtiquetaCiclo;
+    public void setSalidaCiclo(Stack<String> SalidaCiclo) {
+        this.SalidaCiclo = SalidaCiclo;
     }
 
     /**
-     * @return the EtiquetaSalidaCiclo
+     * @return the ContinueCiclo
      */
-    public String getEtiquetaSalidaCiclo() {
-        return EtiquetaSalidaCiclo;
+    public Stack<String> getContinueCiclo() {
+        return ContinueCiclo;
     }
 
     /**
-     * @param EtiquetaSalidaCiclo the EtiquetaSalidaCiclo to set
+     * @param ContinueCiclo the ContinueCiclo to set
      */
-    public void setEtiquetaSalidaCiclo(String EtiquetaSalidaCiclo) {
-        this.EtiquetaSalidaCiclo = EtiquetaSalidaCiclo;
+    public void setContinueCiclo(Stack<String> ContinueCiclo) {
+        this.ContinueCiclo = ContinueCiclo;
     }
 }

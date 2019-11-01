@@ -94,8 +94,8 @@ non terminal NodoAST STATEMENT;
 non terminal WITH_STMT;
 non terminal Asignacion ASSIGNMENT_STMT;
 non terminal Expresion TARGET;
-non terminal BREAK_STMT;
-non terminal CONTINUE_STMT;
+non terminal Break BREAK_STMT;
+non terminal Continue CONTINUE_STMT;
 non terminal EXIT_STMT;
 non terminal If IF_STMT;
 non terminal Switch CASE_STMT;
@@ -297,8 +297,8 @@ SENTENCIAS ::= SENTENCIAS:a SENTENCIA:b
 SENTENCIA ::= WITH_STMT puntoycoma
             | WITH_STMT
             | ASSIGNMENT_STMT:a puntoycoma {: RESULT = a; :}
-            | BREAK_STMT puntoycoma
-            | CONTINUE_STMT puntoycoma
+            | BREAK_STMT:a puntoycoma {: RESULT = a; :}
+            | CONTINUE_STMT:a puntoycoma {: RESULT = a; :}
             | EXIT_STMT puntoycoma
             | IF_STMT:a {: RESULT = a; :}
             | CASE_STMT:a {: RESULT = a; :}
@@ -323,10 +323,10 @@ TARGET ::= id:a {: RESULT = new Identificador(a, aleft, aright); :}
 ASSIGNMENT_STMT ::= TARGET:a asignacion:b EXPRESSION:c {: RESULT = new Asignacion(a, c, bleft, bright); :} 
 ;
 
-BREAK_STMT ::= break_
+BREAK_STMT ::= break_:a {: RESULT = new Break(aleft, aright); :}
 ;
 
-CONTINUE_STMT ::= continue_
+CONTINUE_STMT ::= continue_:a {: RESULT = new Continue(aleft, aright); :}
 ;
 
 EXIT_STMT ::= exit_

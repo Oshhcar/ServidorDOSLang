@@ -40,7 +40,9 @@ public class Repeat extends Instruccion {
         String etqCiclo = NuevaEtiqueta();
 
         codigo += etqCiclo + ":\n";
-
+        e.getSalidaCiclo().push(NuevaEtiqueta());
+        e.getContinueCiclo().push(etqCiclo);
+        
         for (NodoAST nodo : Sentencias) {
             if (nodo instanceof Instruccion) {
                 codigo += ((Instruccion) nodo).GetCuadruplos(e, errores, global).getCodigo();
@@ -84,7 +86,9 @@ public class Repeat extends Instruccion {
         codigo += rsCondicion.getEtiquetaF();
         codigo += "jmp, , , " + etqCiclo +"\n";
         codigo += rsCondicion.getEtiquetaV();
+        codigo += e.getSalidaCiclo().pop() + ":\n";
         
+        e.getContinueCiclo().pop();
         
         result.setCodigo(codigo);
         return result;

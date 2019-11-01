@@ -69,6 +69,8 @@ public class While extends Instruccion{
         }
 
         String etqCiclo = NuevaEtiqueta();
+        e.getSalidaCiclo().push(NuevaEtiqueta());
+        e.getContinueCiclo().push(etqCiclo);
         
         codigo += etqCiclo + ":\n";
         codigo += rsCondicion.getCodigo();
@@ -82,7 +84,9 @@ public class While extends Instruccion{
         
         codigo += "jmp, , , " + etqCiclo + "\n";
         codigo += rsCondicion.getEtiquetaF();
+        codigo += e.getSalidaCiclo().pop()+":\n";
         
+        e.getContinueCiclo().pop();
         
         result.setCodigo(codigo);
         return result;
