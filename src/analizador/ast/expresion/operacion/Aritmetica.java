@@ -431,7 +431,7 @@ public class Aritmetica extends Operacion {
             codigo += "=, t0, t" + rsOp.getValor() + ", stack\n";
             codigo += rsOp.getEtiquetaV() + ":\n";
 
-            //Obtegmo el valor de la pila
+            //Obtengo el valor de la pila
             codigo += "+, P, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
             codigo += "=, stack, t0, t" + rsOp.getValor() + "\n";
 
@@ -461,7 +461,7 @@ public class Aritmetica extends Operacion {
             codigo += "=, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp.getValor() + ", stack\n";
 
             codigo += etqCiclo + ":\n";
-            //Obtegmo el valor de la pila
+            //Obtengo el valor de la pila
             codigo += "+, P, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
             codigo += "=, stack, t0, t" + rsOp.getValor() + "\n";
             codigo += "%, t" + rsOp.getValor() + ", 10, t" + tmpCiclo + "\n";
@@ -516,6 +516,17 @@ public class Aritmetica extends Operacion {
             codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
             codigo += "=, stack, t0, t" + tmpCiclo + "\n";
             codigo += "+, t" + tmpCiclo + ", 48, t" + tmpCiclo + "\n";
+            
+            int tmp2 = NuevoTemporal();
+            
+            codigo += "*, t" + tmpCiclo + ", 10, t" + tmpCiclo + "\n";
+            codigo += "%, t" + tmpCiclo +", 10, t" + tmp2 + "\n";
+            codigo += "-, t" + tmpCiclo +", t" + tmp2 +", t" +tmpCiclo + "\n";
+            codigo += "/, t" + tmpCiclo +", 10, t" + tmpCiclo + "\n";
+            
+            codigo += "+, P, " + (tmp2 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + tmp2 + ", stack\n"; 
+            
             codigo += "=, H, t" + tmpCiclo + ", heap\n";
             codigo += "+, H, 1, H\n";
             codigo += "+, P, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
