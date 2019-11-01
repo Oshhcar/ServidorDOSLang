@@ -8,6 +8,7 @@ package analizador.ast.instruccion;
 import analizador.ErrorC;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
+import analizador.ast.entorno.Rol;
 import analizador.ast.entorno.Simbolo;
 import analizador.ast.entorno.Tipo;
 import java.util.ArrayList;
@@ -37,7 +38,12 @@ public class TipoDef extends Instruccion {
                 errores.add(new ErrorC("Semántico", Linea, Columna, "No se ha definido un tipo con el id: " + Tipo.getId() + "."));
                 return null;
             } else {
-                Tipo.setTipoPadre(type.getTipo());
+                if (type.getRol() == Rol.TYPE) {
+                    Tipo.setTipoPadre(type.getTipo());
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, Tipo.getId() + " no es un tipo."));
+                    return null;
+                }
             }
         }
 

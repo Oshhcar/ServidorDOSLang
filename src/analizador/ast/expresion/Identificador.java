@@ -52,6 +52,8 @@ public class Identificador extends Expresion {
                     result.setEstructura("stack");
                     result.setValor(tmp);
                 }
+            } else {
+                errores.add(new ErrorC("Semántico", Linea, Columna, Id + " no es una variable."));
             }
         } else {
             errores.add(new ErrorC("Semántico", Linea, Columna, "No se ha definido una variable con el id: " + Id + "."));

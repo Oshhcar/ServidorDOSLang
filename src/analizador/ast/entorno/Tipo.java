@@ -57,6 +57,11 @@ public class Tipo {
         return Tipo.name().toLowerCase();
     }
     
+    /**
+     *No lo voy a usar porque dicen que no se valida
+     * @param o
+     * @return 
+     */
     @Override
     public boolean equals(Object o){
         if(o instanceof Tipo){

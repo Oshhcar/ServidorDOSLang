@@ -50,38 +50,30 @@ public class Asignacion extends Instruccion {
             if (!Valor.getTipo().IsUndefined()) {
                 boolean bandera = false;
 
-                if (Valor instanceof Literal || Valor instanceof Operacion) {
-                    if (Target.getTipo().getTipo() == Valor.getTipo().getTipo()) {
-                        bandera = true;
-                    } else {
-                        //Hacer cast
-                        //Solo va a hacer el cast si es literal o operacion (lo demás verifica el tipo)
-                        switch (Target.getTipo().getTipo()) {
-                            case WORD:
-                                if (Valor.getTipo().IsString()) {
-                                    bandera = true;
-                                }
-                                break;
-                            case STRING:
-                                if (Valor.getTipo().IsWord()) {
-                                    bandera = true;
-                                }
-                                break;
-                            case REAL:
-                                if (Valor.getTipo().IsChar() || Valor.getTipo().IsInteger()) {
-                                    bandera = true;
-                                }
-                                break;
-                            case INTEGER:
-                                if (Valor.getTipo().IsChar()) {
-                                    bandera = true;
-                                }
-                                break;
-                        }
-                    }
+                if (Target.getTipo().getTipo() == Valor.getTipo().getTipo()) {
+                    bandera = true;
                 } else {
-                    if (Target.getTipo().equals(Valor.getTipo())) {
-                        bandera = true;
+                    switch (Target.getTipo().getTipo()) {
+                        case WORD:
+                            if (Valor.getTipo().IsString()) {
+                                bandera = true;
+                            }
+                            break;
+                        case STRING:
+                            if (Valor.getTipo().IsWord()) {
+                                bandera = true;
+                            }
+                            break;
+                        case REAL:
+                            if (Valor.getTipo().IsChar() || Valor.getTipo().IsInteger()) {
+                                bandera = true;
+                            }
+                            break;
+                        case INTEGER:
+                            if (Valor.getTipo().IsChar()) {
+                                bandera = true;
+                            }
+                            break;
                     }
                 }
 
