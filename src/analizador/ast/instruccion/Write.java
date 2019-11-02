@@ -46,12 +46,22 @@ public class Write extends Instruccion {
                             codigo += "+, P, " + (rsExp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, stack, t0, t" + rsExp.getValor() + "\n";
                             codigo += "print(%c, t" + rsExp.getValor() + ")\n";
+
+                            if (IsLn) {
+                                codigo += "print(%c, 10)\n";
+                            }
+
                             break;
                         case INTEGER:
                             codigo += rsExp.getCodigo();
                             codigo += "+, P, " + (rsExp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, stack, t0, t" + rsExp.getValor() + "\n";
                             codigo += "print(%e, t" + rsExp.getValor() + ")\n";
+
+                            if (IsLn) {
+                                codigo += "print(%c, 10)\n";
+                            }
+
                             break;
                         case REAL:
                             codigo += rsExp.getCodigo();
@@ -59,6 +69,11 @@ public class Write extends Instruccion {
                             codigo += "+, P, " + (rsExp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, stack, t0, t" + rsExp.getValor() + "\n";
                             codigo += "print(%d, t" + rsExp.getValor() + ")\n";
+
+                            if (IsLn) {
+                                codigo += "print(%c, 10)\n";
+                            }
+
                             break;
                         case STRING:
                         case WORD:
@@ -83,6 +98,10 @@ public class Write extends Instruccion {
                             codigo += "+, t" + rsExp.getValor() + ", 1, t" + rsExp.getValor() + "\n";
                             codigo += "jmp, , , " + etqCiclo + "\n";
                             codigo += result.getEtiquetaV() + ":\n";
+
+                            if (IsLn) {
+                                codigo += "print(%c, 10)\n";
+                            }
 
                             break;
                         case BOOLEAN:
@@ -112,6 +131,11 @@ public class Write extends Instruccion {
                             codigo += "print(%c, 85)\n";
                             codigo += "print(%c, 69)\n";
                             codigo += etqSalida + ":\n";
+
+                            if (IsLn) {
+                                codigo += "print(%c, 10)\n";
+                            }
+
                             break;
                         case NIL:
                             codigo += rsExp.getCodigo();
@@ -122,6 +146,11 @@ public class Write extends Instruccion {
                             codigo += "print(%c, 78)\n";
                             codigo += "print(%c, 73)\n";
                             codigo += "print(%c, 76)\n";
+
+                            if (IsLn) {
+                                codigo += "print(%c, 10)\n";
+                            }
+
                             break;
                         case ENUM:
                             codigo += rsExp.getCodigo();
@@ -140,12 +169,12 @@ public class Write extends Instruccion {
                                     codigo += "je, t" + rsExp.getValor() + ", " + contador + ", " + result.getEtiquetaV() + "\n";
                                     codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
                                     codigo += result.getEtiquetaV() + ":\n";
-                                    
-                                    for(char c: id.toCharArray()){
+
+                                    for (char c : id.toCharArray()) {
                                         int valChar = c;
                                         codigo += "print(%c, " + valChar + ")\n";
                                     }
-                                    
+
                                     codigo += "jmp, , , " + salidaIf + "\n";
                                     codigo += result.getEtiquetaF() + ":\n";
                                     contador++;
@@ -155,6 +184,10 @@ public class Write extends Instruccion {
                                 codigo += "print(%e, t" + rsExp.getValor() + ")\n";
                             }
 
+                            if (IsLn) {
+                                codigo += "print(%c, 10)\n";
+                            }
+
                             break;
                         default:
                             errores.add(new ErrorC("Semántico", this.getLinea(), this.getColumna(), "Valor no se puede imprimir."));
@@ -162,10 +195,6 @@ public class Write extends Instruccion {
                     }
                 }
             }
-        }
-
-        if (IsLn) {
-            codigo += "print(%c, 10)\n";
         }
 
         result.setCodigo(codigo);
