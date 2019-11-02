@@ -142,7 +142,7 @@ PROGRAM ::= PROGRAM_NAME:a USES:b TYPEDEF:c CONSTDEF:d VARDEF:e PROCEDUREDEF:f B
         {: RESULT = new AST(a, b, c, e, g.getSentencias()); :}
 ;
 
-PROGRAM_NAME ::= program_ id:a puntoycoma {: RESULT = a.toLowerCase(); :}
+PROGRAM_NAME ::= program_ id:a puntoycoma {: RESULT = a; :}
 ;
 
 USES ::= uses_ ID_LIST:a puntoycoma {: RESULT = a; :}
@@ -152,12 +152,12 @@ USES ::= uses_ ID_LIST:a puntoycoma {: RESULT = a; :}
 ID_LIST ::= ID_LIST:a coma id:b
                 {:
                     RESULT = a;
-                    RESULT.add(b.toLowerCase());
+                    RESULT.add(b);
                 :}
             | id:a 
                 {:
                     RESULT = new ArrayList<>();
-                    RESULT.add(a.toLowerCase());
+                    RESULT.add(a);
                 :}
 ;
 
@@ -190,13 +190,13 @@ TYPE ::= ID_LIST:a igual:b TYPE_VALUE:c puntoycoma {: RESULT = new TipoDef(a, c,
 ;
 
 TYPE_VALUE ::= TYPE_SPECIFIER:a {: RESULT = a; :}
-            | parIzquierda ID_LIST parDerecha
+            | parIzquierda ID_LIST:a parDerecha {: RESULT = new Tipo(a); :}
             | LITERAL puntos3 LITERAL
 ;
 
 TYPE_SPECIFIER ::= TYPE_PRIMITIVE:a {: RESULT = new Tipo(a); :}
                 | array_ corcheteIzquierda DIM_LIST corcheteDerecha of_ TYPE_SPECIFIER
-                | id:a {: RESULT = new Tipo(a.toLowerCase()); :}
+                | id:a {: RESULT = new Tipo(a); :}
                 | record_ VAR_LIST end_
 ;
 
@@ -440,7 +440,7 @@ PRIMARY ::= ATOM:a {: RESULT = a; :}
         | CALL :a {: RESULT = a; :}
 ;
 
-ATOM ::= id:a {: RESULT = new Identificador(a.toLowerCase(), aleft, aright); :} /*esto puede ser una llamada*/
+ATOM ::= id:a {: RESULT = new Identificador(a, aleft, aright); :} /*esto puede ser una llamada*/
         | LITERAL:a {: RESULT = a; :}
         | ENCLOSURE:a {: RESULT = a; :}
 ;

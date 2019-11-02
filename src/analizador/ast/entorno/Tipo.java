@@ -5,6 +5,7 @@
  */
 package analizador.ast.entorno;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -12,71 +13,160 @@ import java.util.Objects;
  * @author oscar
  */
 public class Tipo {
-    
+
     private Type Tipo;
     private String Id;
     private Tipo TipoPadre;
-    
-    public Tipo(Type Tipo){
+    private ArrayList<String> Lista;
+    private String IdEnum;
+
+    public Tipo(Type Tipo) {
         this.Tipo = Tipo;
         this.Id = null;
         this.TipoPadre = null;
+        this.Lista = null;
+        this.IdEnum = null;
     }
-    
+
     /**
      * Cuando Es un id(subtipo)
+     *
      * @param Id the Id to set
      */
-    public Tipo(String Id){ 
+    public Tipo(String Id) {
         this.Tipo = Type.UNDEFINED;
         this.Id = Id;
         this.TipoPadre = null;
-}
-
-    public boolean IsChar() { return this.Tipo == Type.CHAR; }
-    public boolean IsInteger(){ return this.Tipo == Type.INTEGER; }
-    public boolean IsReal(){ return this.Tipo == Type.REAL; }
-    public boolean IsString(){ return this.Tipo == Type.STRING; }
-    public boolean IsWord(){ return this.Tipo == Type.WORD; }
-    public boolean IsBoolean(){ return this.Tipo == Type.BOOLEAN; }
-    public boolean IsEnum(){ return this.Tipo == Type.ENUM; }
-    public boolean IsArray(){ return this.Tipo == Type.ARRAY; }
-    public boolean IsRecord(){ return this.Tipo == Type.RECORD; }
-    public boolean IsNil(){ return this.Tipo == Type.NIL; }
-    public boolean IsUndefined(){ return this.Tipo == Type.UNDEFINED; }
-    
-    public boolean IsNumeric(){
-        return IsInteger() || IsReal() || IsChar();
+        this.Lista = null;
+        this.IdEnum = null;
     }
-    
+
+    /**
+     * Cuando es un enum
+     *
+     * @param Lista the Lista to set
+     */
+    public Tipo(ArrayList<String> Lista) {
+        this.Tipo = Type.ENUM;
+        this.Id = null;
+        this.TipoPadre = null;
+        this.Lista = Lista;
+        this.IdEnum = null;
+    }
+
+    /**
+     * Busca id en Enum
+     *
+     * @param id the id to found
+     * @return true si lo encontro
+     */
+    public boolean ExisteEnum(String id) {
+        if (this.Lista != null) {
+            for (String val : Lista) {
+                if (val.equalsIgnoreCase(id)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Busca posicion Enum
+     *
+     * @param id the id to found
+     * @return posicion int
+     */
+    public int GetPosicion(String id) {
+        int contador = 0;
+        if (Lista != null) {
+            for (String val : Lista) {
+                if (val.equalsIgnoreCase(id)) {
+                    return contador;
+                }
+                contador++;
+            }
+        }
+        return 0;
+    }
+
+    public boolean IsChar() {
+        return this.Tipo == Type.CHAR;
+    }
+
+    public boolean IsInteger() {
+        return this.Tipo == Type.INTEGER;
+    }
+
+    public boolean IsReal() {
+        return this.Tipo == Type.REAL;
+    }
+
+    public boolean IsString() {
+        return this.Tipo == Type.STRING;
+    }
+
+    public boolean IsWord() {
+        return this.Tipo == Type.WORD;
+    }
+
+    public boolean IsBoolean() {
+        return this.Tipo == Type.BOOLEAN;
+    }
+
+    public boolean IsEnum() {
+        return this.Tipo == Type.ENUM;
+    }
+
+    public boolean IsArray() {
+        return this.Tipo == Type.ARRAY;
+    }
+
+    public boolean IsRecord() {
+        return this.Tipo == Type.RECORD;
+    }
+
+    public boolean IsNil() {
+        return this.Tipo == Type.NIL;
+    }
+
+    public boolean IsUndefined() {
+        return this.Tipo == Type.UNDEFINED;
+    }
+
+    public boolean IsNumeric() {
+        return IsInteger() || IsReal() || IsChar() || IsEnum();
+    }
+
     @Override
-    public String toString(){
-        if(Id != null){
+    public String toString() {
+        if (Id != null) {
             return Id;
         }
         return Tipo.name().toLowerCase();
     }
-    
+
     /**
-     *No lo voy a usar porque dicen que no se valida
+     * No lo voy a usar porque dicen que no se valida
+     *
      * @param o
-     * @return 
+     * @return
      */
     @Override
-    public boolean equals(Object o){
-        if(o instanceof Tipo){
-            Tipo t = (Tipo)o;
-            
-            if(Id != null){
-                if(t.getId() != null){
-                    return Id.equals(t.getId());
+    public boolean equals(Object o) {
+        if (o instanceof Tipo) {
+            Tipo t = (Tipo) o;
+
+            if (Id != null) {
+                if (t.getId() != null) {
+                    return Id.equalsIgnoreCase(t.getId());
                 }
             } else {
-                if(t.getId() == null){
+                if (t.getId() == null) {
                     return Tipo == t.getTipo();
                 }
             }
-            
+
         }
         return false;
     }
@@ -88,13 +178,14 @@ public class Tipo {
         hash = 59 * hash + Objects.hashCode(this.Id);
         return hash;
     }
-    
+
     /**
      * @return the Tipo
      */
     public Type getTipo() {
-        if(TipoPadre != null)
+        if (TipoPadre != null) {
             return TipoPadre.getTipo();
+        }
         return Tipo;
     }
 
@@ -105,6 +196,16 @@ public class Tipo {
         this.Tipo = Tipo;
     }
 
+    /**
+     * @return the IdPadre
+     */
+    public String getIdPadre() {
+        if(TipoPadre != null){
+            return TipoPadre.getIdPadre();
+        }
+        return Id;
+    }
+    
     /**
      * @return the Id
      */
@@ -132,5 +233,39 @@ public class Tipo {
     public void setTipoPadre(Tipo TipoPadre) {
         this.TipoPadre = TipoPadre;
         this.Tipo = TipoPadre.getTipo();
+    }
+
+    /**
+     * @return the Lista
+     */
+    public ArrayList<String> getLista() {
+        if(TipoPadre != null){
+            return TipoPadre.getLista();
+        }
+        return Lista;
+    }
+
+    /**
+     * @param Lista the Lista to set
+     */
+    public void setLista(ArrayList<String> Lista) {
+        this.Lista = Lista;
+    }
+
+    /**
+     * @return the IdEnum
+     */
+    public String getIdEnum() {
+        if(TipoPadre != null){
+            return TipoPadre.getIdEnum();
+        }
+        return IdEnum;
+    }
+
+    /**
+     * @param IdEnum the IdEnum to set
+     */
+    public void setIdEnum(String IdEnum) {
+        this.IdEnum = IdEnum;
     }
 }

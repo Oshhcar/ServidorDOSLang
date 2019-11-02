@@ -10,6 +10,7 @@ import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.entorno.Rol;
 import analizador.ast.entorno.Simbolo;
+import analizador.ast.entorno.Tipo;
 import java.util.ArrayList;
 
 /**
@@ -51,6 +52,23 @@ public class Identificador extends Expresion {
                 } else {
                     result.setEstructura("stack");
                     result.setValor(tmp);
+                }
+            } else if (sim.getTipo().IsEnum()) {
+                if (!sim.getId().equalsIgnoreCase(Id)) {
+                    if (Acceso) {
+                        Tipo = sim.getTipo();
+                        
+                        int valor = sim.getTipo().GetPosicion(Id);
+                        result.setValor(NuevoTemporal());
+                        codigo += "=, " + valor + ", , t" + result.getValor()+"\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                        
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es un valor enum, no se puede asignar un valor."));
+                    }
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es un tipo enum, no se puede asignar."));
                 }
             } else {
                 errores.add(new ErrorC("Semántico", Linea, Columna, Id + " no es una variable."));

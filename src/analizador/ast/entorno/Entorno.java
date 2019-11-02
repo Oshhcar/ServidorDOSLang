@@ -54,8 +54,14 @@ public class Entorno {
 
         for (Simbolo s : Simbolos) {
             if (s.getRol() != Rol.METHOD && s.getRol() != Rol.FUNCION) {
-                if (s.getId().equals(id)) {
+                if (s.getId().equalsIgnoreCase(id)) {
                     return s;
+                }
+                
+                if(s.getTipo().IsEnum()){
+                    if(s.getTipo().ExisteEnum(id)){
+                        return s;
+                    }
                 }
             }
         }
@@ -67,7 +73,7 @@ public class Entorno {
 
         for (Simbolo s : Simbolos) {
             if (s.getRol() != Rol.METHOD && s.getRol() != Rol.FUNCION) {
-                if (s.getId().equals(id)) {
+                if (s.getId().equalsIgnoreCase(id)) {
                     return s;
                 }
             }

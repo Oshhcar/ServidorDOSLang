@@ -50,30 +50,38 @@ public class Asignacion extends Instruccion {
             if (!Valor.getTipo().IsUndefined()) {
                 boolean bandera = false;
 
-                if (Target.getTipo().getTipo() == Valor.getTipo().getTipo()) {
-                    bandera = true;
+                if (Target.getTipo().IsEnum()) {
+                    if (Valor.getTipo().IsEnum()) {
+                        if(Target.getTipo().getIdEnum().equals(Valor.getTipo().getIdEnum())){
+                            bandera = true;
+                        }
+                    }
                 } else {
-                    switch (Target.getTipo().getTipo()) {
-                        case WORD:
-                            if (Valor.getTipo().IsString()) {
-                                bandera = true;
-                            }
-                            break;
-                        case STRING:
-                            if (Valor.getTipo().IsWord()) {
-                                bandera = true;
-                            }
-                            break;
-                        case REAL:
-                            if (Valor.getTipo().IsChar() || Valor.getTipo().IsInteger()) {
-                                bandera = true;
-                            }
-                            break;
-                        case INTEGER:
-                            if (Valor.getTipo().IsChar()) {
-                                bandera = true;
-                            }
-                            break;
+                    if (Target.getTipo().getTipo() == Valor.getTipo().getTipo()) {
+                        bandera = true;
+                    } else {
+                        switch (Target.getTipo().getTipo()) {
+                            case WORD:
+                                if (Valor.getTipo().IsString()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case STRING:
+                                if (Valor.getTipo().IsWord()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case REAL:
+                                if (Valor.getTipo().IsChar() || Valor.getTipo().IsInteger()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case INTEGER:
+                                if (Valor.getTipo().IsChar()) {
+                                    bandera = true;
+                                }
+                                break;
+                        }
                     }
                 }
 

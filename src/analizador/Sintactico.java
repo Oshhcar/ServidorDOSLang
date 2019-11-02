@@ -1096,7 +1096,7 @@ class CUP$Sintactico$actions {
 		int aleft = ((java_cup.runtime.Symbol)CUP$Sintactico$stack.elementAt(CUP$Sintactico$top-1)).left;
 		int aright = ((java_cup.runtime.Symbol)CUP$Sintactico$stack.elementAt(CUP$Sintactico$top-1)).right;
 		String a = (String)((java_cup.runtime.Symbol) CUP$Sintactico$stack.elementAt(CUP$Sintactico$top-1)).value;
-		 RESULT = a.toLowerCase(); 
+		 RESULT = a; 
               CUP$Sintactico$result = parser.getSymbolFactory().newSymbol("PROGRAM_NAME",2, ((java_cup.runtime.Symbol)CUP$Sintactico$stack.elementAt(CUP$Sintactico$top-2)), ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), RESULT);
             }
           return CUP$Sintactico$result;
@@ -1134,7 +1134,7 @@ class CUP$Sintactico$actions {
 		String b = (String)((java_cup.runtime.Symbol) CUP$Sintactico$stack.peek()).value;
 		
                     RESULT = a;
-                    RESULT.add(b.toLowerCase());
+                    RESULT.add(b);
                 
               CUP$Sintactico$result = parser.getSymbolFactory().newSymbol("ID_LIST",4, ((java_cup.runtime.Symbol)CUP$Sintactico$stack.elementAt(CUP$Sintactico$top-2)), ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), RESULT);
             }
@@ -1149,7 +1149,7 @@ class CUP$Sintactico$actions {
 		String a = (String)((java_cup.runtime.Symbol) CUP$Sintactico$stack.peek()).value;
 		
                     RESULT = new ArrayList<>();
-                    RESULT.add(a.toLowerCase());
+                    RESULT.add(a);
                 
               CUP$Sintactico$result = parser.getSymbolFactory().newSymbol("ID_LIST",4, ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), RESULT);
             }
@@ -1297,7 +1297,10 @@ class CUP$Sintactico$actions {
           case 20: // TYPE_VALUE ::= parIzquierda ID_LIST parDerecha 
             {
               Tipo RESULT =null;
-
+		int aleft = ((java_cup.runtime.Symbol)CUP$Sintactico$stack.elementAt(CUP$Sintactico$top-1)).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$Sintactico$stack.elementAt(CUP$Sintactico$top-1)).right;
+		ArrayList<String> a = (ArrayList<String>)((java_cup.runtime.Symbol) CUP$Sintactico$stack.elementAt(CUP$Sintactico$top-1)).value;
+		 RESULT = new Tipo(a); 
               CUP$Sintactico$result = parser.getSymbolFactory().newSymbol("TYPE_VALUE",9, ((java_cup.runtime.Symbol)CUP$Sintactico$stack.elementAt(CUP$Sintactico$top-2)), ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), RESULT);
             }
           return CUP$Sintactico$result;
@@ -1339,7 +1342,7 @@ class CUP$Sintactico$actions {
 		int aleft = ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()).left;
 		int aright = ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()).right;
 		String a = (String)((java_cup.runtime.Symbol) CUP$Sintactico$stack.peek()).value;
-		 RESULT = new Tipo(a.toLowerCase()); 
+		 RESULT = new Tipo(a); 
               CUP$Sintactico$result = parser.getSymbolFactory().newSymbol("TYPE_SPECIFIER",10, ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), RESULT);
             }
           return CUP$Sintactico$result;
@@ -2833,7 +2836,7 @@ class CUP$Sintactico$actions {
 		int aleft = ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()).left;
 		int aright = ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()).right;
 		String a = (String)((java_cup.runtime.Symbol) CUP$Sintactico$stack.peek()).value;
-		 RESULT = new Identificador(a.toLowerCase(), aleft, aright); 
+		 RESULT = new Identificador(a, aleft, aright); 
               CUP$Sintactico$result = parser.getSymbolFactory().newSymbol("ATOM",59, ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), RESULT);
             }
           return CUP$Sintactico$result;

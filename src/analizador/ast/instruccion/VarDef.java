@@ -53,6 +53,7 @@ public class VarDef extends Instruccion {
                 return null;
             } else {
                 if (type.getRol() == Rol.TYPE) {
+                    Tipo.setId(Tipo.getId().toLowerCase());
                     Tipo.setTipoPadre(type.getTipo());
                 } else {
                     errores.add(new ErrorC("Semántico", Linea, Columna, Tipo.getId() + " no es un tipo."));
