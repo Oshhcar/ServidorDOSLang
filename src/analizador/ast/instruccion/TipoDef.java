@@ -46,17 +46,34 @@ public class TipoDef extends Instruccion {
                     return null;
                 }
             }
+        } else {
+            if (Tipo.getLimiteInf() != null && Tipo.getLimiteSup() != null) {
+                Tipo.getLimiteInf().GetCuadruplos(e, errores);
+                Tipo.getLimiteSup().GetCuadruplos(e, errores);
+
+                if (Tipo.getLimiteInf().getTipo().IsNumeric() && Tipo.getLimiteSup().getTipo().IsNumeric()) {
+                    if(Tipo.getLimiteInf().getTipo().getTipo() == Tipo.getLimiteSup().getTipo().getTipo()){
+                        Tipo.setTipo(Tipo.getLimiteInf().getTipo().getTipo());
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo del límite inferior no coincide con el del límite superior."));
+                        return null;
+                    }
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo subrango solo acepta tipos numéricos y carácteres."));
+                    return null;
+                }
+            }
         }
 
         Id.forEach((id) -> {
             if (e.Get(id) == null) {
-                
-                if(Tipo.IsEnum()){
-                    if(Tipo.getId() == null){
+
+                if (Tipo.IsEnum()) {
+                    if (Tipo.getId() == null) {
                         Tipo.setIdEnum(id.toLowerCase());
                     }
                 }
-                
+
                 e.Add(new Simbolo(id, Tipo, e.getAmbito()));
                 global.Add(new Simbolo(id, Tipo, e.getAmbito()));
             } else {

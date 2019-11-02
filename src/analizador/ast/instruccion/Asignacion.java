@@ -52,7 +52,7 @@ public class Asignacion extends Instruccion {
 
                 if (Target.getTipo().IsEnum()) {
                     if (Valor.getTipo().IsEnum()) {
-                        if(Target.getTipo().getIdEnum().equals(Valor.getTipo().getIdEnum())){
+                        if (Target.getTipo().getIdEnum().equals(Valor.getTipo().getIdEnum())) {
                             bandera = true;
                         }
                     }
@@ -89,8 +89,56 @@ public class Asignacion extends Instruccion {
                     codigo += rsTarget.getCodigo();
                     codigo += rsValor.getCodigo();
 
-                    codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
+                    Expresion limiteInf = Target.getTipo().getLimiteInf();
+                    Expresion limiteSup = Target.getTipo().getLimiteSup();
+                    if (limiteInf != null && limiteSup != null) {
+                        Result rsLimiteInf = limiteInf.GetCuadruplos(e, errores);
+                        Result rsLimiteSup = limiteSup.GetCuadruplos(e, errores);
 
+                        codigo += rsLimiteInf.getCodigo();
+                        codigo += rsLimiteSup.getCodigo();
+
+                        rsLimiteInf.setEtiquetaV(NuevaEtiqueta());
+                        rsLimiteInf.setEtiquetaF(NuevaEtiqueta());
+
+                        codigo += "jge, t" + rsValor.getValor() + ", t" + rsLimiteInf.getValor() + ", " + rsLimiteInf.getEtiquetaV() + "\n";
+                        codigo += "jmp, , , " + rsLimiteInf.getEtiquetaF() + "\n";
+
+                        rsLimiteSup.setEtiquetaV(NuevaEtiqueta());
+                        rsLimiteSup.setEtiquetaF(NuevaEtiqueta());
+                        codigo += rsLimiteInf.getEtiquetaV() + ":\n";
+                        codigo += "jle, t" + rsValor.getValor() + ", t" + rsLimiteSup.getValor() + ", " + rsLimiteSup.getEtiquetaV() + "\n";
+                        codigo += "jmp, , , " + rsLimiteSup.getEtiquetaF() + "\n";
+                        codigo += rsLimiteSup.getEtiquetaV() + ":\n";
+
+                        codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
+
+                        String etqSalida = NuevaEtiqueta();
+                        codigo += "jmp, , , " + etqSalida + "\n";
+                        codigo += rsLimiteInf.getEtiquetaF() + ":\n";
+                        codigo += rsLimiteSup.getEtiquetaF() + ":\n";
+
+                        codigo += "print(%c, 70)\n"
+                                + "print(%c, 117)\n"
+                                + "print(%c, 101)\n"
+                                + "print(%c, 114)\n"
+                                + "print(%c, 97)\n"
+                                + "print(%c, 32)\n"
+                                + "print(%c, 100)\n"
+                                + "print(%c, 101)\n"
+                                + "print(%c, 32)\n"
+                                + "print(%c, 114)\n"
+                                + "print(%c, 97)\n"
+                                + "print(%c, 110)\n"
+                                + "print(%c, 103)\n"
+                                + "print(%c, 111)\n"
+                                + "print(%c, 10)\n";
+
+                        codigo += etqSalida + ":\n";
+
+                    } else {
+                        codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
+                    }
                 } else {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "El valor de la expresión no corresponde al Tipo de la variable."));
                 }

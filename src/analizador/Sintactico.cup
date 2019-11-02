@@ -190,13 +190,14 @@ TYPE ::= ID_LIST:a igual:b TYPE_VALUE:c puntoycoma {: RESULT = new TipoDef(a, c,
 ;
 
 TYPE_VALUE ::= TYPE_SPECIFIER:a {: RESULT = a; :}
-            | parIzquierda ID_LIST:a parDerecha {: RESULT = new Tipo(a); :}
-            | LITERAL puntos3 LITERAL
+            | parIzquierda ID_LIST:a parDerecha {: RESULT = new Tipo(a); :}         
 ;
 
 TYPE_SPECIFIER ::= TYPE_PRIMITIVE:a {: RESULT = new Tipo(a); :}
                 | array_ corcheteIzquierda DIM_LIST corcheteDerecha of_ TYPE_SPECIFIER
                 | id:a {: RESULT = new Tipo(a); :}
+                | LITERAL:a puntos3 LITERAL:b {: RESULT = new Tipo(a, b); :}
+                | id:a puntos3 id:b {: RESULT = new Tipo(new Identificador(a, aleft, aright), new Identificador(b, bleft, bright)); :}
                 | record_ VAR_LIST end_
 ;
 

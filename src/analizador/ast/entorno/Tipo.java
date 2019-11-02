@@ -5,6 +5,7 @@
  */
 package analizador.ast.entorno;
 
+import analizador.ast.expresion.Expresion;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -19,6 +20,8 @@ public class Tipo {
     private Tipo TipoPadre;
     private ArrayList<String> Lista;
     private String IdEnum;
+    private Expresion LimiteInf;
+    private Expresion LimiteSup;
 
     public Tipo(Type Tipo) {
         this.Tipo = Tipo;
@@ -26,6 +29,8 @@ public class Tipo {
         this.TipoPadre = null;
         this.Lista = null;
         this.IdEnum = null;
+        this.LimiteInf = null;
+        this.LimiteSup = null;
     }
 
     /**
@@ -39,6 +44,24 @@ public class Tipo {
         this.TipoPadre = null;
         this.Lista = null;
         this.IdEnum = null;
+        this.LimiteInf = null;
+        this.LimiteSup = null;
+    }
+    
+    /**
+     * Cuando Es un rango
+     *
+     * @param LimiteInf the LimiteInf to set
+     * @param LimiteSup the LimiteSup to set
+     */
+    public Tipo(Expresion LimiteInf, Expresion LimiteSup) {
+        this.Tipo = Type.UNDEFINED;
+        this.Id = null;
+        this.TipoPadre = null;
+        this.Lista = null;
+        this.IdEnum = null;
+        this.LimiteInf = LimiteInf;
+        this.LimiteSup = LimiteSup;
     }
 
     /**
@@ -52,6 +75,8 @@ public class Tipo {
         this.TipoPadre = null;
         this.Lista = Lista;
         this.IdEnum = null;
+        this.LimiteInf = null;
+        this.LimiteSup = null;
     }
 
     /**
@@ -267,5 +292,39 @@ public class Tipo {
      */
     public void setIdEnum(String IdEnum) {
         this.IdEnum = IdEnum;
+    }
+
+    /**
+     * @return the LimiteInf
+     */
+    public Expresion getLimiteInf() {
+        if(TipoPadre != null){
+            return TipoPadre.getLimiteInf();
+        }
+        return LimiteInf;
+    }
+
+    /**
+     * @param LimiteInf the LimiteInf to set
+     */
+    public void setLimiteInf(Expresion LimiteInf) {
+        this.LimiteInf = LimiteInf;
+    }
+
+    /**
+     * @return the LimiteSup
+     */
+    public Expresion getLimiteSup() {
+        if(TipoPadre != null){
+            return TipoPadre.getLimiteSup();
+        }
+        return LimiteSup;
+    }
+
+    /**
+     * @param LimiteSup the LimiteSup to set
+     */
+    public void setLimiteSup(Expresion LimiteSup) {
+        this.LimiteSup = LimiteSup;
     }
 }
