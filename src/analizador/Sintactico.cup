@@ -71,6 +71,7 @@ non terminal ArrayList<TipoDef> TYPE_LIST;
 non terminal TipoDef TYPE;
 non terminal Tipo TYPE_VALUE;
 non terminal Tipo TYPE_SPECIFIER;
+non terminal Expresion LIMIT_VAL;
 non terminal DIM_LIST;
 non terminal DIM;
 non terminal ArrayList<VarDef> VARDEF;
@@ -194,9 +195,14 @@ TYPE_VALUE ::= TYPE_SPECIFIER:a {: RESULT = a; :}
 TYPE_SPECIFIER ::= TYPE_PRIMITIVE:a {: RESULT = new Tipo(a); :}
                 | array_ corcheteIzquierda DIM_LIST corcheteDerecha of_ TYPE_SPECIFIER
                 | id:a {: RESULT = new Tipo(a); :}
-                | LITERAL:a puntos3 LITERAL:b {: RESULT = new Tipo(a, b); :}
-                | id:a puntos3 id:b {: RESULT = new Tipo(new Identificador(a, aleft, aright), new Identificador(b, bleft, bright)); :}
+                | LIMIT_VAL:a puntos3 LIMIT_VAL:b {: RESULT = new Tipo(a, b); :}
                 | record_ VAR_LIST end_
+;
+
+LIMIT_VAL ::= LITERAL:a {: RESULT = a; :}
+            | id:a {: RESULT = new Identificador(a, aleft, aright); :}
+            | mas:b LIMIT_VAL:a {: RESULT = a; :}
+            | menos:b LIMIT_VAL:a {: RESULT = new Unario(a, Operador.RESTA, bleft, bright); :}
 ;
 
 DIM_LIST ::= DIM_LIST coma DIM
