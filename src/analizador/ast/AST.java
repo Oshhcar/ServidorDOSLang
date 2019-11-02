@@ -24,13 +24,15 @@ public class AST {
     private String Nombre;
     private ArrayList<String> Uses;
     private ArrayList<TipoDef> Tipos;
+    private ArrayList<VarDef> Constantes;
     private ArrayList<VarDef> Variables;
     private ArrayList<NodoAST> Sentencias;
 
-    public AST(String Nombre, ArrayList<String> Uses, ArrayList<TipoDef> Tipos, ArrayList<VarDef> Variables, ArrayList<NodoAST> Sentencias) {
+    public AST(String Nombre, ArrayList<String> Uses, ArrayList<TipoDef> Tipos, ArrayList<VarDef> Constantes, ArrayList<VarDef> Variables, ArrayList<NodoAST> Sentencias) {
         this.Nombre = Nombre;
         this.Uses = Uses;
         this.Tipos = Tipos;
+        this.Constantes = Constantes;
         this.Variables = Variables;
         this.Sentencias = Sentencias;
     }
@@ -53,6 +55,16 @@ public class AST {
         if (Tipos != null) {
             Tipos.forEach((tipo) -> {
                 tipo.GetCuadruplos(local, errores, global);
+            });
+        }
+        
+        /**
+         * Ejecuto declaracion Constantes
+         */
+        if (Constantes != null) {
+            Constantes.forEach((constante) -> {
+                constante.setConstante(true);
+                constante.GetCuadruplos(local, errores, global);
             });
         }
 
@@ -103,6 +115,18 @@ public class AST {
         if (Tipos != null) {
             Tipos.forEach((tipo) -> {
                 tipo.GetCuadruplos(local, errores, global);
+            });
+        }
+        
+        /**
+         * Ejecuto declaracion Constantes
+         */
+        if (Constantes != null) {
+            Constantes.forEach((constante) -> {
+                Result rsCons = constante.GetCuadruplos(local, errores, global);
+                if (rsCons != null) {
+                    result.setCodigo(result.getCodigo() + rsCons.getCodigo());
+                }
             });
         }
 
@@ -208,6 +232,20 @@ public class AST {
      */
     public void setVariables(ArrayList<VarDef> Variables) {
         this.Variables = Variables;
+    }
+
+    /**
+     * @return the Constantes
+     */
+    public ArrayList<VarDef> getConstantes() {
+        return Constantes;
+    }
+
+    /**
+     * @param Constantes the Constantes to set
+     */
+    public void setConstantes(ArrayList<VarDef> Constantes) {
+        this.Constantes = Constantes;
     }
 
 }

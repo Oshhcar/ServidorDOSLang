@@ -22,6 +22,7 @@ public class Simbolo {
     private Entorno Entorno;
     private String Firma;
     private boolean Nil;
+    private boolean Constante;
 
     public Simbolo(String Id, Tipo Tipo, Rol Rol, int Tam, int Pos, String Ambito, int NumParam, int TipoParam) {
         this.Id = Id;
@@ -34,6 +35,7 @@ public class Simbolo {
         this.TipoParam = TipoParam;
         this.Entorno = null;
         this.Nil = false;
+        this.Constante = false;
     }
     
     /**
@@ -53,6 +55,7 @@ public class Simbolo {
         this.TipoParam = -1;
         this.Entorno = null;
         this.Nil = false;
+        this.Constante = false;
     }
     
     /**
@@ -73,6 +76,7 @@ public class Simbolo {
         this.TipoParam = -1;
         this.Entorno = null;
         this.Nil = false;
+        this.Constante = false;
     }
 
     /**
@@ -227,5 +231,19 @@ public class Simbolo {
      */
     public void setNil(boolean Nil) {
         this.Nil = Nil;
+    }
+
+    /**
+     * @return the Constante
+     */
+    public boolean isConstante() {
+        return Constante;
+    }
+
+    /**
+     * @param Constante the Constante to set
+     */
+    public void setConstante(boolean Constante) {
+        this.Constante = Constante;
     }
 }

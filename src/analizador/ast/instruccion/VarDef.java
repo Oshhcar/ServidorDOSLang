@@ -25,12 +25,14 @@ public class VarDef extends Instruccion {
     private ArrayList<String> Id;
     private Tipo Tipo;
     private Expresion Expr;
+    private boolean Constante;
 
     public VarDef(ArrayList<String> Id, Tipo Tipo, int Linea, int Columna) {
         super(Linea, Columna);
         this.Id = Id;
         this.Tipo = Tipo;
         this.Expr = null;
+        this.Constante = false;
     }
 
     public VarDef(ArrayList<String> Id, Tipo Tipo, Expresion Expr, int Linea, int Columna) {
@@ -38,6 +40,7 @@ public class VarDef extends Instruccion {
         this.Id = Id;
         this.Tipo = Tipo;
         this.Expr = Expr;
+        this.Constante = false;
     }
 
     @Override
@@ -125,7 +128,8 @@ public class VarDef extends Instruccion {
         for (String id : Id) {
             if (e.Get(id) == null) {
                 Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito());
-
+                s.setConstante(Constante);
+                
                 if (result.getValor() > 0) {
                     int tmp = NuevoTemporal();
                     codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
@@ -185,6 +189,20 @@ public class VarDef extends Instruccion {
      */
     public void setExpr(Expresion Expr) {
         this.Expr = Expr;
+    }
+
+    /**
+     * @return the Constante
+     */
+    public boolean isConstante() {
+        return Constante;
+    }
+
+    /**
+     * @param Constante the Constante to set
+     */
+    public void setConstante(boolean Constante) {
+        this.Constante = Constante;
     }
 
 }

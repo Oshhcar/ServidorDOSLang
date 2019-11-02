@@ -37,33 +37,37 @@ public class Identificador extends Expresion {
 
         if (sim != null) {
             if (sim.getRol() == Rol.LOCAL) {
-                Tipo = sim.getTipo();
-                int tmp = NuevoTemporal();
-
-                codigo += "+, P, " + sim.getPos() + ", t" + tmp + "\n";
-                codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                codigo += "=, t0, t" + tmp + ", stack\n";
-
-                if (Acceso) {
-                    result.setValor(NuevoTemporal());
-                    codigo += "=, stack, t" + tmp + ", t" + result.getValor() + "\n";
-                    codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                    codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                if (!Acceso && sim.isConstante()) {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es una constante, no se puede cambiar el valor."));
                 } else {
-                    result.setEstructura("stack");
-                    result.setValor(tmp);
+                    Tipo = sim.getTipo();
+                    int tmp = NuevoTemporal();
+
+                    codigo += "+, P, " + sim.getPos() + ", t" + tmp + "\n";
+                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + tmp + ", stack\n";
+
+                    if (Acceso) {
+                        result.setValor(NuevoTemporal());
+                        codigo += "=, stack, t" + tmp + ", t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                    } else {
+                        result.setEstructura("stack");
+                        result.setValor(tmp);
+                    }
                 }
             } else if (sim.getTipo().IsEnum()) {
                 if (!sim.getId().equalsIgnoreCase(Id)) {
                     if (Acceso) {
                         Tipo = sim.getTipo();
-                        
+
                         int valor = sim.getTipo().GetPosicion(Id);
                         result.setValor(NuevoTemporal());
-                        codigo += "=, " + valor + ", , t" + result.getValor()+"\n";
+                        codigo += "=, " + valor + ", , t" + result.getValor() + "\n";
                         codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + result.getValor() + ", stack\n";
-                        
+
                     } else {
                         errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es un valor enum, no se puede asignar un valor."));
                     }

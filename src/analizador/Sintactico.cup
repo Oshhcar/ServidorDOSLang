@@ -76,9 +76,7 @@ non terminal DIM;
 non terminal ArrayList<VarDef> VARDEF;
 non terminal ArrayList<VarDef> VAR_LIST;
 non terminal VarDef VAR;
-non terminal CONSTDEF;
-non terminal CONST_LIST;
-non terminal CONST;
+non terminal ArrayList<VarDef> CONSTDEF;
 non terminal PROCEDUREDEF;
 non terminal METHOD_LIST;
 non terminal METHOD;
@@ -139,7 +137,7 @@ INICIO ::= PROGRAM:a
 ;
 
 PROGRAM ::= PROGRAM_NAME:a USES:b TYPEDEF:c CONSTDEF:d VARDEF:e PROCEDUREDEF:f BLOQUE:g punto
-        {: RESULT = new AST(a, b, c, e, g.getSentencias()); :}
+        {: RESULT = new AST(a, b, c, d, e, g.getSentencias()); :}
 ;
 
 PROGRAM_NAME ::= program_ id:a puntoycoma {: RESULT = a; :}
@@ -232,14 +230,8 @@ VAR ::= ID_LIST:a dospuntos:b TYPE_SPECIFIER:c puntoycoma
             {: RESULT = new VarDef(a, c, d, bleft, bright); :}
 ;
 
-CONSTDEF ::= const_ CONST_LIST
-        | {: :} 
-;
-
-CONST_LIST ::= CONST_LIST CONST
-        | CONST;
-
-CONST ::= ID_LIST igual EXPRESSION puntoycoma
+CONSTDEF ::= const_ VAR_LIST:a {: RESULT = a; :}
+        | {: RESULT = null; :} 
 ;
 
 PROCEDUREDEF ::= {: :}
