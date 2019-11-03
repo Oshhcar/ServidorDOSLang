@@ -10,8 +10,6 @@ import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.expresion.Expresion;
 import analizador.ast.expresion.Identificador;
-import analizador.ast.expresion.Literal;
-import analizador.ast.expresion.operacion.Operacion;
 import java.util.ArrayList;
 
 /**
