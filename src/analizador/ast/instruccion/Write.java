@@ -53,6 +53,7 @@ public class Write extends Instruccion {
 
                             break;
                         case INTEGER:
+                        case RECORD:
                             codigo += rsExp.getCodigo();
                             codigo += "+, P, " + (rsExp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, stack, t0, t" + rsExp.getValor() + "\n";

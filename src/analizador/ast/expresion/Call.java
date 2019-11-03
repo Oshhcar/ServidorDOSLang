@@ -83,16 +83,16 @@ public class Call extends Expresion {
                     if (!parametro.getTipo().IsUndefined()) {
                         if (parametro.getTipo().IsInteger()) {
                             Tipo.setTipo(Type.INTEGER);
-                           
+
                             codigo += rsParametro.getCodigo();
 
                             result.setValor(NuevoTemporal());
                             codigo += "=, H, , t" + result.getValor() + "\n";
                             codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, t0, t" + result.getValor() + ", stack\n";
-                            
+
                             codigo += "+, H, t" + rsParametro.getValor() + ", H\n";
-                            
+
                         } else {
                             errores.add(new ErrorC("Semántico", Linea, Columna, "La función malloc necesita un entero como parámetro."));
                         }
@@ -100,6 +100,41 @@ public class Call extends Expresion {
 
                 } else {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "La función malloc necesita un entero como parámetro."));
+                }
+                break;
+            case "free":
+                if (Parametros != null) {
+
+                    if (Parametros.size() > 1) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función free solo necesita un record como parámetro."));
+                    }
+
+                    Expresion parametro = Parametros.get(0);
+
+                    if (parametro instanceof Identificador) {
+                        ((Identificador) parametro).setAcceso(false);
+                    }
+
+                    Result rsParametro = parametro.GetCuadruplos(e, errores);
+
+                    if (rsParametro.getEstructura() != null) {
+                        if (parametro.getTipo().IsRecord()) {
+                            codigo += rsParametro.getCodigo();
+                            
+                            int negativo = NuevoTemporal();
+                            codigo += "-, 0, 1, t" + negativo;
+                            codigo += "+, P, " + (negativo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + negativo + ", stack\n";
+                            
+                            codigo += "=, t" + rsParametro.getValor() + ", t" + negativo + ", " + rsParametro.getEstructura() + "\n";
+
+                        } else {
+                            errores.add(new ErrorC("Semántico", Linea, Columna, "El parametro no es de tipo record."));
+                        }
+                    }
+
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función sizeof necesita un record como parámetro."));
                 }
                 break;
         }

@@ -105,7 +105,7 @@ non terminal Repeat REPEAT_STMT;
 non terminal For FOR_STMT;
 non terminal Write WRITE_STMT;
 non terminal READ_STMT;
-non terminal EXPRESSION_STMT;
+non terminal Expresion EXPRESSION_STMT;
 non terminal ArrayList<Expresion> EXPRESSION_LIST;
 non terminal Expresion EXPRESSION;
 non terminal Expresion OR_EXPR;
@@ -307,7 +307,7 @@ SENTENCIA ::= WITH_STMT puntoycoma
             | FOR_STMT:a {: RESULT = a; :}
             | WRITE_STMT:a puntoycoma {: RESULT = a; :}
             | READ_STMT puntoycoma
-            | EXPRESSION_STMT puntoycoma
+            | EXPRESSION_STMT:a puntoycoma {: RESULT = a; :}
 ;
 
 WITH_STMT ::= with_ ID_LIST do_ SENTENCIAS end_ 
@@ -376,8 +376,8 @@ WRITE_STMT ::= write_:a parIzquierda EXPRESSION_LIST:b parDerecha  //agregar en 
 READ_STMT ::= read_ parIzquierda EXPRESSION parDerecha
 ;
 
-EXPRESSION_STMT ::= CALL 
-                | id
+EXPRESSION_STMT ::= CALL:a {: RESULT = a; :}
+                | id:a {: RESULT = new Call(a, aleft, aright); :}
 ;
 
 EXPRESSION_LIST ::= EXPRESSION_LIST:a coma EXPRESSION:b {: RESULT = a; RESULT.add(b); :}
