@@ -52,7 +52,7 @@ public class TipoDef extends Instruccion {
                 Tipo.getLimiteSup().GetCuadruplos(e, errores);
 
                 if (Tipo.getLimiteInf().getTipo().IsNumeric() && Tipo.getLimiteSup().getTipo().IsNumeric()) {
-                    if(Tipo.getLimiteInf().getTipo().getTipo() == Tipo.getLimiteSup().getTipo().getTipo()){
+                    if (Tipo.getLimiteInf().getTipo().getTipo() == Tipo.getLimiteSup().getTipo().getTipo()) {
                         Tipo.setTipo(Tipo.getLimiteInf().getTipo().getTipo());
                     } else {
                         errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo del límite inferior no coincide con el del límite superior."));
@@ -62,6 +62,12 @@ public class TipoDef extends Instruccion {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo subrango solo acepta tipos numéricos y carácteres."));
                     return null;
                 }
+            } else if (Tipo.getVariables() != null) {
+                Tipo.setEntorno(new Entorno("record"));
+                Tipo.getVariables().forEach((variable) -> {
+                    variable.GetCuadruplos(Tipo.getEntorno(), errores, global);
+                });
+                Tipo.getEntorno().setSize(Tipo.getEntorno().getPos());
             }
         }
 
@@ -75,7 +81,7 @@ public class TipoDef extends Instruccion {
                 }
 
                 e.Add(new Simbolo(id, Tipo, e.getAmbito()));
-                global.Add(new Simbolo(id, Tipo, e.getAmbito()));
+                //global.Add(new Simbolo(id, Tipo, e.getAmbito()));
             } else {
                 errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
             }

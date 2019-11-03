@@ -91,7 +91,7 @@ public class AST {
         }
 
         local.getSimbolos().clear();
-        global.getSimbolos().clear();
+        //global.getSimbolos().clear();
         errores.clear();
 
         //Variables locales
@@ -141,6 +141,9 @@ public class AST {
                 }
             });
         }
+        
+        //Agrego Simbolos que se mostraran en reporte
+        global.getSimbolos().addAll(local.getSimbolos());
 
         /**
          * Ejecuto Sentencias

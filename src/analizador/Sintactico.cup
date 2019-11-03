@@ -196,7 +196,7 @@ TYPE_SPECIFIER ::= TYPE_PRIMITIVE:a {: RESULT = new Tipo(a); :}
                 | array_ corcheteIzquierda DIM_LIST corcheteDerecha of_ TYPE_SPECIFIER
                 | id:a {: RESULT = new Tipo(a); :}
                 | LIMIT_VAL:a puntos3 LIMIT_VAL:b {: RESULT = new Tipo(a, b); :}
-                | record_ VAR_LIST end_
+                | record_ VAR_LIST:a end_ {: RESULT = new Tipo(a, Type.RECORD); :}
 ;
 
 LIMIT_VAL ::= LITERAL:a {: RESULT = a; :}
@@ -465,6 +465,6 @@ ATTRIBUTEREF ::= PRIMARY punto id
 ACCESS ::= PRIMARY corcheteIzquierda EXPRESSION_LIST corcheteDerecha
 ;
 
-CALL ::=  id parIzquierda parDerecha
-        | id parIzquierda EXPRESSION_LIST parDerecha
+CALL ::=  id:a parIzquierda parDerecha {: RESULT = new Call(a, aleft, aright); :}
+        | id:a parIzquierda EXPRESSION_LIST:b parDerecha {: RESULT =  new Call(a, b, aleft, aright); :}
 ;

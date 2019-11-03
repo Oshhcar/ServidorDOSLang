@@ -6,6 +6,7 @@
 package analizador.ast.entorno;
 
 import analizador.ast.expresion.Expresion;
+import analizador.ast.instruccion.VarDef;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -22,6 +23,8 @@ public class Tipo {
     private String IdEnum;
     private Expresion LimiteInf;
     private Expresion LimiteSup;
+    private ArrayList<VarDef> Variables;
+    private Entorno Entorno;
 
     public Tipo(Type Tipo) {
         this.Tipo = Tipo;
@@ -31,6 +34,8 @@ public class Tipo {
         this.IdEnum = null;
         this.LimiteInf = null;
         this.LimiteSup = null;
+        this.Variables = null;
+        this.Entorno = null;
     }
 
     /**
@@ -46,8 +51,10 @@ public class Tipo {
         this.IdEnum = null;
         this.LimiteInf = null;
         this.LimiteSup = null;
+        this.Variables = null;
+        this.Entorno = null;
     }
-    
+
     /**
      * Cuando Es un rango
      *
@@ -62,6 +69,26 @@ public class Tipo {
         this.IdEnum = null;
         this.LimiteInf = LimiteInf;
         this.LimiteSup = LimiteSup;
+        this.Variables = null;
+        this.Entorno = null;
+    }
+    
+    /**
+     * Cuando Es un record
+     *
+     * @param Variables the Variables to set
+     * @param Tipo the Tipo to set
+     */
+    public Tipo(ArrayList<VarDef> Variables, Type Tipo) {
+        this.Tipo = Tipo;
+        this.Id = null;
+        this.TipoPadre = null;
+        this.Lista = null;
+        this.IdEnum = null;
+        this.LimiteInf = null;
+        this.LimiteSup = null;
+        this.Variables = Variables;
+        this.Entorno = null;
     }
 
     /**
@@ -77,6 +104,7 @@ public class Tipo {
         this.IdEnum = null;
         this.LimiteInf = null;
         this.LimiteSup = null;
+        this.Entorno = null;
     }
 
     /**
@@ -225,12 +253,12 @@ public class Tipo {
      * @return the IdPadre
      */
     public String getIdPadre() {
-        if(TipoPadre != null){
+        if (TipoPadre != null) {
             return TipoPadre.getIdPadre();
         }
         return Id;
     }
-    
+
     /**
      * @return the Id
      */
@@ -264,7 +292,7 @@ public class Tipo {
      * @return the Lista
      */
     public ArrayList<String> getLista() {
-        if(TipoPadre != null){
+        if (TipoPadre != null) {
             return TipoPadre.getLista();
         }
         return Lista;
@@ -281,7 +309,7 @@ public class Tipo {
      * @return the IdEnum
      */
     public String getIdEnum() {
-        if(TipoPadre != null){
+        if (TipoPadre != null) {
             return TipoPadre.getIdEnum();
         }
         return IdEnum;
@@ -298,7 +326,7 @@ public class Tipo {
      * @return the LimiteInf
      */
     public Expresion getLimiteInf() {
-        if(TipoPadre != null){
+        if (TipoPadre != null) {
             return TipoPadre.getLimiteInf();
         }
         return LimiteInf;
@@ -315,7 +343,7 @@ public class Tipo {
      * @return the LimiteSup
      */
     public Expresion getLimiteSup() {
-        if(TipoPadre != null){
+        if (TipoPadre != null) {
             return TipoPadre.getLimiteSup();
         }
         return LimiteSup;
@@ -326,5 +354,36 @@ public class Tipo {
      */
     public void setLimiteSup(Expresion LimiteSup) {
         this.LimiteSup = LimiteSup;
+    }
+
+    /**
+     * @return the Variables
+     */
+    public ArrayList<VarDef> getVariables() {
+        return Variables;
+    }
+
+    /**
+     * @param Variables the Variables to set
+     */
+    public void setVariables(ArrayList<VarDef> Variables) {
+        this.Variables = Variables;
+    }
+
+    /**
+     * @return the Entorno
+     */
+    public Entorno getEntorno() {
+        if(TipoPadre != null){
+            return TipoPadre.getEntorno();
+        }
+        return Entorno;
+    }
+
+    /**
+     * @param Entorno the Entorno to set
+     */
+    public void setEntorno(Entorno Entorno) {
+        this.Entorno = Entorno;
     }
 }
