@@ -71,6 +71,37 @@ public class Call extends Expresion {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "La función sizeof necesita un record como parámetro."));
                 }
                 break;
+            case "malloc":
+                if (Parametros != null) {
+                    if (Parametros.size() > 1) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función malloc solo necesita un entero como parámetro."));
+                    }
+
+                    Expresion parametro = Parametros.get(0);
+                    Result rsParametro = parametro.GetCuadruplos(e, errores);
+
+                    if (!parametro.getTipo().IsUndefined()) {
+                        if (parametro.getTipo().IsInteger()) {
+                            Tipo.setTipo(Type.INTEGER);
+                           
+                            codigo += rsParametro.getCodigo();
+
+                            result.setValor(NuevoTemporal());
+                            codigo += "=, H, , t" + result.getValor() + "\n";
+                            codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                            
+                            codigo += "+, H, t" + rsParametro.getValor() + ", H\n";
+                            
+                        } else {
+                            errores.add(new ErrorC("Semántico", Linea, Columna, "La función malloc necesita un entero como parámetro."));
+                        }
+                    }
+
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función malloc necesita un entero como parámetro."));
+                }
+                break;
         }
 
         result.setCodigo(codigo);
