@@ -65,8 +65,8 @@ public class Entorno {
                 }
             }
         }
-
-        return null;
+        
+        return Padre != null ? Padre.Get(id) : null;
     }
 
     public Simbolo GetGlobal(String id) {

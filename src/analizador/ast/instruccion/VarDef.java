@@ -79,6 +79,13 @@ public class VarDef extends Instruccion {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo subrango solo acepta tipos numéricos y carácteres."));
                     return null;
                 }
+            } else if (Tipo.getVariables() != null) {
+                Tipo.setEntorno(new Entorno("record", e));
+                Tipo.getVariables().forEach((variable) -> {
+                    variable.GetCuadruplos(Tipo.getEntorno(), errores, global);
+                });
+                Tipo.getEntorno().setSize(Tipo.getEntorno().getPos());
+                Tipo.getEntorno().setPadre(null);
             }
         }
 
@@ -88,30 +95,36 @@ public class VarDef extends Instruccion {
             if (!Expr.getTipo().IsUndefined()) {
                 boolean bandera = false;
 
-                if (Tipo.getTipo() == Expr.getTipo().getTipo()) {
-                    bandera = true;
+                if (Tipo.IsRecord()) {
+                    if (Expr.getTipo().IsNumeric()) {
+                        bandera = true;
+                    }
                 } else {
-                    switch (Tipo.getTipo()) {
-                        case WORD:
-                            if (Expr.getTipo().IsString()) {
-                                bandera = true;
-                            }
-                            break;
-                        case STRING:
-                            if (Expr.getTipo().IsWord()) {
-                                bandera = true;
-                            }
-                            break;
-                        case REAL:
-                            if (Expr.getTipo().IsChar() || Expr.getTipo().IsInteger()) {
-                                bandera = true;
-                            }
-                            break;
-                        case INTEGER:
-                            if (Expr.getTipo().IsChar()) {
-                                bandera = true;
-                            }
-                            break;
+                    if (Tipo.getTipo() == Expr.getTipo().getTipo()) {
+                        bandera = true;
+                    } else {
+                        switch (Tipo.getTipo()) {
+                            case WORD:
+                                if (Expr.getTipo().IsString()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case STRING:
+                                if (Expr.getTipo().IsWord()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case REAL:
+                                if (Expr.getTipo().IsChar() || Expr.getTipo().IsInteger()) {
+                                    bandera = true;
+                                }
+                                break;
+                            case INTEGER:
+                                if (Expr.getTipo().IsChar()) {
+                                    bandera = true;
+                                }
+                                break;
+                        }
                     }
                 }
 
@@ -129,7 +142,7 @@ public class VarDef extends Instruccion {
             if (e.Get(id) == null) {
                 Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito());
                 s.setConstante(Constante);
-                
+
                 if (result.getValor() > 0) {
                     int tmp = NuevoTemporal();
                     codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";

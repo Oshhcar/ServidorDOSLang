@@ -63,29 +63,43 @@ public class TipoDef extends Instruccion {
                     return null;
                 }
             } else if (Tipo.getVariables() != null) {
-                Tipo.setEntorno(new Entorno("record"));
+
+                //Guardo Tipos antes por si hace referencia a el mismo
+                Id.forEach((id) -> {
+                    if (e.Get(id) == null) {
+                        e.Add(new Simbolo(id, Tipo, e.getAmbito()));
+                        //global.Add(new Simbolo(id, Tipo, e.getAmbito()));
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
+                    }
+                });
+
+                Tipo.setEntorno(new Entorno("record", e));
                 Tipo.getVariables().forEach((variable) -> {
                     variable.GetCuadruplos(Tipo.getEntorno(), errores, global);
                 });
                 Tipo.getEntorno().setSize(Tipo.getEntorno().getPos());
+                Tipo.getEntorno().setPadre(null);
             }
         }
 
-        Id.forEach((id) -> {
-            if (e.Get(id) == null) {
+        if (Tipo.getVariables() == null) {
+            Id.forEach((id) -> {
+                if (e.Get(id) == null) {
 
-                if (Tipo.IsEnum()) {
-                    if (Tipo.getId() == null) {
-                        Tipo.setIdEnum(id.toLowerCase());
+                    if (Tipo.IsEnum()) {
+                        if (Tipo.getId() == null) {
+                            Tipo.setIdEnum(id.toLowerCase());
+                        }
                     }
-                }
 
-                e.Add(new Simbolo(id, Tipo, e.getAmbito()));
-                //global.Add(new Simbolo(id, Tipo, e.getAmbito()));
-            } else {
-                errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
-            }
-        });
+                    e.Add(new Simbolo(id, Tipo, e.getAmbito()));
+                    //global.Add(new Simbolo(id, Tipo, e.getAmbito()));
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
+                }
+            });
+        }
 
         return null;
     }
