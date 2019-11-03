@@ -10,7 +10,6 @@ import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.entorno.Rol;
 import analizador.ast.entorno.Simbolo;
-import analizador.ast.entorno.Tipo;
 import java.util.ArrayList;
 
 /**
