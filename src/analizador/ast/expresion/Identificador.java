@@ -20,11 +20,13 @@ public class Identificador extends Expresion {
 
     private String Id;
     private boolean Acceso;
+    private boolean ObtenerTipo; //sirve para sizeof
 
     public Identificador(String Id, int Linea, int Columna) {
         super(Linea, Columna);
         this.Id = Id;
         this.Acceso = true;
+        this.ObtenerTipo = false;
     }
 
     @Override
@@ -35,6 +37,12 @@ public class Identificador extends Expresion {
         Simbolo sim = e.Get(Id);
 
         if (sim != null) {
+            
+            if(ObtenerTipo){
+                Tipo = sim.getTipo();
+                return result;
+            }
+            
             if (sim.getRol() == Rol.LOCAL) {
                 if (!Acceso && sim.isConstante()) {
                     errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es una constante, no se puede cambiar el valor."));
@@ -71,7 +79,11 @@ public class Identificador extends Expresion {
                         errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es un valor enum, no se puede asignar un valor."));
                     }
                 } else {
-                    errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es un tipo enum, no se puede asignar."));
+                    if (Acceso) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es un tipo enum, no se puede obtener valor."));
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es un tipo enum, no se puede asignar."));
+                    }
                 }
             } else {
                 errores.add(new ErrorC("Semántico", Linea, Columna, Id + " no es una variable."));
@@ -110,6 +122,20 @@ public class Identificador extends Expresion {
      */
     public void setAcceso(boolean Acceso) {
         this.Acceso = Acceso;
+    }
+
+    /**
+     * @return the ObtenerTipo
+     */
+    public boolean isObtenerTipo() {
+        return ObtenerTipo;
+    }
+
+    /**
+     * @param ObtenerTipo the ObtenerTipo to set
+     */
+    public void setObtenerTipo(boolean ObtenerTipo) {
+        this.ObtenerTipo = ObtenerTipo;
     }
 
 }

@@ -39,7 +39,7 @@ public class Call extends Expresion {
         String codigo = "";
 
         switch (Id.toLowerCase()) {
-            case "sizeof":
+            case "sizeof": //Por el momento solo acepta id de parametro
                 if (Parametros != null) {
 
                     if (Parametros.size() > 1) {
@@ -47,30 +47,26 @@ public class Call extends Expresion {
                     }
 
                     Expresion parametro = Parametros.get(0);
-                    //No se si solo vendran Identificador como parametro
-                    if (parametro instanceof Identificador) {
-                        Identificador id = (Identificador) parametro;
-                        Simbolo sim = e.Get(id.getId());
 
-                        if (sim != null) {
-                            if (sim.getTipo().IsRecord()) {
-                                Tipo.setTipo(Type.INTEGER);
-                                
-                                result.setValor(NuevoTemporal());
-                                
-                                codigo += "=, " + sim.getTipo().getEntorno().getSize() + ", , t" + result.getValor() + "\n";
-                                codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                                codigo += "=, t0, t" + result.getValor() + ", stack\n";
-                                
-                            } else {
-                                errores.add(new ErrorC("Semántico", Linea, Columna, id.getId() + " no es de tipo record."));
-                            }
-                        } else {
-                            errores.add(new ErrorC("Semántico", Linea, Columna, "Variable " + id.getId() + " no definida."));
-                        }
-                    } else {
-                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función sizeof necesita un record como parámetro."));
+                    if (parametro instanceof Identificador) {
+                        ((Identificador) parametro).setObtenerTipo(true);
                     }
+
+                    parametro.GetCuadruplos(e, errores);
+
+                    if (parametro.getTipo().IsRecord()) {
+                        Tipo.setTipo(Type.INTEGER);
+
+                        result.setValor(NuevoTemporal());
+
+                        codigo += "=, " + parametro.getTipo().getEntorno().getSize() + ", , t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "Parametro no es de tipo record."));
+                    }
+
                 } else {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "La función sizeof necesita un record como parámetro."));
                 }
