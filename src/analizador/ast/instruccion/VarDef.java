@@ -143,6 +143,14 @@ public class VarDef extends Instruccion {
                 Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito());
                 s.setConstante(Constante);
 
+                if(Tipo.IsRecord()){
+                    s.setEntorno(new Entorno(id));
+                    Tipo.getEntorno().getSimbolos().forEach((sim) -> {
+                        s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id));
+                    });
+                    
+                }
+                
                 if (result.getValor() > 0) {
                     int tmp = NuevoTemporal();
                     codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
