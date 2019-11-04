@@ -66,7 +66,7 @@ public class TipoDef extends Instruccion {
 
                 //Guardo Tipos antes por si hace referencia a el mismo
                 Id.forEach((id) -> {
-                    if (e.Get(id) == null) {
+                    if (e.GetLocal(id) == null) {
                         e.Add(new Simbolo(id, Tipo, e.getAmbito()));
                         //global.Add(new Simbolo(id, Tipo, e.getAmbito()));
                     } else {
@@ -85,7 +85,7 @@ public class TipoDef extends Instruccion {
 
         if (Tipo.getVariables() == null) {
             Id.forEach((id) -> {
-                if (e.Get(id) == null) {
+                if (e.GetLocal(id) == null) {
 
                     if (Tipo.IsEnum()) {
                         if (Tipo.getId() == null) {

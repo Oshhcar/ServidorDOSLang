@@ -37,31 +37,58 @@ public class Identificador extends Expresion {
         Simbolo sim = e.Get(Id);
 
         if (sim != null) {
-            
-            if(ObtenerTipo){
+
+            if (ObtenerTipo) {
                 Tipo = sim.getTipo();
                 return result;
             }
-            
-            if (sim.getRol() == Rol.LOCAL) {
-                if (!Acceso && sim.isConstante()) {
-                    errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es una constante, no se puede cambiar el valor."));
-                } else {
-                    Tipo = sim.getTipo();
-                    int tmp = NuevoTemporal();
 
-                    codigo += "+, P, " + sim.getPos() + ", t" + tmp + "\n";
+            if (sim.getRol() == Rol.LOCAL) {
+                if (sim.getRecord() != null) { //si es un atributo de un record
+                    Tipo = sim.getTipo();
+
+                    int tmp = NuevoTemporal();
+                    //Valor record
+                    codigo += "+, P, " + sim.getRecord().getPos() + ", t" + tmp + "\n";
                     codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
                     codigo += "=, t0, t" + tmp + ", stack\n";
 
+                    int tmpValor = NuevoTemporal();
+                    codigo += "=, stack, t" + tmp + ", t" + tmpValor + "\n";
+                    codigo += "+, t" + tmpValor + ", " + sim.getPos() + ", t" + tmpValor + "\n";
+                    codigo += "+, P, " + (tmpValor - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + tmpValor + ", stack\n";
+
                     if (Acceso) {
                         result.setValor(NuevoTemporal());
-                        codigo += "=, stack, t" + tmp + ", t" + result.getValor() + "\n";
+                        codigo += "=, heap, t" + tmpValor + ", t" + result.getValor() + "\n";
                         codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + result.getValor() + ", stack\n";
                     } else {
-                        result.setEstructura("stack");
-                        result.setValor(tmp);
+                        result.setEstructura("heap");
+                        result.setValor(tmpValor);
+                    }
+
+                } else {
+                    if (!Acceso && sim.isConstante()) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es una constante, no se puede cambiar el valor."));
+                    } else {
+                        Tipo = sim.getTipo();
+                        int tmp = NuevoTemporal();
+
+                        codigo += "+, P, " + sim.getPos() + ", t" + tmp + "\n";
+                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmp + ", stack\n";
+
+                        if (Acceso) {
+                            result.setValor(NuevoTemporal());
+                            codigo += "=, stack, t" + tmp + ", t" + result.getValor() + "\n";
+                            codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                        } else {
+                            result.setEstructura("stack");
+                            result.setValor(tmp);
+                        }
                     }
                 }
             } else if (sim.getTipo().IsEnum()) {

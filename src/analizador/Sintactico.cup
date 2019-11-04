@@ -90,7 +90,7 @@ non terminal Bloque BLOQUE;
 non terminal ArrayList<NodoAST> SENTENCIAS;
 non terminal NodoAST SENTENCIA;
 non terminal NodoAST STATEMENT;
-non terminal WITH_STMT;
+non terminal WithDo WITH_STMT;
 non terminal Asignacion ASSIGNMENT_STMT;
 non terminal Expresion TARGET;
 non terminal Break BREAK_STMT;
@@ -293,8 +293,8 @@ SENTENCIAS ::= SENTENCIAS:a SENTENCIA:b
                 :}
 ;
 
-SENTENCIA ::= WITH_STMT puntoycoma
-            | WITH_STMT
+SENTENCIA ::= WITH_STMT:a puntoycoma {: RESULT = a; :}
+            | WITH_STMT:a {: RESULT = a; :}
             | ASSIGNMENT_STMT:a puntoycoma {: RESULT = a; :}
             | BREAK_STMT:a puntoycoma {: RESULT = a; :}
             | CONTINUE_STMT:a puntoycoma {: RESULT = a; :}
@@ -310,8 +310,8 @@ SENTENCIA ::= WITH_STMT puntoycoma
             | EXPRESSION_STMT:a puntoycoma {: RESULT = a; :}
 ;
 
-WITH_STMT ::= with_ ID_LIST do_ SENTENCIAS end_ 
-            | with_ ID_LIST do_ end_
+WITH_STMT ::= with_:a ID_LIST:b do_ SENTENCIAS:c end_ {: RESULT = new WithDo(b, c, aleft, aright); :} 
+            | with_:a ID_LIST:b do_ end_ {: RESULT = new WithDo(b, aleft, aright); :}
 ;
 
 TARGET ::= id:a {: RESULT = new Identificador(a, aleft, aright); :}

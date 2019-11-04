@@ -139,14 +139,14 @@ public class VarDef extends Instruccion {
         }
 
         for (String id : Id) {
-            if (e.Get(id) == null) {
+            if (e.GetLocal(id) == null) {
                 Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito());
                 s.setConstante(Constante);
 
                 if(Tipo.IsRecord()){
                     s.setEntorno(new Entorno(id));
                     Tipo.getEntorno().getSimbolos().forEach((sim) -> {
-                        s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id));
+                        s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id, s));
                     });
                     
                 }

@@ -23,6 +23,7 @@ public class Simbolo {
     private String Firma;
     private boolean Nil;
     private boolean Constante;
+    private Simbolo Record;
 
     public Simbolo(String Id, Tipo Tipo, Rol Rol, int Tam, int Pos, String Ambito, int NumParam, int TipoParam) {
         this.Id = Id;
@@ -36,6 +37,7 @@ public class Simbolo {
         this.Entorno = null;
         this.Nil = false;
         this.Constante = false;
+        this.Record = null;
     }
     
     /**
@@ -56,6 +58,7 @@ public class Simbolo {
         this.Entorno = null;
         this.Nil = false;
         this.Constante = false;
+        this.Record = null;
     }
     
     /**
@@ -77,7 +80,31 @@ public class Simbolo {
         this.Entorno = null;
         this.Nil = false;
         this.Constante = false;
+        this.Record = null;
     }
+    
+    /**
+     * Constructor para Var de un record
+     * @param Id the Id to set
+     * @param Tipo the Tipo to set
+     * @param Pos the Pos to set
+     * @param Ambito the Ambito to set
+     */
+    public Simbolo(String Id, Tipo Tipo, int Pos, String Ambito, Simbolo Record){
+        this.Id = Id;
+        this.Tipo = Tipo;
+        this.Rol = Rol.LOCAL;
+        this.Tam = -1;
+        this.Pos = Pos;
+        this.Ambito = Ambito;
+        this.NumParam = -1;
+        this.TipoParam = -1;
+        this.Entorno = null;
+        this.Nil = false;
+        this.Constante = false;
+        this.Record = Record;
+    }
+
 
     /**
      * @return the Id
@@ -245,5 +272,19 @@ public class Simbolo {
      */
     public void setConstante(boolean Constante) {
         this.Constante = Constante;
+    }
+
+    /**
+     * @return the Record
+     */
+    public Simbolo getRecord() {
+        return Record;
+    }
+
+    /**
+     * @param Record the Record to set
+     */
+    public void setRecord(Simbolo Record) {
+        this.Record = Record;
     }
 }

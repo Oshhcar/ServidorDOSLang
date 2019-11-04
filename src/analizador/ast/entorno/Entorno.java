@@ -22,8 +22,8 @@ public class Entorno {
     private int TmpInicio;
     private int TmpFin;
     private Stack<String> SalidaCiclo;
-    private Stack<String> ContinueCiclo;
-
+    private Stack<String> ContinueCiclo; //cuando agrege aqui lo de exit, añadirlo a ent en withdo
+    
     public Entorno(String Ambito) {
         Simbolos = new ArrayList<>();
         Pos = 0;
@@ -44,6 +44,8 @@ public class Entorno {
         Size = 0;
         TmpInicio = 0;
         TmpFin = 0;
+        SalidaCiclo = new Stack<>();
+        ContinueCiclo = new Stack<>();
     }
 
     public void Add(Simbolo s) {
@@ -69,7 +71,7 @@ public class Entorno {
         return Padre != null ? Padre.Get(id) : null;
     }
 
-    public Simbolo GetGlobal(String id) {
+    public Simbolo GetLocal(String id) {
 
         for (Simbolo s : Simbolos) {
             if (s.getRol() != Rol.METHOD && s.getRol() != Rol.FUNCION) {
@@ -79,7 +81,7 @@ public class Entorno {
             }
         }
 
-        return Padre != null ? Padre.GetGlobal(id) : null;
+        return null;
     }
 
     public void Recorrer() {
