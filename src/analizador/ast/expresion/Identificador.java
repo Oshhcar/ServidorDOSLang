@@ -37,7 +37,9 @@ public class Identificador extends Expresion {
         Simbolo sim = e.Get(Id);
 
         if (sim != null) {
-
+            
+            result.setSimbolo(sim);
+            
             if (ObtenerTipo) {
                 Tipo = sim.getTipo();
                 return result;

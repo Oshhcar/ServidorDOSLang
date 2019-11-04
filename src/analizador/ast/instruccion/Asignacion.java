@@ -8,6 +8,7 @@ package analizador.ast.instruccion;
 import analizador.ErrorC;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
+import analizador.ast.expresion.Atributo;
 import analizador.ast.expresion.Expresion;
 import analizador.ast.expresion.Identificador;
 import java.util.ArrayList;
@@ -34,12 +35,16 @@ public class Asignacion extends Instruccion {
 
         if (Target instanceof Identificador) {
             ((Identificador) Target).setAcceso(false);
+        } else if(Target instanceof Atributo) {
+            ((Atributo) Target).setAcceso(false);
         }
 
         Result rsTarget = Target.GetCuadruplos(e, errores);
 
         if (Target instanceof Identificador) {
             ((Identificador) Target).setAcceso(true);
+        } else if(Target instanceof Atributo) {
+            ((Atributo) Target).setAcceso(true);
         }
 
         if (rsTarget.getEstructura() != null) {

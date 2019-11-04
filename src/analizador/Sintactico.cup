@@ -315,7 +315,7 @@ WITH_STMT ::= with_:a ID_LIST:b do_ SENTENCIAS:c end_ {: RESULT = new WithDo(b, 
 ;
 
 TARGET ::= id:a {: RESULT = new Identificador(a, aleft, aright); :}
-        | ATTRIBUTEREF
+        | ATTRIBUTEREF:a {: RESULT = a; :}
         | ACCESS
 ;
 
@@ -459,7 +459,7 @@ ENCLOSURE ::= PARENTH_FORM:a {: RESULT = a; :}
 PARENTH_FORM ::= parIzquierda EXPRESSION:a parDerecha {: RESULT = a; :}
 ;
 
-ATTRIBUTEREF ::= PRIMARY punto id
+ATTRIBUTEREF ::= PRIMARY:a punto:b id:c {: RESULT = new Atributo(a, c, bleft, bright); :}
 ;
 
 ACCESS ::= PRIMARY corcheteIzquierda EXPRESSION_LIST corcheteDerecha

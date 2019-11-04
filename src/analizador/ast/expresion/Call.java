@@ -50,6 +50,8 @@ public class Call extends Expresion {
 
                     if (parametro instanceof Identificador) {
                         ((Identificador) parametro).setObtenerTipo(true);
+                    } else if(parametro instanceof Atributo) {
+                        ((Atributo) parametro).setObtenerTipo(true);
                     }
 
                     parametro.GetCuadruplos(e, errores);

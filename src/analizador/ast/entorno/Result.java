@@ -17,7 +17,7 @@ public class Result {
     private String EtiquetaV; //Se utiliza en op
     private String EtiquetaF; //Se utiliza en op
     private int PtrStack;
-    private Simbolo Simbolo;
+    private Simbolo Simbolo; //Se utiliza en acceso a atributo.
     private Tipo Tipo;
 
     public Result() {
