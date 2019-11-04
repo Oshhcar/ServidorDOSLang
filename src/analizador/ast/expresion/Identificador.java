@@ -21,12 +21,14 @@ public class Identificador extends Expresion {
     private String Id;
     private boolean Acceso;
     private boolean ObtenerTipo; //sirve para sizeof
+    private boolean ObtenerSim; //Sirve para withDo
 
     public Identificador(String Id, int Linea, int Columna) {
         super(Linea, Columna);
         this.Id = Id;
         this.Acceso = true;
         this.ObtenerTipo = false;
+        this.ObtenerSim = false;
     }
 
     @Override
@@ -42,6 +44,10 @@ public class Identificador extends Expresion {
             
             if (ObtenerTipo) {
                 Tipo = sim.getTipo();
+                return result;
+            }
+            
+            if(ObtenerSim){
                 return result;
             }
 
@@ -165,6 +171,20 @@ public class Identificador extends Expresion {
      */
     public void setObtenerTipo(boolean ObtenerTipo) {
         this.ObtenerTipo = ObtenerTipo;
+    }
+
+    /**
+     * @return the ObtenerSim
+     */
+    public boolean isObtenerSim() {
+        return ObtenerSim;
+    }
+
+    /**
+     * @param ObtenerSim the ObtenerSim to set
+     */
+    public void setObtenerSim(boolean ObtenerSim) {
+        this.ObtenerSim = ObtenerSim;
     }
 
 }

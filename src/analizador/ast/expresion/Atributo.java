@@ -21,6 +21,7 @@ public class Atributo extends Expresion {
     private String Id;
     private boolean Acceso;
     private boolean ObtenerTipo; //sirve para sizeof
+    private boolean ObtenerSim; //Sirve para withDo
 
     public Atributo(Expresion Target, String Id, int Linea, int Columna) {
         super(Linea, Columna);
@@ -28,6 +29,7 @@ public class Atributo extends Expresion {
         this.Id = Id;
         this.Acceso = true;
         this.ObtenerTipo = false;
+        this.ObtenerSim = false;
     }
 
     @Override
@@ -36,20 +38,45 @@ public class Atributo extends Expresion {
         String codigo = "";
 
         if (Target instanceof Identificador) {
-            ((Identificador) Target).setAcceso(false);
+            ((Identificador) Target).setAcceso(false); //creo que aca solo necesito el simbolo
         } else if (Target instanceof Atributo) {
-            ((Atributo) Target).setAcceso(false);
+            ((Atributo) Target).setAcceso(true);
         }
 
         Result rsTarget = Target.GetCuadruplos(e, errores);
 
-        if (rsTarget.getEstructura() != null) {
-            if (Target.getTipo().IsRecord()) {
-                Simbolo sim = rsTarget.getSimbolo().getEntorno().GetLocal(Id);
+        if (Target.getTipo().IsRecord()) {
+            Simbolo sim = rsTarget.getSimbolo().getEntorno().GetLocal(Id);
 
-                if (sim != null) {
-                    Tipo = sim.getTipo();
-                    
+            if (sim != null) {
+                Tipo = sim.getTipo();
+
+                result.setSimbolo(sim);
+
+                if (ObtenerTipo || ObtenerSim) { //esto esta malo si un atributo es record
+                    return result;
+                }
+
+                codigo += rsTarget.getCodigo();
+
+                if (Target instanceof Atributo) { //si cambia el entorno
+                    int tmp = NuevoTemporal();
+
+                    codigo += "+, t" + rsTarget.getValor() + ", " + sim.getPos() + ", t" + tmp + "\n";
+                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + tmp + ", stack\n";
+
+                    if (Acceso) {
+                        result.setValor(NuevoTemporal());
+                        codigo += "=, heap, t" + tmp + ", t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                    } else {
+                        result.setEstructura("heap");
+                        result.setValor(tmp);
+                    }
+
+                } else {
                     int tmp = NuevoTemporal();
                     //Valor record
                     codigo += "+, P, " + rsTarget.getSimbolo().getPos() + ", t" + tmp + "\n";
@@ -61,7 +88,7 @@ public class Atributo extends Expresion {
                     codigo += "+, t" + tmpValor + ", " + sim.getPos() + ", t" + tmpValor + "\n";
                     codigo += "+, P, " + (tmpValor - e.getTmpInicio() + e.getSize()) + ", t0\n";
                     codigo += "=, t0, t" + tmpValor + ", stack\n";
-                    
+
                     if (Acceso) {
                         result.setValor(NuevoTemporal());
                         codigo += "=, heap, t" + tmpValor + ", t" + result.getValor() + "\n";
@@ -71,13 +98,13 @@ public class Atributo extends Expresion {
                         result.setEstructura("heap");
                         result.setValor(tmpValor);
                     }
-                    
-                } else {
-                    errores.add(new ErrorC("Semántico", Linea, Columna, "Atributo " + Id + " no definido."));
                 }
+
             } else {
-                errores.add(new ErrorC("Semántico", Linea, Columna, "La variable no es de tipo record."));
+                errores.add(new ErrorC("Semántico", Linea, Columna, "Atributo " + Id + " no definido."));
             }
+        } else {
+            errores.add(new ErrorC("Semántico", Linea, Columna, "La variable no es de tipo record."));
         }
 
         result.setCodigo(codigo);
@@ -138,6 +165,20 @@ public class Atributo extends Expresion {
      */
     public void setObtenerTipo(boolean ObtenerTipo) {
         this.ObtenerTipo = ObtenerTipo;
+    }
+
+    /**
+     * @return the ObtenerSim
+     */
+    public boolean isObtenerSim() {
+        return ObtenerSim;
+    }
+
+    /**
+     * @param ObtenerSim the ObtenerSim to set
+     */
+    public void setObtenerSim(boolean ObtenerSim) {
+        this.ObtenerSim = ObtenerSim;
     }
 
 }

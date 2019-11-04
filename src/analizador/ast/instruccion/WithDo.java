@@ -10,7 +10,9 @@ import analizador.ast.NodoAST;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.entorno.Simbolo;
+import analizador.ast.expresion.Atributo;
 import analizador.ast.expresion.Expresion;
+import analizador.ast.expresion.Identificador;
 import java.util.ArrayList;
 
 /**
@@ -19,18 +21,18 @@ import java.util.ArrayList;
  */
 public class WithDo extends Instruccion {
 
-    private ArrayList<String> Id;
+    private ArrayList<Expresion> Target;
     private ArrayList<NodoAST> Sentencias;
     
-    public WithDo(ArrayList<String> Id, int Linea, int Columna) {
+    public WithDo(ArrayList<Expresion> Target, int Linea, int Columna) {
         super(Linea, Columna);
-        this.Id = Id;
+        this.Target = Target;
         this.Sentencias = null;
     }
 
-    public WithDo(ArrayList<String> Id, ArrayList<NodoAST> Sentencias, int Linea, int Columna) {
+    public WithDo(ArrayList<Expresion> Target, ArrayList<NodoAST> Sentencias, int Linea, int Columna) {
         super(Linea, Columna);
-        this.Id = Id;
+        this.Target = Target;
         this.Sentencias = Sentencias;
     }
 
@@ -41,12 +43,22 @@ public class WithDo extends Instruccion {
 
         Entorno local = e;
 
-        for (String id : Id) { 
-            Simbolo s = e.Get(id);
+        for (Expresion target : Target) { 
+            
+            if(target instanceof Identificador){
+                ((Identificador) target).setObtenerSim(true);
+            } else if(target instanceof Atributo){
+                ((Atributo) target).setObtenerSim(true);
+            }
+            
+            Result rsTarget = target.GetCuadruplos(e, errores);
+            
+            
+            Simbolo s = rsTarget.getSimbolo();
 
             if (s != null) {
                 if (s.getTipo().IsRecord()) {
-                    Entorno tmp = new Entorno(id, local);
+                    Entorno tmp = new Entorno(s.getId(), local);
                     tmp.setSize(local.getSize());
                     tmp.setTmpInicio(local.getTmpInicio());
                     tmp.setTmpFin(local.getTmpFin());
@@ -56,11 +68,9 @@ public class WithDo extends Instruccion {
                     tmp.getSimbolos().addAll(s.getEntorno().getSimbolos());//agregar tmpinicio y fin
                     local = tmp;
                 } else {
-                    errores.add(new ErrorC("Semántico", Linea, Columna, id + " no es de tipo record."));
+                    errores.add(new ErrorC("Semántico", Linea, Columna, s.getId() + " no es de tipo record."));
                 }
-            } else {
-                errores.add(new ErrorC("Semántico", Linea, Columna, "No se ha definido una variable con el id: " + id + "."));
-            }
+            } 
         }
 
         if (Sentencias != null) {

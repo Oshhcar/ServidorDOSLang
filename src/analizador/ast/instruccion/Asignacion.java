@@ -8,6 +8,7 @@ package analizador.ast.instruccion;
 import analizador.ErrorC;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
+import analizador.ast.entorno.Simbolo;
 import analizador.ast.expresion.Atributo;
 import analizador.ast.expresion.Expresion;
 import analizador.ast.expresion.Identificador;
@@ -35,7 +36,7 @@ public class Asignacion extends Instruccion {
 
         if (Target instanceof Identificador) {
             ((Identificador) Target).setAcceso(false);
-        } else if(Target instanceof Atributo) {
+        } else if (Target instanceof Atributo) {
             ((Atributo) Target).setAcceso(false);
         }
 
@@ -43,7 +44,7 @@ public class Asignacion extends Instruccion {
 
         if (Target instanceof Identificador) {
             ((Identificador) Target).setAcceso(true);
-        } else if(Target instanceof Atributo) {
+        } else if (Target instanceof Atributo) {
             ((Atributo) Target).setAcceso(true);
         }
 
@@ -59,8 +60,8 @@ public class Asignacion extends Instruccion {
                             bandera = true;
                         }
                     }
-                } else if(Target.getTipo().IsRecord()){
-                    if(Valor.getTipo().IsNumeric()){
+                } else if (Target.getTipo().IsRecord()) {
+                    if (Valor.getTipo().IsNumeric()) {
                         bandera = true;
                     }
                 } else {
@@ -93,6 +94,21 @@ public class Asignacion extends Instruccion {
                 }
 
                 if (bandera) {
+
+                    /*Si target es record, defino los simbolos de sus atributos si hay record*/
+                    if (Target.getTipo().IsRecord()) {
+                        if (rsTarget.getSimbolo().getEntorno() != null) {
+                            for (Simbolo s : rsTarget.getSimbolo().getEntorno().getSimbolos()) {
+                                if (s.getTipo().IsRecord()) {
+                                    s.setEntorno(new Entorno(s.getId()));
+                                    s.getTipo().getEntorno().getSimbolos().forEach((sim) -> {
+                                        s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), s.getId(), s));
+                                    });
+                                }
+                            }
+                        }
+                    }
+
                     codigo += rsTarget.getCodigo();
                     codigo += rsValor.getCodigo();
 

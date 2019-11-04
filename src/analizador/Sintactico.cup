@@ -92,6 +92,7 @@ non terminal NodoAST SENTENCIA;
 non terminal NodoAST STATEMENT;
 non terminal WithDo WITH_STMT;
 non terminal Asignacion ASSIGNMENT_STMT;
+non terminal ArrayList<Expresion> TARGET_LIST;
 non terminal Expresion TARGET;
 non terminal Break BREAK_STMT;
 non terminal Continue CONTINUE_STMT;
@@ -310,8 +311,20 @@ SENTENCIA ::= WITH_STMT:a puntoycoma {: RESULT = a; :}
             | EXPRESSION_STMT:a puntoycoma {: RESULT = a; :}
 ;
 
-WITH_STMT ::= with_:a ID_LIST:b do_ SENTENCIAS:c end_ {: RESULT = new WithDo(b, c, aleft, aright); :} 
-            | with_:a ID_LIST:b do_ end_ {: RESULT = new WithDo(b, aleft, aright); :}
+WITH_STMT ::= with_:a TARGET_LIST:b do_ SENTENCIAS:c end_ {: RESULT = new WithDo(b, c, aleft, aright); :} 
+            | with_:a TARGET_LIST:b do_ end_ {: RESULT = new WithDo(b, aleft, aright); :}
+;
+
+TARGET_LIST ::= TARGET_LIST:a coma TARGET:b
+                {:
+                    RESULT = a;
+                    RESULT.add(b);
+                :}
+            | TARGET:a 
+                {:
+                    RESULT = new ArrayList<>();
+                    RESULT.add(a);
+                :}
 ;
 
 TARGET ::= id:a {: RESULT = new Identificador(a, aleft, aright); :}
