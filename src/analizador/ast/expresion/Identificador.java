@@ -42,28 +42,24 @@ public class Identificador extends Expresion {
             
             result.setSimbolo(sim);
             
-            if (ObtenerTipo) {
+            if (ObtenerTipo || ObtenerSim) {
                 Tipo = sim.getTipo();
-                return result;
-            }
-            
-            if(ObtenerSim){
+                result.setCodigo("");
                 return result;
             }
 
             if (sim.getRol() == Rol.LOCAL) {
-                if (sim.getRecord() != null) { //si es un atributo de un record
+                if (sim.getRecord() != null) { //si es un atributo de un record //dentro de withdo
                     Tipo = sim.getTipo();
 
-                    int tmp = NuevoTemporal();
-                    //Valor record
-                    codigo += "+, P, " + sim.getRecord().getPos() + ", t" + tmp + "\n";
-                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                    codigo += "=, t0, t" + tmp + ", stack\n";
+//                    int tmp = NuevoTemporal();
+//                    //Valor record
+//                    codigo += "+, P, " + sim.getRecord().getPos() + ", t" + tmp + "\n";
+//                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+//                    codigo += "=, t0, t" + tmp + ", stack\n";
 
                     int tmpValor = NuevoTemporal();
-                    codigo += "=, stack, t" + tmp + ", t" + tmpValor + "\n";
-                    codigo += "+, t" + tmpValor + ", " + sim.getPos() + ", t" + tmpValor + "\n";
+                    codigo += "+, t" + e.getTmpP() + ", " + sim.getPos() + ", t" + tmpValor + "\n";
                     codigo += "+, P, " + (tmpValor - e.getTmpInicio() + e.getSize()) + ", t0\n";
                     codigo += "=, t0, t" + tmpValor + ", stack\n";
 

@@ -38,7 +38,8 @@ public class Atributo extends Expresion {
         String codigo = "";
 
         if (Target instanceof Identificador) {
-            ((Identificador) Target).setAcceso(false); //creo que aca solo necesito el simbolo
+           //((Identificador) Target).setAcceso(false); //creo que aca solo necesito el simbolo
+            ((Identificador) Target).setObtenerSim(true);
         } else if (Target instanceof Atributo) {
             ((Atributo) Target).setAcceso(true);
         }

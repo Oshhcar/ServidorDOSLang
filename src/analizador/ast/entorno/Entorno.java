@@ -23,7 +23,8 @@ public class Entorno {
     private int TmpFin;
     private Stack<String> SalidaCiclo;
     private Stack<String> ContinueCiclo; //cuando agrege aqui lo de exit, añadirlo a ent en withdo
-    
+    private int TmpP; //Apuntador al ambito de las variables de record.
+            
     public Entorno(String Ambito) {
         Simbolos = new ArrayList<>();
         Pos = 0;
@@ -34,6 +35,7 @@ public class Entorno {
         TmpFin = 0;
         SalidaCiclo = new Stack<>();
         ContinueCiclo = new Stack<>();
+        TmpP = 0;
     }
 
     public Entorno(String Ambito, Entorno Padre) {
@@ -46,6 +48,7 @@ public class Entorno {
         TmpFin = 0;
         SalidaCiclo = new Stack<>();
         ContinueCiclo = new Stack<>();
+        TmpP = 0;
     }
 
     public void Add(Simbolo s) {
@@ -229,4 +232,19 @@ public class Entorno {
     public void setContinueCiclo(Stack<String> ContinueCiclo) {
         this.ContinueCiclo = ContinueCiclo;
     }
+
+    /**
+     * @return the TmpP
+     */
+    public int getTmpP() {
+        return TmpP;
+    }
+
+    /**
+     * @param TmpP the TmpP to set
+     */
+    public void setTmpP(int TmpP) {
+        this.TmpP = TmpP;
+    }
+    
 }

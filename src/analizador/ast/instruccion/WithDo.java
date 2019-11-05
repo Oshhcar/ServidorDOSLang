@@ -23,7 +23,7 @@ public class WithDo extends Instruccion {
 
     private ArrayList<Expresion> Target;
     private ArrayList<NodoAST> Sentencias;
-    
+
     public WithDo(ArrayList<Expresion> Target, int Linea, int Columna) {
         super(Linea, Columna);
         this.Target = Target;
@@ -43,34 +43,31 @@ public class WithDo extends Instruccion {
 
         Entorno local = e;
 
-        for (Expresion target : Target) { 
-            
-            if(target instanceof Identificador){
-                ((Identificador) target).setObtenerSim(true);
-            } else if(target instanceof Atributo){
-                ((Atributo) target).setObtenerSim(true);
-            }
-            
+        for (Expresion target : Target) {
             Result rsTarget = target.GetCuadruplos(e, errores);
-            
-            
+
             Simbolo s = rsTarget.getSimbolo();
 
             if (s != null) {
                 if (s.getTipo().IsRecord()) {
+                    
+                    codigo += rsTarget.getCodigo();
+                    
                     Entorno tmp = new Entorno(s.getId(), local);
                     tmp.setSize(local.getSize());
                     tmp.setTmpInicio(local.getTmpInicio());
                     tmp.setTmpFin(local.getTmpFin());
                     tmp.setSalidaCiclo(local.getSalidaCiclo());
                     tmp.setContinueCiclo(local.getContinueCiclo());
-                    
+
                     tmp.getSimbolos().addAll(s.getEntorno().getSimbolos());//agregar tmpinicio y fin
+                    tmp.setTmpP(rsTarget.getValor()); //Sirve Calcular posicion;
+                    
                     local = tmp;
                 } else {
                     errores.add(new ErrorC("Semántico", Linea, Columna, s.getId() + " no es de tipo record."));
                 }
-            } 
+            }
         }
 
         if (Sentencias != null) {
