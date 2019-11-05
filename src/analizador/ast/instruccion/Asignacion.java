@@ -89,6 +89,11 @@ public class Asignacion extends Instruccion {
                                     bandera = true;
                                 }
                                 break;
+                            case CHAR:
+                                if(Valor.getTipo().IsInteger()){
+                                    bandera = true;
+                                }
+                                break;
                         }
                     }
                 }
