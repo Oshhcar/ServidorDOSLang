@@ -61,7 +61,7 @@ public class Asignacion extends Instruccion {
                         }
                     }
                 } else if (Target.getTipo().IsRecord()) {
-                    if (Valor.getTipo().IsNumeric()) {
+                    if (Valor.getTipo().IsNumeric() || Valor.getTipo().IsRecord()) {
                         bandera = true;
                     }
                 } else {
