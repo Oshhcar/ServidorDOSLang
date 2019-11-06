@@ -40,9 +40,10 @@ public class Atributo extends Expresion {
         if (Target instanceof Identificador) {
            //((Identificador) Target).setAcceso(false); //creo que aca solo necesito el simbolo
             ((Identificador) Target).setObtenerSim(true);
-        } else if (Target instanceof Atributo) {
-            ((Atributo) Target).setAcceso(true);
-        }
+        } 
+//        else if (Target instanceof Atributo) {
+//            ((Atributo) Target).setAcceso(true);
+//        }
 
         Result rsTarget = Target.GetCuadruplos(e, errores);
 
@@ -60,7 +61,7 @@ public class Atributo extends Expresion {
 
                 codigo += rsTarget.getCodigo();
 
-                if (Target instanceof Atributo) { //si cambia el entorno
+                if (Target instanceof Atributo || Target instanceof Acceso) { //si cambia el entorno
                     int tmp = NuevoTemporal();
 
                     codigo += "+, t" + rsTarget.getValor() + ", " + sim.getPos() + ", t" + tmp + "\n";

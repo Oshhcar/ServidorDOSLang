@@ -49,7 +49,19 @@ public class WithDo extends Instruccion {
             Simbolo s = rsTarget.getSimbolo();
 
             if (s != null) {
-                if (s.getTipo().IsRecord()) {
+                boolean bandera = false;
+                
+                if(s.getTipo().IsRecord()){
+                    bandera = true;
+                } else {
+                    if(s.getTipo().IsArray()){
+                        if(s.getTipo().getTipoArray().IsRecord()){
+                            bandera = true;
+                        }
+                    }
+                }
+                
+                if (bandera) {
                     
                     codigo += rsTarget.getCodigo();
                     

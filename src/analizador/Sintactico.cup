@@ -474,7 +474,7 @@ PARENTH_FORM ::= parIzquierda EXPRESSION:a parDerecha {: RESULT = a; :}
 ATTRIBUTEREF ::= PRIMARY:a punto:b id:c {: RESULT = new Atributo(a, c, bleft, bright); :}
 ;
 
-ACCESS ::= PRIMARY:a corcheteIzquierda:b EXPRESSION_LIST:c corcheteDerecha {: RESULT = new Acceso(a, c, bright, bleft); :}
+ACCESS ::= PRIMARY:a corcheteIzquierda:b EXPRESSION_LIST:c corcheteDerecha {: RESULT = new Acceso(a, c, bleft, bright); :}
 ;
 
 CALL ::=  id:a parIzquierda parDerecha {: RESULT = new Call(a, aleft, aright); :}
