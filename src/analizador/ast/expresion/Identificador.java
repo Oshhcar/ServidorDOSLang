@@ -44,6 +44,11 @@ public class Identificador extends Expresion {
             
             if (ObtenerTipo || ObtenerSim) {
                 Tipo = sim.getTipo();
+                
+                if(sim.getTipo().IsArray()){
+                    Tipo = sim.getTipo().getTipoArray();
+                }
+                
                 result.setCodigo("");
                 return result;
             }

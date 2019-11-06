@@ -25,6 +25,8 @@ public class Tipo {
     private Expresion LimiteSup;
     private ArrayList<VarDef> Variables;
     private Entorno Entorno;
+    private ArrayList<Dimension> Dimensiones;
+    private Tipo TipoArray;
 
     public Tipo(Type Tipo) {
         this.Tipo = Tipo;
@@ -36,6 +38,8 @@ public class Tipo {
         this.LimiteSup = null;
         this.Variables = null;
         this.Entorno = null;
+        this.Dimensiones = null;
+        this.TipoArray = null;
     }
 
     /**
@@ -53,6 +57,8 @@ public class Tipo {
         this.LimiteSup = null;
         this.Variables = null;
         this.Entorno = null;
+        this.Dimensiones = null;
+        this.TipoArray = null;
     }
 
     /**
@@ -71,6 +77,8 @@ public class Tipo {
         this.LimiteSup = LimiteSup;
         this.Variables = null;
         this.Entorno = null;
+        this.Dimensiones = null;
+        this.TipoArray = null;
     }
     
     /**
@@ -89,6 +97,28 @@ public class Tipo {
         this.LimiteSup = null;
         this.Variables = Variables;
         this.Entorno = null;
+        this.Dimensiones = null;
+        this.TipoArray = null;
+    }
+    
+    /**
+     * Cuando Es un Array
+     *
+     * @param Dimensiones the Dimensiones to set
+     * @param TipoArray the TipoArray to set
+     */
+    public Tipo(ArrayList<Dimension> Dimensiones, Tipo TipoArray) {
+        this.Tipo = Type.ARRAY;
+        this.Id = null;
+        this.TipoPadre = null;
+        this.Lista = null;
+        this.IdEnum = null;
+        this.LimiteInf = null;
+        this.LimiteSup = null;
+        this.Variables = null;
+        this.Entorno = null;
+        this.Dimensiones = Dimensiones;
+        this.TipoArray = TipoArray;
     }
 
     /**
@@ -104,7 +134,10 @@ public class Tipo {
         this.IdEnum = null;
         this.LimiteInf = null;
         this.LimiteSup = null;
+        this.Variables = null;
         this.Entorno = null;
+        this.Dimensiones = null;
+        this.TipoArray = null;
     }
 
     /**
@@ -385,5 +418,39 @@ public class Tipo {
      */
     public void setEntorno(Entorno Entorno) {
         this.Entorno = Entorno;
+    }
+
+    /**
+     * @return the Dimensiones
+     */
+    public ArrayList<Dimension> getDimensiones() {
+        if(TipoPadre != null){
+            return TipoPadre.getDimensiones();
+        }
+        return Dimensiones;
+    }
+
+    /**
+     * @param Dimensiones the Dimensiones to set
+     */
+    public void setDimensiones(ArrayList<Dimension> Dimensiones) {
+        this.Dimensiones = Dimensiones;
+    }
+
+    /**
+     * @return the TipoArray
+     */
+    public Tipo getTipoArray() {
+        if(TipoPadre != null){
+            return TipoPadre.getTipoArray();
+        }
+        return TipoArray;
+    }
+
+    /**
+     * @param TipoArray the TipoArray to set
+     */
+    public void setTipoArray(Tipo TipoArray) {
+        this.TipoArray = TipoArray;
     }
 }

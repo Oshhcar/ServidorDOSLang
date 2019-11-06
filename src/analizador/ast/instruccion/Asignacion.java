@@ -9,6 +9,7 @@ import analizador.ErrorC;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.entorno.Simbolo;
+import analizador.ast.expresion.Acceso;
 import analizador.ast.expresion.Atributo;
 import analizador.ast.expresion.Expresion;
 import analizador.ast.expresion.Identificador;
@@ -38,6 +39,8 @@ public class Asignacion extends Instruccion {
             ((Identificador) Target).setAcceso(false);
         } else if (Target instanceof Atributo) {
             ((Atributo) Target).setAcceso(false);
+        } else if (Target instanceof Acceso) {
+            ((Acceso) Target).setAcceso(false);
         }
 
         Result rsTarget = Target.GetCuadruplos(e, errores);
@@ -46,6 +49,8 @@ public class Asignacion extends Instruccion {
             ((Identificador) Target).setAcceso(true);
         } else if (Target instanceof Atributo) {
             ((Atributo) Target).setAcceso(true);
+        } else if (Target instanceof Acceso) {
+            ((Acceso) Target).setAcceso(true);
         }
 
         if (rsTarget.getEstructura() != null) {
@@ -64,7 +69,7 @@ public class Asignacion extends Instruccion {
                     if (Valor.getTipo().IsNumeric() || Valor.getTipo().IsRecord()) {
                         bandera = true;
                     }
-                } else {
+                } else { //verificar arreglos del mismo tipoArreglo
                     if (Target.getTipo().getTipo() == Valor.getTipo().getTipo()) {
                         bandera = true;
                     } else {

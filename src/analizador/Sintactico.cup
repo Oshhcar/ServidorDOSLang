@@ -8,6 +8,7 @@ import java.util.HashMap;
 import analizador.ast.*;
 import analizador.ast.entorno.Tipo;
 import analizador.ast.entorno.Type;
+import analizador.ast.entorno.Dimension;
 import analizador.ast.expresion.*;
 import analizador.ast.expresion.operacion.*;
 import analizador.ast.instruccion.*;
@@ -72,8 +73,8 @@ non terminal TipoDef TYPE;
 non terminal Tipo TYPE_VALUE;
 non terminal Tipo TYPE_SPECIFIER;
 non terminal Expresion LIMIT_VAL;
-non terminal DIM_LIST;
-non terminal DIM;
+non terminal ArrayList<Dimension> DIM_LIST;
+non terminal Dimension DIM;
 non terminal ArrayList<VarDef> VARDEF;
 non terminal ArrayList<VarDef> VAR_LIST;
 non terminal VarDef VAR;
@@ -194,7 +195,7 @@ TYPE_VALUE ::= TYPE_SPECIFIER:a {: RESULT = a; :}
 ;
 
 TYPE_SPECIFIER ::= TYPE_PRIMITIVE:a {: RESULT = new Tipo(a); :}
-                | array_ corcheteIzquierda DIM_LIST corcheteDerecha of_ TYPE_SPECIFIER
+                | array_ corcheteIzquierda DIM_LIST:a corcheteDerecha of_ TYPE_SPECIFIER:b {: RESULT = new Tipo(a, b); :}
                 | id:a {: RESULT = new Tipo(a); :}
                 | LIMIT_VAL:a puntos3 LIMIT_VAL:b {: RESULT = new Tipo(a, b); :}
                 | record_ VAR_LIST:a end_ {: RESULT = new Tipo(a, Type.RECORD); :}
@@ -206,13 +207,11 @@ LIMIT_VAL ::= LITERAL:a {: RESULT = a; :}
             | menos:b LIMIT_VAL:a {: RESULT = new Unario(a, Operador.RESTA, bleft, bright); :}
 ;
 
-DIM_LIST ::= DIM_LIST coma DIM
-            | DIM
+DIM_LIST ::= DIM_LIST:a coma DIM:b {: RESULT = a; RESULT.add(b); :}
+            | DIM:a {: RESULT = new ArrayList<>(); RESULT.add(a); :}
 ;
 
-DIM ::= LITERAL puntos2 LITERAL
-        //| id puntos2 id
-        | id
+DIM ::= EXPRESSION:a puntos2 EXPRESSION:b {: RESULT = new Dimension(a, b); :}
 ;
 
 VARDEF ::= var_ VAR_LIST:a {: RESULT = a; :}
@@ -329,7 +328,7 @@ TARGET_LIST ::= TARGET_LIST:a coma TARGET:b
 
 TARGET ::= id:a {: RESULT = new Identificador(a, aleft, aright); :}
         | ATTRIBUTEREF:a {: RESULT = a; :}
-        | ACCESS
+        | ACCESS:a {: RESULT = a; :}
 ;
 
 ASSIGNMENT_STMT ::= TARGET:a asignacion:b EXPRESSION:c {: RESULT = new Asignacion(a, c, bleft, bright); :} 
@@ -475,7 +474,7 @@ PARENTH_FORM ::= parIzquierda EXPRESSION:a parDerecha {: RESULT = a; :}
 ATTRIBUTEREF ::= PRIMARY:a punto:b id:c {: RESULT = new Atributo(a, c, bleft, bright); :}
 ;
 
-ACCESS ::= PRIMARY corcheteIzquierda EXPRESSION_LIST corcheteDerecha
+ACCESS ::= PRIMARY:a corcheteIzquierda:b EXPRESSION_LIST:c corcheteDerecha {: RESULT = new Acceso(a, c, bright, bleft); :}
 ;
 
 CALL ::=  id:a parIzquierda parDerecha {: RESULT = new Call(a, aleft, aright); :}

@@ -6,14 +6,18 @@
 package analizador.ast.instruccion;
 
 import analizador.ErrorC;
+import analizador.ast.entorno.Dimension;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.entorno.Rol;
 import analizador.ast.entorno.Simbolo;
 import analizador.ast.entorno.Tipo;
+import analizador.ast.entorno.Type;
 import analizador.ast.expresion.Expresion;
+import analizador.ast.expresion.Identificador;
 import analizador.ast.expresion.Literal;
-import analizador.ast.expresion.operacion.Operacion;
+import analizador.ast.expresion.operacion.Aritmetica;
+import analizador.ast.expresion.operacion.Operador;
 import java.util.ArrayList;
 
 /**
@@ -89,74 +93,39 @@ public class VarDef extends Instruccion {
             }
         }
 
-        if (Expr != null) {
-            Result rsExpr = Expr.GetCuadruplos(e, errores);
-
-            if (!Expr.getTipo().IsUndefined()) {
-                boolean bandera = false;
-
-                if (Tipo.IsRecord()) {
-                    if (Expr.getTipo().IsNumeric()) {
-                        bandera = true;
-                    }
-                } else {
-                    if (Tipo.getTipo() == Expr.getTipo().getTipo()) {
-                        bandera = true;
-                    } else {
-                        switch (Tipo.getTipo()) {
-                            case WORD:
-                                if (Expr.getTipo().IsString()) {
-                                    bandera = true;
-                                }
-                                break;
-                            case STRING:
-                                if (Expr.getTipo().IsWord()) {
-                                    bandera = true;
-                                }
-                                break;
-                            case REAL:
-                                if (Expr.getTipo().IsChar() || Expr.getTipo().IsInteger()) {
-                                    bandera = true;
-                                }
-                                break;
-                            case INTEGER:
-                                if (Expr.getTipo().IsChar()) {
-                                    bandera = true;
-                                }
-                                break;
-                        }
-                    }
-                }
-
-                if (bandera) {
-                    codigo += rsExpr.getCodigo();
-                    result.setValor(rsExpr.getValor());
-                } else {
-                    errores.add(new ErrorC("Semántico", Linea, Columna, "El valor de la expresión no corresponde al Tipo."));
-                    return null;
-                }
-            }
-        }
-
         for (String id : Id) {
             if (e.GetLocal(id) == null) {
                 Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito());
                 s.setConstante(Constante);
 
-                if(Tipo.IsRecord()){
+                if (Tipo.IsRecord()) {
                     s.setEntorno(new Entorno(id));
                     Tipo.getEntorno().getSimbolos().forEach((sim) -> {
                         s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id, s));
                     });
-                    
+
                 }
-                
-                if (result.getValor() > 0) {
+
+                //Si es arreglo lo instancio
+                if (Tipo.IsArray()) {
+
+                    //Si es record guardo simbolos
+                    if (Tipo.getTipoArray().IsRecord()) {
+                        s.setEntorno(new Entorno(id));
+                        Tipo.getTipoArray().getEntorno().getSimbolos().forEach((sim) -> {
+                            s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id, s));
+                        });
+                    }
+
                     int tmp = NuevoTemporal();
                     codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
                     codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
                     codigo += "=, t0, t" + tmp + ", stack\n";
-                    codigo += "=, t" + tmp + ", t" + result.getValor() + ", stack\n";
+
+                    codigo += "=, t" + tmp + ", H, stack\n";
+
+                    codigo += LlenarDimension(0, e, errores);
+                    //codigo += "+, H, t" + rsSuma.getValor() + ", H\n"; //reservo memoria
                 }
 
                 e.Add(s);
@@ -166,8 +135,95 @@ public class VarDef extends Instruccion {
             }
         }
 
+        if (Expr != null) {
+            for (String id : Id) {
+                Identificador target = new Identificador(id, Linea, Columna);
+                Asignacion asigna = new Asignacion(target, Expr, Linea, Columna);
+
+                codigo += asigna.GetCuadruplos(e, errores, global).getCodigo();
+            }
+        }
+
         result.setCodigo(codigo);
         return result;
+    }
+
+    public String LlenarDimension(int pos, Entorno e, ArrayList<ErrorC> errores) {
+        String codigo = "";
+
+        Dimension dim = Tipo.getDimensiones().get(pos);
+
+        //Cálculo su tamaño
+        Aritmetica suma = new Aritmetica(new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna), new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna);
+        Result rsSuma = suma.GetCuadruplos(e, errores);
+
+        //Guardo el tamaño en su primera posicion
+        codigo += rsSuma.getCodigo();
+        codigo += "=, H, t" + rsSuma.getValor() + ", heap\n";
+        codigo += "+, H, 1, H\n";
+
+        //Guardo el limite inf en su segunda posicion
+        Result rsInf = dim.getLimiteInf().GetCuadruplos(e, errores);
+        codigo += rsInf.getCodigo();
+        codigo += "=, H, t" + rsInf.getValor() + ", heap\n";
+        codigo += "+, H, 1, H\n";
+
+        //Guardo el limite sup en su tercera posicion
+        Result rsSup = dim.getLimiteSup().GetCuadruplos(e, errores);
+        codigo += rsSup.getCodigo();
+        codigo += "=, H, t" + rsSup.getValor() + ", heap\n";
+        codigo += "+, H, 1, H\n";
+
+        int contador = NuevoTemporal();
+        codigo += "=, 0, , t" + contador + "\n";
+        codigo += "+, P, " + (contador - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, t0, t" + contador + ", stack\n";
+
+        int tmpInicio = 0;
+        //Si tiene más dimensiones reservo todo y guardo el inicio
+        if ((Tipo.getDimensiones().size() - 1) != pos) {
+            tmpInicio = NuevoTemporal();
+            codigo += "=, H, , t" + tmpInicio + "\n";
+            codigo += "+, P, " + (tmpInicio - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + tmpInicio + ", stack\n";
+
+            codigo += "+, H, t" + rsSuma.getValor() + ", H\n"; //reservo el espacio del a primera dim
+        }
+
+        String etqV = NuevaEtiqueta();
+        String etqF = NuevaEtiqueta();
+        String etqCiclo = NuevaEtiqueta();
+
+        codigo += etqCiclo + ":\n";
+        codigo += "+, P, " + (contador - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, stack, t0, t" + contador + "\n";
+        codigo += "jge, t" + contador + ", t" + rsSuma.getValor() + ", " + etqV + "\n";
+        codigo += "jmp, , , " + etqF + "\n";
+        codigo += etqF + ":\n";
+
+        if ((Tipo.getDimensiones().size() - 1) == pos) {
+            //codigo += "=, H, 0, heap\n";
+            codigo += "+, H, 1, H\n";
+        } else {
+
+            codigo += "+, P, " + (tmpInicio - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, stack, t0, t" + tmpInicio + "\n";
+            codigo += "=, t" + tmpInicio + ", H, heap\n";
+            codigo += "+, t" + tmpInicio + ", 1, t" + tmpInicio + "\n";
+            codigo += "+, P, " + (tmpInicio - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + tmpInicio + ", stack\n";
+
+            codigo += LlenarDimension(pos + 1, e, errores);
+
+        }
+
+        codigo += "+, t" + contador + ", 1, t" + contador + "\n";
+        codigo += "+, P, " + (contador - e.getTmpInicio() + e.getSize()) + ", t0\n";
+        codigo += "=, t0, t" + contador + ", stack\n";
+        codigo += "jmp, , , " + etqCiclo + "\n";
+        codigo += etqV + ":\n";
+
+        return codigo;
     }
 
     /**
