@@ -71,7 +71,8 @@ public class WithDo extends Instruccion {
                     tmp.setTmpFin(local.getTmpFin());
                     tmp.setSalidaCiclo(local.getSalidaCiclo());
                     tmp.setContinueCiclo(local.getContinueCiclo());
-
+                    tmp.setEtqSalida(local.getEtqSalida());
+                    
                     tmp.getSimbolos().addAll(s.getEntorno().getSimbolos());//agregar tmpinicio y fin
                     tmp.setTmpP(rsTarget.getValor()); //Sirve Calcular posicion;
                     

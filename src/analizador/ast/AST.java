@@ -169,6 +169,9 @@ public class AST {
         //Agrego Simbolos que se mostraran en reporte
         global.getSimbolos().addAll(local.getSimbolos());
 
+        //Seteo etiqueta Exit
+        NodoAST.Etiquetas++;
+        local.setEtqSalida("L" + NodoAST.Etiquetas);
         /**
          * Ejecuto Sentencias
          */
@@ -187,7 +190,9 @@ public class AST {
                 }
             });
         }
-
+        
+        result.setCodigo(result.getCodigo() + local.getEtqSalida() + ":\n");
+        
         return result.getCodigo();
     }
 

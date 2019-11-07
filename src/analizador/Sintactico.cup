@@ -97,7 +97,7 @@ non terminal ArrayList<Expresion> TARGET_LIST;
 non terminal Expresion TARGET;
 non terminal Break BREAK_STMT;
 non terminal Continue CONTINUE_STMT;
-non terminal EXIT_STMT;
+non terminal Exit EXIT_STMT;
 non terminal If IF_STMT;
 non terminal Switch CASE_STMT;
 non terminal ArrayList<Case> CASE_LIST;
@@ -298,7 +298,7 @@ SENTENCIA ::= WITH_STMT:a puntoycoma {: RESULT = a; :}
             | ASSIGNMENT_STMT:a puntoycoma {: RESULT = a; :}
             | BREAK_STMT:a puntoycoma {: RESULT = a; :}
             | CONTINUE_STMT:a puntoycoma {: RESULT = a; :}
-            | EXIT_STMT puntoycoma
+            | EXIT_STMT:a puntoycoma {: RESULT = a; :}
             | IF_STMT:a {: RESULT = a; :}
             | CASE_STMT:a {: RESULT = a; :}
             | CASE_STMT:a puntoycoma {: RESULT = a; :}
@@ -340,7 +340,7 @@ BREAK_STMT ::= break_:a {: RESULT = new Break(aleft, aright); :}
 CONTINUE_STMT ::= continue_:a {: RESULT = new Continue(aleft, aright); :}
 ;
 
-EXIT_STMT ::= exit_
+EXIT_STMT ::= exit_:a {: RESULT = new Exit(aleft, aright); :}
 ;
 
 IF_STMT ::= if_:a EXPRESSION:b then_ STATEMENT:c else_ STATEMENT:d {: RESULT = new If(b, c, d, aleft, aright); :}

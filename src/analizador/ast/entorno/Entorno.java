@@ -23,6 +23,7 @@ public class Entorno {
     private int TmpFin;
     private Stack<String> SalidaCiclo;
     private Stack<String> ContinueCiclo; //cuando agrege aqui lo de exit, añadirlo a ent en withdo
+    private String EtqSalida;
     private int TmpP; //Apuntador al ambito de las variables de record.
             
     public Entorno(String Ambito) {
@@ -35,6 +36,7 @@ public class Entorno {
         TmpFin = 0;
         SalidaCiclo = new Stack<>();
         ContinueCiclo = new Stack<>();
+        EtqSalida = "";
         TmpP = 0;
     }
 
@@ -48,6 +50,7 @@ public class Entorno {
         TmpFin = 0;
         SalidaCiclo = new Stack<>();
         ContinueCiclo = new Stack<>();
+        EtqSalida = "";
         TmpP = 0;
     }
 
@@ -245,6 +248,20 @@ public class Entorno {
      */
     public void setTmpP(int TmpP) {
         this.TmpP = TmpP;
+    }
+
+    /**
+     * @return the EtqSalida
+     */
+    public String getEtqSalida() {
+        return EtqSalida;
+    }
+
+    /**
+     * @param EtqSalida the EtqSalida to set
+     */
+    public void setEtqSalida(String EtqSalida) {
+        this.EtqSalida = EtqSalida;
     }
     
 }
