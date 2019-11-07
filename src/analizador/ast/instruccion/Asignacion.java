@@ -9,6 +9,7 @@ import analizador.ErrorC;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.entorno.Simbolo;
+import analizador.ast.entorno.Tipo;
 import analizador.ast.expresion.Acceso;
 import analizador.ast.expresion.Atributo;
 import analizador.ast.expresion.Expresion;
@@ -57,53 +58,8 @@ public class Asignacion extends Instruccion {
             Result rsValor = Valor.GetCuadruplos(e, errores);
 
             if (!Valor.getTipo().IsUndefined()) {
-                boolean bandera = false;
 
-                if (Target.getTipo().IsEnum()) {
-                    if (Valor.getTipo().IsEnum()) {
-                        if (Target.getTipo().getIdEnum().equals(Valor.getTipo().getIdEnum())) {
-                            bandera = true;
-                        }
-                    }
-                } else if (Target.getTipo().IsRecord()) {
-                    if (Valor.getTipo().IsNumeric() || Valor.getTipo().IsRecord()) {
-                        bandera = true;
-                    }
-                } else { //verificar arreglos del mismo tipoArreglo
-                    if (Target.getTipo().getTipo() == Valor.getTipo().getTipo()) {
-                        bandera = true;
-                    } else {
-                        switch (Target.getTipo().getTipo()) {
-                            case WORD:
-                                if (Valor.getTipo().IsString()) {
-                                    bandera = true;
-                                }
-                                break;
-                            case STRING:
-                                if (Valor.getTipo().IsWord()) {
-                                    bandera = true;
-                                }
-                                break;
-                            case REAL:
-                                if (Valor.getTipo().IsChar() || Valor.getTipo().IsInteger()) {
-                                    bandera = true;
-                                }
-                                break;
-                            case INTEGER:
-                                if (Valor.getTipo().IsChar()) {
-                                    bandera = true;
-                                }
-                                break;
-                            case CHAR:
-                                if(Valor.getTipo().IsInteger()){
-                                    bandera = true;
-                                }
-                                break;
-                        }
-                    }
-                }
-
-                if (bandera) {
+                if (ValidarTipo(Target.getTipo(), Valor.getTipo())) {
 
                     /*Si target es record, defino los simbolos de sus atributos si hay record*/
                     if (Target.getTipo().IsRecord()) {
@@ -181,6 +137,74 @@ public class Asignacion extends Instruccion {
 
         result.setCodigo(codigo);
         return result;
+    }
+
+    private boolean ValidarTipo(Tipo target, Tipo valor) {
+        if (target.IsEnum()) {
+            if (valor.IsEnum()) {
+                if (target.getIdEnum().equals(valor.getIdEnum())) {
+                    return true;
+                }
+            }
+        } else if (target.IsRecord()) {
+            if (valor.IsInteger()) {
+                return true;
+            } else if (valor.IsRecord()) {
+                if (target.getIdRecord() == valor.getIdRecord()) {
+                    return true;
+                }
+            }
+        } else if (target.IsArray()) {
+            if (valor.IsArray()) {
+                
+                int dimTarget;
+                int dimValor;
+                //Validar Dimensiones
+                if (Target instanceof Acceso) {
+                    dimTarget = Target.getTipo().getDimensiones().size() - ((Acceso) Target).getNumAccesos();
+                } else {
+                    dimTarget = Target.getTipo().getDimensiones().size();
+                }
+
+                if (Valor instanceof Acceso) {
+                    dimValor = Valor.getTipo().getDimensiones().size() - ((Acceso) Valor).getNumAccesos();
+                } else {
+                    dimValor = Valor.getTipo().getDimensiones().size();
+                }
+
+                if (dimTarget == dimValor) {
+                    return ValidarTipo(target.getTipoArray(), valor.getTipoArray());
+                }
+            }
+        } else {
+            if (target.getTipo() == valor.getTipo()) {
+                return true;
+            } else {
+                switch (target.getTipo()) {
+                    case WORD:
+                        if (valor.IsString()) {
+                            return true;
+                        }
+                    case STRING:
+                        if (valor.IsWord()) {
+                            return true;
+                        }
+                    case REAL:
+                        if (valor.IsChar() || valor.IsInteger()) {
+                            return true;
+                        }
+                    case INTEGER:
+                        if (valor.IsChar()) {
+                            return true;
+                        }
+                    case CHAR:
+                        if (valor.IsInteger()) {
+                            return true;
+                        }
+                }
+            }
+        }
+        return false;
     }
 
     /**

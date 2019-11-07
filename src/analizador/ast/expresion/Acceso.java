@@ -22,6 +22,7 @@ public class Acceso extends Expresion {
     private ArrayList<Expresion> Accesos;
     private boolean Acceso;
     private boolean ObtenerTipo; //sirve para sizeof
+    private int NumAccesos; //Sirve para validar asignaciones
 
     public Acceso(Expresion Target, ArrayList<Expresion> Accesos, int Linea, int Columna) {
         super(Linea, Columna);
@@ -29,6 +30,7 @@ public class Acceso extends Expresion {
         this.Accesos = Accesos;
         this.Acceso = true;
         this.ObtenerTipo = false;
+        this.NumAccesos = 0;
     }
 
     @Override
@@ -55,8 +57,10 @@ public class Acceso extends Expresion {
                 }
                 
                 codigo += rsTarget.getCodigo();
-
+                NumAccesos = 0;
+                
                 for (int i = 0; i < Accesos.size(); i++) {
+                    NumAccesos++;
                     Expresion dim = Accesos.get(i);
 
                     int tmpInf = NuevoTemporal();
@@ -235,6 +239,20 @@ public class Acceso extends Expresion {
      */
     public void setObtenerTipo(boolean ObtenerTipo) {
         this.ObtenerTipo = ObtenerTipo;
+    }
+
+    /**
+     * @return the NumAccesos
+     */
+    public int getNumAccesos() {
+        return NumAccesos;
+    }
+
+    /**
+     * @param NumAccesos the NumAccesos to set
+     */
+    public void setNumAccesos(int NumAccesos) {
+        this.NumAccesos = NumAccesos;
     }
 
 }

@@ -32,7 +32,7 @@ public class TipoDef extends Instruccion {
     @Override
     public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         boolean guardado = false;
-        
+
         //Si es un tipo definido
         if (Tipo.getId() != null) {
             Simbolo type = e.Get(Tipo.getId());
@@ -76,6 +76,7 @@ public class TipoDef extends Instruccion {
                     }
                 });
 
+                Tipo.setIdRecord(this.hashCode());
                 Tipo.setEntorno(new Entorno("record", e));
                 Tipo.getVariables().forEach((variable) -> {
                     variable.GetCuadruplos(Tipo.getEntorno(), errores, global);
@@ -83,7 +84,7 @@ public class TipoDef extends Instruccion {
                 Tipo.getEntorno().setSize(Tipo.getEntorno().getPos());
                 Tipo.getEntorno().setPadre(null);
             } else if (Tipo.getDimensiones() != null) {
-
+                
                 while (Tipo.getTipoArray().IsArray()) {
                     Tipo.getDimensiones().addAll(Tipo.getTipoArray().getDimensiones());
                     Tipo.setTipoArray(Tipo.getTipoArray().getTipoArray());
@@ -97,8 +98,20 @@ public class TipoDef extends Instruccion {
                         return null;
                     } else {
                         if (type.getRol() == Rol.TYPE) {
-                            Tipo.getTipoArray().setId(Tipo.getTipoArray().getId().toLowerCase());
-                            Tipo.getTipoArray().setTipoPadre(type.getTipo());
+
+                            if (type.getTipo().IsArray()) {
+                                Tipo tipSim = type.getTipo();
+
+                                while (tipSim.IsArray()) {
+                                    Tipo.getDimensiones().addAll(tipSim.getDimensiones());
+                                    tipSim = type.getTipo().getTipoArray();
+                                }
+                                Tipo.getTipoArray().setId(Tipo.getTipoArray().getId().toLowerCase());
+                                Tipo.getTipoArray().setTipoPadre(tipSim);
+                            } else {
+                                Tipo.getTipoArray().setId(Tipo.getTipoArray().getId().toLowerCase());
+                                Tipo.getTipoArray().setTipoPadre(type.getTipo());
+                            }
                         } else {
                             errores.add(new ErrorC("Semántico", Linea, Columna, Tipo.getTipoArray().getId() + " no es un tipo."));
                             return null;
@@ -132,6 +145,7 @@ public class TipoDef extends Instruccion {
                             }
                         });
 
+                        Tipo.getTipoArray().setIdRecord(this.hashCode());
                         Tipo.getTipoArray().setEntorno(new Entorno("record", e));
                         Tipo.getTipoArray().getVariables().forEach((variable) -> {
                             variable.GetCuadruplos(Tipo.getTipoArray().getEntorno(), errores, global);
@@ -172,10 +186,10 @@ public class TipoDef extends Instruccion {
                             Tipo.setIdEnum(id.toLowerCase());
                         }
                     }
-                    
-                    if(Tipo.IsArray()){
-                        if(Tipo.getTipoArray().IsEnum()){
-                            if(Tipo.getTipoArray().getId() == null){
+
+                    if (Tipo.IsArray()) {
+                        if (Tipo.getTipoArray().IsEnum()) {
+                            if (Tipo.getTipoArray().getId() == null) {
                                 Tipo.getTipoArray().setIdEnum(id.toLowerCase());
                             }
                         }

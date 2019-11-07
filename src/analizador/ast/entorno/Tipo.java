@@ -27,6 +27,7 @@ public class Tipo {
     private Entorno Entorno;
     private ArrayList<Dimension> Dimensiones;
     private Tipo TipoArray;
+    private int IdRecord;
 
     public Tipo(Type Tipo) {
         this.Tipo = Tipo;
@@ -40,6 +41,7 @@ public class Tipo {
         this.Entorno = null;
         this.Dimensiones = null;
         this.TipoArray = null;
+        this.IdRecord = 0;
     }
 
     /**
@@ -59,6 +61,7 @@ public class Tipo {
         this.Entorno = null;
         this.Dimensiones = null;
         this.TipoArray = null;
+        this.IdRecord = 0;
     }
 
     /**
@@ -79,6 +82,7 @@ public class Tipo {
         this.Entorno = null;
         this.Dimensiones = null;
         this.TipoArray = null;
+        this.IdRecord = 0;
     }
     
     /**
@@ -99,6 +103,7 @@ public class Tipo {
         this.Entorno = null;
         this.Dimensiones = null;
         this.TipoArray = null;
+        this.IdRecord = 0;
     }
     
     /**
@@ -119,6 +124,7 @@ public class Tipo {
         this.Entorno = null;
         this.Dimensiones = Dimensiones;
         this.TipoArray = TipoArray;
+        this.IdRecord = 0;
     }
 
     /**
@@ -138,6 +144,7 @@ public class Tipo {
         this.Entorno = null;
         this.Dimensiones = null;
         this.TipoArray = null;
+        this.IdRecord = 0;
     }
 
     /**
@@ -452,5 +459,22 @@ public class Tipo {
      */
     public void setTipoArray(Tipo TipoArray) {
         this.TipoArray = TipoArray;
+    }
+
+    /**
+     * @return the IdRecord
+     */
+    public int getIdRecord() {
+        if(TipoPadre != null){
+            return TipoPadre.getIdRecord();
+        }
+        return IdRecord;
+    }
+
+    /**
+     * @param IdRecord the IdRecord to set
+     */
+    public void setIdRecord(int IdRecord) {
+        this.IdRecord = IdRecord;
     }
 }
