@@ -129,7 +129,7 @@ public class Editor extends javax.swing.JFrame {
             
             if(ast != null){
                 ArrayList<ErrorC> errores = new ArrayList<>();
-                this.jTextArea2.setText(ast.GenerarCuadruplos(new Entorno("Global"), errores, new ArrayList<>()));
+                this.jTextArea2.setText(ast.GenerarCuadruplos(new Entorno("Global"), errores, new ArrayList<>(), this.jTextArea1.getText()));
             }
             
         } catch(Exception ex){

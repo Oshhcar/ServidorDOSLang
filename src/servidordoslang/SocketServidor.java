@@ -111,7 +111,7 @@ public class SocketServidor extends Thread {
 
                             if (ast != null) {
                                 ArrayList<ErrorC> erroresCompilacion = new ArrayList<>();
-                                respuesta = ast.GenerarCuadruplos(global, erroresCompilacion, files);
+                                respuesta = ast.GenerarCuadruplos(global, erroresCompilacion, files, main.getContent());
                                 errores.addAll(erroresCompilacion);
                             }
 

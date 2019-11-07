@@ -6,12 +6,15 @@
 package analizador.ast;
 
 import analizador.ErrorC;
+import analizador.Lexico;
+import analizador.Sintactico;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.expresion.Expresion;
 import analizador.ast.instruccion.Instruccion;
 import analizador.ast.instruccion.TipoDef;
 import analizador.ast.instruccion.VarDef;
+import java.io.StringReader;
 import java.util.ArrayList;
 import servidordoslang.File;
 
@@ -37,7 +40,7 @@ public class AST {
         this.Sentencias = Sentencias;
     }
 
-    public String GenerarCuadruplos(Entorno global, ArrayList<ErrorC> errores, ArrayList<File> files) {
+    public String GenerarCuadruplos(Entorno global, ArrayList<ErrorC> errores, ArrayList<File> files, String content) {
         Result result = new Result();
         result.setCodigo("");
 
@@ -57,7 +60,7 @@ public class AST {
                 tipo.GetCuadruplos(local, errores, global);
             });
         }
-        
+
         /**
          * Ejecuto declaracion Constantes
          */
@@ -108,7 +111,28 @@ public class AST {
         NodoAST.Temporales = 0;
         NodoAST.H = 0;
 
-        /*Segunda pasada*/
+        /**
+         * Segunda pasada Vuelvo a crear los objetos porque los modifico
+         */
+        Lexico lexico = new Lexico(new StringReader(content));
+        Sintactico sintactico = new Sintactico(lexico);
+
+        try {
+            sintactico.parse();
+            AST ast = sintactico.getAST();
+
+            if (ast != null) {
+                /*uses y nombre creo que no*/
+                Tipos = ast.getTipos();
+                Constantes = ast.getConstantes();
+                Variables = ast.getVariables();
+                Sentencias = ast.getSentencias();
+            }
+
+        } catch (Exception ex) {
+            System.out.println("Parse2: " + ex);
+        }
+
         /**
          * Ejecuto declaracion Tipos
          */
@@ -117,7 +141,7 @@ public class AST {
                 tipo.GetCuadruplos(local, errores, global);
             });
         }
-        
+
         /**
          * Ejecuto declaracion Constantes
          */
@@ -141,7 +165,7 @@ public class AST {
                 }
             });
         }
-        
+
         //Agrego Simbolos que se mostraran en reporte
         global.getSimbolos().addAll(local.getSimbolos());
 
