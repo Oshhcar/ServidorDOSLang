@@ -41,7 +41,6 @@ public class Sym {
   public static final int do_ = 61;
   public static final int record_ = 55;
   public static final int case_ = 64;
-  public static final int read_ = 74;
   public static final int or = 36;
   public static final int mayorque = 28;
   public static final int asignacion = 20;
@@ -157,8 +156,7 @@ public class Sym {
   "to_",
   "downto_",
   "write_",
-  "writeln_",
-  "read_"
+  "writeln_"
   };
 }
 

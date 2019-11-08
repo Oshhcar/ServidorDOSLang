@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
         public void addError(){
             if(this.isError){
-                ErrorC error = new ErrorC("Léxico", yyline+1, this.columnaError, "Carácter no reconocido.");
+                ErrorC error = new ErrorC("Léxico", yyline, this.columnaError, "Carácter " + this.valorError + " no reconocido.");
                 this.errores.add(error);
                 this.isError = false;
                 this.columnaError = 0;
@@ -115,7 +115,6 @@ COMENT_MULTI ="{""{"*([^}])*"}"*"}"
 <YYINITIAL> "downto"			{ return symbol(Sym.downto_);}
 <YYINITIAL> "write"			{ return symbol(Sym.write_);}
 <YYINITIAL> "writeln"			{ return symbol(Sym.writeln_);}
-<YYINITIAL> "read"			{ return symbol(Sym.read_);}
 
 <YYINITIAL>{
 

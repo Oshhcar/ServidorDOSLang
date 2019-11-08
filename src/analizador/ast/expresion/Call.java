@@ -8,7 +8,6 @@ package analizador.ast.expresion;
 import analizador.ErrorC;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
-import analizador.ast.entorno.Simbolo;
 import analizador.ast.entorno.Type;
 import java.util.ArrayList;
 
@@ -50,9 +49,9 @@ public class Call extends Expresion {
 
                     if (parametro instanceof Identificador) {
                         ((Identificador) parametro).setObtenerTipo(true);
-                    } else if(parametro instanceof Atributo) {
+                    } else if (parametro instanceof Atributo) {
                         ((Atributo) parametro).setObtenerTipo(true);
-                    } else if(parametro instanceof Acceso) {
+                    } else if (parametro instanceof Acceso) {
                         ((Acceso) parametro).setObtenerTipo(true);
                     }
 
@@ -124,12 +123,12 @@ public class Call extends Expresion {
                     if (rsParametro.getEstructura() != null) {
                         if (parametro.getTipo().IsRecord()) {
                             codigo += rsParametro.getCodigo();
-                            
+
                             int negativo = NuevoTemporal();
                             codigo += "-, 0, 1, t" + negativo;
                             codigo += "+, P, " + (negativo - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, t0, t" + negativo + ", stack\n";
-                            
+
                             codigo += "=, t" + rsParametro.getValor() + ", t" + negativo + ", " + rsParametro.getEstructura() + "\n";
 
                         } else {
@@ -139,6 +138,90 @@ public class Call extends Expresion {
 
                 } else {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "La función sizeof necesita un record como parámetro."));
+                }
+                break;
+            case "read":
+                if (Parametros != null) {
+                    if (Parametros.size() > 1) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función read solo necesita un target como parámetro."));
+                    }
+
+                    Expresion parametro = Parametros.get(0);
+                    boolean bandera = false;
+
+                    if (parametro instanceof Identificador) {
+                        ((Identificador) parametro).setAcceso(false);
+                        bandera = true;
+                    } else if (parametro instanceof Atributo) {
+                        ((Atributo) parametro).setAcceso(false);
+                        bandera = true;
+                    } else if (parametro instanceof Acceso) {
+                        ((Acceso) parametro).setAcceso(false);
+                        bandera = true;
+                    }
+
+                    if (bandera) {
+                        Result rsTarget = parametro.GetCuadruplos(e, errores);
+                        
+                        if(rsTarget.getEstructura() != null){
+                            codigo += rsTarget.getCodigo();
+                            
+                            int tipo = 1;
+                            
+                            if(parametro.getTipo().IsString() || parametro.getTipo().IsWord()){
+                                tipo = 3;
+                            } else if(parametro.getTipo().IsChar()){
+                                tipo = 0;
+                            } else if(parametro.getTipo().IsBoolean()){
+                                tipo = 4;
+                            } else if(parametro.getTipo().IsReal()){
+                                tipo = 2;
+                            }
+                            
+                            int tmpAmbito = NuevoTemporal();
+                            codigo += "+, P, " + (e.getSize() + e.getTmpFin() - e.getTmpInicio() + 1)  + ", t" +tmpAmbito + "\n"; //cambio simulado
+                            codigo += "+, P, " + (tmpAmbito - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + tmpAmbito + ", stack\n";
+                            
+                            int posDireccion = NuevoTemporal();
+                            codigo += "+, t" + tmpAmbito + ", 1, t" + posDireccion + "\n";
+                            codigo += "+, P, " + (posDireccion - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + posDireccion + ", stack\n";
+                            
+                            codigo += "=, t" + posDireccion + ", t" + rsTarget.getValor() + ", stack\n";
+                            
+                            
+                            int posTipo = NuevoTemporal();
+                            codigo += "+, t" + tmpAmbito + ", 3, t" + posTipo + "\n";
+                            codigo += "+, P, " + (posTipo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + posTipo + ", stack\n";
+                            
+                            codigo += "=, t" + posTipo + ", " + tipo +", stack\n"; 
+                            
+                            
+                            int posStruc = NuevoTemporal();
+                            codigo += "+, t" + tmpAmbito + ", 4, t" + posStruc + "\n";
+                            codigo += "+, P, " + (posStruc - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + posStruc + ", stack\n";
+                            
+                            if(rsTarget.getEstructura().equals("stack")){
+                                codigo += "=, t" + posStruc + ", 0, stack\n";
+                            } else {
+                                codigo += "=, t" + posStruc + ", 1, stack\n";
+                            }
+                            
+                            codigo += "+, P, " + (e.getSize() + e.getTmpFin() - e.getTmpInicio() + 1) + ", P\n";
+                            codigo += "call, , , $_in_value\n";
+                            codigo += "-, P, " + (e.getSize() + e.getTmpFin() - e.getTmpInicio() + 1) + ", P\n";
+                            
+                        }
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función read necesita un target como parámetro."));
+
+                    }
+
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función read necesita un target como parámetro."));
                 }
                 break;
         }

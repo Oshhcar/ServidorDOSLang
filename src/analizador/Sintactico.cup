@@ -32,7 +32,7 @@ parser code
     @Override
     public void syntax_error(Symbol s){
         System.out.println("Error Sintactico en la Linea " + s.left +" Columna "+ s.right + ". Identificador " +s.value + " no reconocido." );
-                ErrorC error = new ErrorC("Sintáctico", s.left+1, s.right+1, "Identificador " +s.value + " no reconocido.");
+                ErrorC error = new ErrorC("Sintáctico", s.left, s.right, "Identificador " +s.value + " no reconocido.");
                 this.errores.add(error);
     }
 
@@ -40,7 +40,7 @@ parser code
     public void unrecovered_syntax_error(Symbol s){
         System.out.println("Error Sintactico Fatal en la Linea " + s.left + " Columna "+ s.right +". Identificador " + s.value + " no reconocido.");
 		//report_fatal_error("Error sintactico: <"+s.value+">", cur_token);
-                ErrorC error = new ErrorC("Sintáctico", s.left+1, s.right+1, "Identificador " +s.value + " no reconocido.");
+                ErrorC error = new ErrorC("Sintáctico", s.left, s.right, "Identificador " +s.value + " no reconocido.");
                 this.errores.add(error);
 	}
 :}
@@ -59,7 +59,7 @@ terminal and, nand, nor, or, not;
 terminal char_, integer_, real_, string_, word_, boolean_;
 terminal program_, uses_, type_, array_, of_, var_, const_, function_, begin_, end_;
 terminal procedure_, record_, break_, if_, then_, else_, with_, do_, continue_, exit_;
-terminal case_, default_, while_, repeat_, until_, for_, to_, downto_, write_, writeln_, read_;
+terminal case_, default_, while_, repeat_, until_, for_, to_, downto_, write_, writeln_;
 
 non terminal INICIO;
 non terminal AST PROGRAM;
@@ -106,7 +106,6 @@ non terminal While WHILE_STMT;
 non terminal Repeat REPEAT_STMT;
 non terminal For FOR_STMT;
 non terminal Write WRITE_STMT;
-non terminal READ_STMT;
 non terminal Expresion EXPRESSION_STMT;
 non terminal ArrayList<Expresion> EXPRESSION_LIST;
 non terminal Expresion EXPRESSION;
@@ -306,7 +305,6 @@ SENTENCIA ::= WITH_STMT:a puntoycoma {: RESULT = a; :}
             | REPEAT_STMT:a puntoycoma {: RESULT = a; :}
             | FOR_STMT:a {: RESULT = a; :}
             | WRITE_STMT:a puntoycoma {: RESULT = a; :}
-            | READ_STMT puntoycoma
             | EXPRESSION_STMT:a puntoycoma {: RESULT = a; :}
 ;
 
@@ -383,9 +381,6 @@ WRITE_STMT ::= write_:a parIzquierda EXPRESSION_LIST:b parDerecha  //agregar en 
                 {: RESULT = new Write(false, b, aleft, aright); :}
             | writeln_:a parIzquierda EXPRESSION_LIST:b parDerecha
                 {: RESULT = new Write(true, b, aleft, aright); :}
-;
-
-READ_STMT ::= read_ parIzquierda EXPRESSION parDerecha
 ;
 
 EXPRESSION_STMT ::= CALL:a {: RESULT = a; :}
