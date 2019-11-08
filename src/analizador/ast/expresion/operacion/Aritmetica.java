@@ -411,6 +411,29 @@ public class Aritmetica extends Operacion {
             codigo += "+, P, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
             codigo += "=, stack, t0, t" + rsOp.getValor() + "\n";
 
+            //verifico si es entero
+            int entero = NuevoTemporal();
+            codigo += "=, 0, , t" + entero + "\n";
+            codigo += "+, P, " + (entero - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + entero + ", stack\n";
+            
+            int resultado = NuevoTemporal();
+            codigo += "%, t" + rsOp.getValor() + ", 1, t" + resultado +"\n";
+            codigo += "+, P, " + (resultado - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + resultado + ", stack\n";
+            
+            codigo += "jne, t" + resultado + ", 0, " + rsOp.getEtiquetaV() + "\n";
+            codigo += "jmp, , , " + rsOp.getEtiquetaF() + "\n";
+            codigo += rsOp.getEtiquetaF() + ":\n";
+            codigo += "=, 1, , t" + entero + "\n";
+            codigo += "+, P, " + (entero - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + entero + ", stack\n";
+            codigo += rsOp.getEtiquetaV() + ":\n";
+            
+            
+            rsOp.setEtiquetaV(NuevaEtiqueta());
+            rsOp.setEtiquetaF(NuevaEtiqueta());
+            
             //Verifico si el número es negativo
             int negativo = NuevoTemporal();
             int factor = NuevoTemporal();
@@ -457,6 +480,8 @@ public class Aritmetica extends Operacion {
             String etqCiclo = NuevaEtiqueta();
 
             codigo += "=, 0, , t" + contador + "\n";
+            codigo += "+, P, " + (contador - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + contador + ", stack\n";
             codigo += "*, t" + rsOp.getValor() + ", 10, t" + rsOp.getValor() + "\n";
             codigo += "=, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp.getValor() + ", stack\n";
 
@@ -485,13 +510,26 @@ public class Aritmetica extends Operacion {
             codigo += "+, P, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) +", t0\n";
             codigo += "=, t0, t" + rsOp.getValor() + ", stack\n";
 
+            
+            codigo += "=, H, 0, heap\n";
+            codigo += "+, H, 1, H\n";
+            
+            rsOp.setEtiquetaV(NuevaEtiqueta());
+            rsOp.setEtiquetaF(NuevaEtiqueta());
+            //agrego .0 si no tiene decimales
+            codigo += "je, t" + entero + ", 0, " + rsOp.getEtiquetaV() + "\n";
+            codigo += "jmp, , , " + rsOp.getEtiquetaF() + "\n";
+            codigo += rsOp.getEtiquetaF() + ":\n";
+            codigo += "=, H, 48, heap\n";
+            codigo += "+, H, 1, H\n";
+            codigo += "=, H, 46, heap\n";
+            codigo += "+, H, 1, H\n";
+            codigo += rsOp.getEtiquetaV() + ":\n";
+            
             rsOp.setEtiquetaV(NuevaEtiqueta());
             rsOp.setEtiquetaF(NuevaEtiqueta());
             etqCiclo = NuevaEtiqueta();
-
-            codigo += "=, H, 0, heap\n";
-            codigo += "+, H, 1, H\n";
-
+            
             int contador2 = NuevoTemporal();
             String etqV = NuevaEtiqueta();
             String etqF = NuevaEtiqueta();
