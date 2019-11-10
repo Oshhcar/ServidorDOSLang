@@ -9,7 +9,11 @@ import analizador.ErrorC;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.entorno.Type;
+import analizador.ast.expresion.Acceso;
+import analizador.ast.expresion.Atributo;
+import analizador.ast.expresion.Call;
 import analizador.ast.expresion.Expresion;
+import analizador.ast.expresion.Identificador;
 import analizador.ast.expresion.Literal;
 import java.util.ArrayList;
 
@@ -53,7 +57,8 @@ public class Logica extends Operacion {
         if (Op1.getTipo().IsBoolean() && Op2.getTipo().IsBoolean()) {
             Tipo.setTipo(Type.BOOLEAN);
 
-            if (Op1 instanceof Literal) {
+            if (Op1 instanceof Literal || Op1 instanceof Call || Op1 instanceof Identificador
+                    || Op1 instanceof Acceso || Op1 instanceof Atributo) {
                 String cod = rsOp1.getCodigo();
 
                 rsOp1.setEtiquetaV(NuevaEtiqueta());
@@ -68,7 +73,8 @@ public class Logica extends Operacion {
                 rsOp1.setCodigo(cod);
             }
 
-            if (Op2 instanceof Literal) {
+            if (Op2 instanceof Literal || Op2 instanceof Call || Op2 instanceof Identificador
+                    || Op2 instanceof Acceso || Op2 instanceof Atributo) {
                 String cod = rsOp2.getCodigo();
 
                 rsOp2.setEtiquetaV(NuevaEtiqueta());
@@ -87,7 +93,8 @@ public class Logica extends Operacion {
                 case AND:
                     codigo += rsOp1.getCodigo();
 
-                    if (Op1 instanceof Relacional || Op1 instanceof Literal) {
+                    if (Op1 instanceof Relacional || Op1 instanceof Literal || Op1 instanceof Call 
+                            || Op1 instanceof Identificador || Op1 instanceof Acceso || Op1 instanceof Atributo) {
                         codigo += rsOp1.getEtiquetaF();
                         rsOp1.setEtiquetaF(rsOp1.getEtiquetaV());
                         rsOp1.setEtiquetaV(null);
@@ -98,7 +105,8 @@ public class Logica extends Operacion {
 
                     codigo += rsOp2.getCodigo();
 
-                    if (Op2 instanceof Relacional || Op2 instanceof Literal) {
+                    if (Op2 instanceof Relacional || Op2 instanceof Literal || Op2 instanceof Call 
+                            || Op2 instanceof Identificador || Op2 instanceof Acceso || Op2 instanceof Atributo) {
                         String copy = rsOp2.getEtiquetaV();
                         rsOp2.setEtiquetaV(rsOp2.getEtiquetaF());
                         rsOp2.setEtiquetaF(copy);
@@ -109,7 +117,8 @@ public class Logica extends Operacion {
                 case OR:
                     codigo += rsOp1.getCodigo();
 
-                    if (Op1 instanceof Relacional || Op1 instanceof Literal) {
+                    if (Op1 instanceof Relacional || Op1 instanceof Literal || Op1 instanceof Call 
+                            || Op1 instanceof Identificador || Op1 instanceof Acceso || Op1 instanceof Atributo) {
                         codigo += rsOp1.getEtiquetaV();
                         rsOp1.setEtiquetaV(rsOp1.getEtiquetaF());
                         rsOp1.setEtiquetaF(null);
@@ -120,7 +129,8 @@ public class Logica extends Operacion {
 
                     codigo += rsOp2.getCodigo();
 
-                    if (Op2 instanceof Relacional || Op2 instanceof Literal) {
+                    if (Op2 instanceof Relacional || Op2 instanceof Literal || Op2 instanceof Call 
+                            || Op2 instanceof Identificador || Op2 instanceof Acceso || Op2 instanceof Atributo) {
                         String copy = rsOp2.getEtiquetaV();
                         rsOp2.setEtiquetaV(rsOp2.getEtiquetaF());
                         rsOp2.setEtiquetaF(copy);
@@ -132,7 +142,8 @@ public class Logica extends Operacion {
                 case NAND:
                     codigo += rsOp1.getCodigo();
 
-                    if (Op1 instanceof Relacional || Op1 instanceof Literal) {
+                    if (Op1 instanceof Relacional || Op1 instanceof Literal || Op1 instanceof Call 
+                            || Op1 instanceof Identificador || Op1 instanceof Acceso || Op1 instanceof Atributo) {
                         codigo += rsOp1.getEtiquetaF();
                         rsOp1.setEtiquetaF(rsOp1.getEtiquetaV());
                         rsOp1.setEtiquetaV(null);
@@ -143,7 +154,8 @@ public class Logica extends Operacion {
 
                     codigo += rsOp2.getCodigo();
 
-                    if (Op2 instanceof Relacional || Op2 instanceof Literal) {
+                    if (Op2 instanceof Relacional || Op2 instanceof Literal || Op2 instanceof Call 
+                            || Op2 instanceof Identificador || Op2 instanceof Acceso || Op2 instanceof Atributo) {
                         String copy = rsOp2.getEtiquetaV();
                         rsOp2.setEtiquetaV(rsOp2.getEtiquetaF());
                         rsOp2.setEtiquetaF(copy);
@@ -154,7 +166,8 @@ public class Logica extends Operacion {
                 case NOR:
                     codigo += rsOp1.getCodigo();
 
-                    if (Op1 instanceof Relacional || Op1 instanceof Literal) {
+                    if (Op1 instanceof Relacional || Op1 instanceof Literal || Op1 instanceof Call 
+                            || Op1 instanceof Identificador || Op1 instanceof Acceso || Op1 instanceof Atributo) {
                         codigo += rsOp1.getEtiquetaV();
                         rsOp1.setEtiquetaV(rsOp1.getEtiquetaF());
                         rsOp1.setEtiquetaF(null);
@@ -165,7 +178,8 @@ public class Logica extends Operacion {
 
                     codigo += rsOp2.getCodigo();
 
-                    if (Op2 instanceof Relacional || Op2 instanceof Literal) {
+                    if (Op2 instanceof Relacional || Op2 instanceof Literal || Op2 instanceof Call 
+                            || Op2 instanceof Identificador || Op2 instanceof Acceso || Op2 instanceof Atributo) {
                         String copy = rsOp2.getEtiquetaV();
                         rsOp2.setEtiquetaV(rsOp2.getEtiquetaF());
                         rsOp2.setEtiquetaF(copy);

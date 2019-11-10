@@ -6,8 +6,10 @@
 package analizador.ast.expresion;
 
 import analizador.ErrorC;
+import analizador.ast.entorno.Dimension;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
+import analizador.ast.entorno.Tipo;
 import analizador.ast.entorno.Type;
 import java.util.ArrayList;
 
@@ -267,11 +269,11 @@ public class Call extends Expresion {
 
                                 String etqV = NuevaEtiqueta();
                                 String etqF = NuevaEtiqueta();
-                                
+
                                 codigo += "je, t" + contador + ", t" + rsPosicion.getValor() + ", " + etqV + "\n";
                                 codigo += "jmp, , , " + etqF + "\n";
                                 codigo += etqF + ":\n";
-                                
+
                                 codigo += "+, t" + contador + ", 1, t" + contador + "\n";
                                 codigo += "+, P, " + (contador - e.getTmpInicio() + e.getSize()) + ", t0\n";
                                 codigo += "=, t0, t" + contador + ", stack\n";
@@ -384,7 +386,622 @@ public class Call extends Expresion {
                         errores.add(new ErrorC("Semántico", Linea, Columna, "La función length necesita un String o Word como parámetros."));
                     }
                 } else {
-                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función length necesita un String o Word como parámetros."));
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función length necesita un String o Word como parámetro."));
+                }
+                break;
+            case "replace":
+                if (Parametros != null) {
+                    if (Parametros.size() >= 2) {
+                        if (Parametros.size() > 2) {
+                            errores.add(new ErrorC("Semántico", Linea, Columna, "La función replace solo necesita un String o Word como parámetro."));
+                        }
+
+                        Expresion cadena1 = Parametros.get(0);
+                        Expresion cadena2 = Parametros.get(1);
+
+                        Result rsCadena1 = cadena1.GetCuadruplos(e, errores);
+
+                        if (cadena1.getTipo().IsString() || cadena1.getTipo().IsWord()) {
+                            Result rsCadena2 = cadena2.GetCuadruplos(e, errores);
+
+                            if (cadena2.getTipo().IsString() || cadena2.getTipo().IsWord()) {
+                                Tipo.setTipo(cadena1.getTipo().getTipo());
+                                codigo += rsCadena1.getCodigo();
+                                codigo += rsCadena2.getCodigo();
+
+                                result.setEtiquetaV(NuevaEtiqueta());
+                                result.setEtiquetaF(NuevaEtiqueta());
+                                String etqCiclo = NuevaEtiqueta();
+                                result.setValor(NuevoTemporal());
+                                int tmpCiclo = NuevoTemporal();
+
+                                codigo += "=, H, , t" + result.getValor() + "\n";
+                                codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                                codigo += "+, P, " + (rsCadena1.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, stack, t0, t" + rsCadena1.getValor() + "\n";
+
+                                codigo += "+, P, " + (rsCadena2.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, stack, t0, t" + rsCadena2.getValor() + "\n";
+
+                                codigo += "=, heap, t" + rsCadena1.getValor() + ", t" + tmpCiclo + "\n";
+                                codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                                codigo += etqCiclo + ":\n";
+                                codigo += "je, t" + tmpCiclo + ", 0, " + result.getEtiquetaV() + "\n";
+                                codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
+                                codigo += result.getEtiquetaF() + ":\n";
+
+                                String etqV = NuevaEtiqueta();
+                                String etqF = NuevaEtiqueta();
+                                int tmpCiclo2 = NuevoTemporal();
+
+                                codigo += "=, heap, t" + rsCadena2.getValor() + ", t" + tmpCiclo2 + "\n";
+                                codigo += "+, P, " + (tmpCiclo2 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo2 + ", stack\n";
+
+                                codigo += "jne, t" + tmpCiclo + ", t" + tmpCiclo2 + ", " + etqV + "\n";
+                                codigo += "jmp, , , " + etqF + "\n";
+                                codigo += etqF + ":\n";
+
+                                int tmpCadena1 = NuevoTemporal();
+                                int tmpCadena2 = NuevoTemporal();
+                                int tmpCiclo1_1 = NuevoTemporal();
+
+                                codigo += "+, t" + rsCadena1.getValor() + ", 1, t" + tmpCadena1 + "\n";
+                                codigo += "+, P, " + (tmpCadena1 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCadena1 + ", stack\n";
+                                codigo += "=, heap, t" + tmpCadena1 + ", t" + tmpCiclo1_1 + "\n";
+                                codigo += "+, P, " + (tmpCiclo1_1 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo1_1 + ", stack\n";
+
+                                codigo += "+, t" + rsCadena2.getValor() + ", 1, t" + tmpCadena2 + "\n";
+                                codigo += "+, P, " + (tmpCadena2 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCadena2 + ", stack\n";
+                                codigo += "=, heap, t" + tmpCadena2 + ", t" + tmpCiclo2 + "\n";
+                                codigo += "+, P, " + (tmpCiclo2 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo2 + ", stack\n";
+
+                                String etqV2 = NuevaEtiqueta();
+                                String etqF2 = NuevaEtiqueta();
+                                String etqCiclo2 = NuevaEtiqueta();
+
+                                codigo += etqCiclo2 + ":\n";
+                                codigo += "je, t" + tmpCiclo2 + ", 0, " + etqV2 + "\n";
+                                codigo += "jmp, , , " + etqF2 + "\n";
+                                codigo += etqF2 + ":\n";
+
+                                String etqV3 = NuevaEtiqueta();
+                                String etqF3 = NuevaEtiqueta();
+
+                                codigo += "je, t" + tmpCiclo1_1 + ", t" + tmpCiclo2 + ", " + etqV3 + "\n";
+                                codigo += "jmp, , , " + etqF3 + "\n";
+                                codigo += etqV3 + ":\n";
+
+                                codigo += "+, t" + tmpCadena1 + ", 1, t" + tmpCadena1 + "\n";
+                                codigo += "+, P, " + (tmpCadena1 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCadena1 + ", stack\n";
+                                codigo += "=, heap, t" + tmpCadena1 + ", t" + tmpCiclo1_1 + "\n";
+                                codigo += "+, P, " + (tmpCiclo1_1 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo1_1 + ", stack\n";
+
+                                codigo += "+, t" + tmpCadena2 + ", 1, t" + tmpCadena2 + "\n";
+                                codigo += "+, P, " + (tmpCadena2 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCadena2 + ", stack\n";
+                                codigo += "=, heap, t" + tmpCadena2 + ", t" + tmpCiclo2 + "\n";
+                                codigo += "+, P, " + (tmpCiclo2 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo2 + ", stack\n";
+
+                                codigo += "jmp, , , " + etqCiclo2 + "\n";
+
+                                codigo += etqV2 + ":\n";
+                                codigo += "=, t" + tmpCiclo1_1 + ", , t" + tmpCiclo + "\n";
+                                codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+
+                                codigo += "=, t" + tmpCadena1 + ", , t" + rsCadena1.getValor() + "\n";
+                                codigo += "+, P, " + (rsCadena1.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + rsCadena1.getValor() + ", stack\n";
+
+                                codigo += etqF3 + ":\n";
+                                codigo += etqV + ":\n";
+                                codigo += "=, H, t" + tmpCiclo + ", heap\n";
+                                codigo += "+, H, 1, H\n";
+
+                                codigo += "+, t" + rsCadena1.getValor() + ", 1, t" + rsCadena1.getValor() + "\n";
+                                codigo += "+, P, " + (rsCadena1.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + rsCadena1.getValor() + ", stack\n";
+                                codigo += "=, heap, t" + rsCadena1.getValor() + ", t" + tmpCiclo + "\n";
+                                codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                                codigo += "jmp, , , " + etqCiclo + "\n";
+                                codigo += result.getEtiquetaV() + ":\n";
+
+                                codigo += "=, H, 0, heap\n";
+                                codigo += "+, H, 1, H\n";
+
+                            } else {
+                                errores.add(new ErrorC("Semántico", Linea, Columna, "La función replace necesita dos String o Word como parámetros."));
+                            }
+                        } else {
+                            errores.add(new ErrorC("Semántico", Linea, Columna, "La función replace necesita dos String o Word como parámetros."));
+                        }
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función replace necesita dos String o Word como parámetros."));
+                    }
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función replace necesita dos String o Word como parámetros."));
+                }
+                break;
+            case "tochararray":
+                if (Parametros != null) {
+
+                    if (Parametros.size() > 1) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función toCharArray solo necesita un String o Word como parámetro."));
+                    }
+
+                    Expresion cadena = Parametros.get(0);
+                    Result rsCadena = cadena.GetCuadruplos(e, errores);
+
+                    if (cadena.getTipo().IsString() || cadena.getTipo().IsWord()) {
+                        Tipo.setTipo(Type.ARRAY);
+                        Tipo.setDimensiones(new ArrayList<>());
+                        Tipo.getDimensiones().add(new Dimension(null, null));
+                        Tipo.setTipoArray(new Tipo(Type.CHAR));
+
+                        codigo += rsCadena.getCodigo();
+                        result.setValor(NuevoTemporal());
+
+                        codigo += "=, H, , t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                        result.setEtiquetaV(NuevaEtiqueta());
+                        result.setEtiquetaF(NuevaEtiqueta());
+                        String etqCiclo = NuevaEtiqueta();
+                        int length = NuevoTemporal();
+                        int tmpCadena = NuevoTemporal();
+                        int tmpCiclo = NuevoTemporal();
+
+                        codigo += "=, 0, , t" + length + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                        codigo += "+, P, " + (rsCadena.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, stack, t0, t" + rsCadena.getValor() + "\n";
+                        codigo += "=, t" + rsCadena.getValor() + ", , t" + tmpCadena + "\n";
+                        codigo += "+, P, " + (tmpCadena - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpCadena + ", stack\n";
+
+                        codigo += "=, heap, t" + tmpCadena + ", t" + tmpCiclo + "\n";
+                        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                        codigo += etqCiclo + ":\n";
+                        codigo += "je, t" + tmpCiclo + ", 0, " + result.getEtiquetaV() + "\n";
+                        codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
+                        codigo += result.getEtiquetaF() + ":\n";
+                        codigo += "+, t" + length + ", 1, t" + length + "\n";
+                        codigo += "+, P, " + (length - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + length + ", stack\n";
+
+                        codigo += "+, t" + tmpCadena + ", 1, t" + tmpCadena + "\n";
+                        codigo += "+, P, " + (tmpCadena - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpCadena + ", stack\n";
+                        codigo += "=, heap, t" + tmpCadena + ", t" + tmpCiclo + "\n";
+                        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                        codigo += "jmp, , , " + etqCiclo + "\n";
+                        codigo += result.getEtiquetaV() + ":\n";
+
+                        codigo += "=, H, t" + length + ", heap\n";
+                        codigo += "+, H, 1, H\n";
+                        codigo += "=, H, 0, heap\n";
+                        codigo += "+, H, 1, H\n";
+                        codigo += "-, t" + length + ", 1, t" + length + "\n";
+
+                        codigo += "=, H, t" + length + ", heap\n";
+                        codigo += "+, H, 1, H\n";
+
+                        result.setEtiquetaV(NuevaEtiqueta());
+                        result.setEtiquetaF(NuevaEtiqueta());
+                        etqCiclo = NuevaEtiqueta();
+                        tmpCiclo = NuevoTemporal();
+
+                        codigo += "+, P, " + (rsCadena.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, stack, t0, t" + rsCadena.getValor() + "\n";
+
+                        codigo += "=, heap, t" + rsCadena.getValor() + ", t" + tmpCiclo + "\n";
+                        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                        codigo += etqCiclo + ":\n";
+                        codigo += "je, t" + tmpCiclo + ", 0, " + result.getEtiquetaV() + "\n";
+                        codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
+                        codigo += result.getEtiquetaF() + ":\n";
+
+                        codigo += "=, H, t" + tmpCiclo + ", heap\n";
+                        codigo += "+, H, 1, H\n";
+
+                        codigo += "+, t" + rsCadena.getValor() + ", 1, t" + rsCadena.getValor() + "\n";
+                        codigo += "+, P, " + (rsCadena.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + rsCadena.getValor() + ", stack\n";
+                        codigo += "=, heap, t" + rsCadena.getValor() + ", t" + tmpCiclo + "\n";
+                        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                        codigo += "jmp, , , " + etqCiclo + "\n";
+                        codigo += result.getEtiquetaV() + ":\n";
+
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función toCharArray necesita un String o Word como parámetro."));
+                    }
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función toCharArray necesita un String o Word como parámetro."));
+                }
+                break;
+            case "tolowercase":
+                if (Parametros != null) {
+                    if (Parametros.size() > 1) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función toLowerCase solo necesita un String o Word como parámetro."));
+                    }
+
+                    Expresion cadena = Parametros.get(0);
+                    Result rsCadena = cadena.GetCuadruplos(e, errores);
+
+                    if (cadena.getTipo().IsString() || cadena.getTipo().IsWord()) {
+                        Tipo.setTipo(cadena.getTipo().getTipo());
+
+                        codigo += rsCadena.getCodigo();
+
+                        result.setEtiquetaV(NuevaEtiqueta());
+                        result.setEtiquetaF(NuevaEtiqueta());
+                        String etqCiclo = NuevaEtiqueta();
+                        result.setValor(NuevoTemporal());
+                        int tmpCiclo = NuevoTemporal();
+
+                        codigo += "=, H, , t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                        //Valor
+                        codigo += "+, P, " + (rsCadena.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, stack, t0, t" + rsCadena.getValor() + "\n";
+                        codigo += "=, heap, t" + rsCadena.getValor() + ", t" + tmpCiclo + "\n";
+                        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                        codigo += etqCiclo + ":\n";
+                        codigo += "je, t" + tmpCiclo + ", 0, " + result.getEtiquetaV() + "\n";
+                        codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
+                        codigo += result.getEtiquetaF() + ":\n";
+
+                        String etqV = NuevaEtiqueta();
+                        String etqF = NuevaEtiqueta();
+                        String etqV2 = NuevaEtiqueta();
+                        String etqF2 = NuevaEtiqueta();
+
+                        codigo += "jl, t" + tmpCiclo + ", 65, " + etqV + "\n";
+                        codigo += "jmp, , , " + etqF + "\n";
+                        codigo += etqF + ":\n";
+                        codigo += "jg, t" + tmpCiclo + ", 90, " + etqV2 + "\n";
+                        codigo += "jmp, , , " + etqF2 + "\n";
+                        codigo += etqF2 + ":\n";
+                        codigo += "+, t" + tmpCiclo + ", 32, t" + tmpCiclo + "\n";
+                        codigo += etqV2 + ":\n";
+                        codigo += etqV + ":\n";
+
+                        codigo += "=, H, t" + tmpCiclo + ", heap\n";
+                        codigo += "+, H, 1, H\n";
+
+                        codigo += "+, t" + rsCadena.getValor() + ", 1, t" + rsCadena.getValor() + "\n";
+                        codigo += "+, P, " + (rsCadena.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + rsCadena.getValor() + ", stack\n";
+                        codigo += "=, heap, t" + rsCadena.getValor() + ", t" + tmpCiclo + "\n";
+                        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                        codigo += "jmp, , , " + etqCiclo + "\n";
+                        codigo += result.getEtiquetaV() + ":\n";
+                        codigo += "=, H, 0, heap\n";
+                        codigo += "+, H, 1, H\n";
+
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función toLowerCase necesita un String o Word como parámetro."));
+                    }
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función toLowerCase necesita un String o Word como parámetro."));
+                }
+                break;
+            case "touppercase":
+                if (Parametros != null) {
+                    if (Parametros.size() > 1) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función toUpperCase solo necesita un String o Word como parámetro."));
+                    }
+
+                    Expresion cadena = Parametros.get(0);
+                    Result rsCadena = cadena.GetCuadruplos(e, errores);
+
+                    if (cadena.getTipo().IsString() || cadena.getTipo().IsWord()) {
+                        Tipo.setTipo(cadena.getTipo().getTipo());
+
+                        codigo += rsCadena.getCodigo();
+
+                        result.setEtiquetaV(NuevaEtiqueta());
+                        result.setEtiquetaF(NuevaEtiqueta());
+                        String etqCiclo = NuevaEtiqueta();
+                        result.setValor(NuevoTemporal());
+                        int tmpCiclo = NuevoTemporal();
+
+                        codigo += "=, H, , t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                        //Valor
+                        codigo += "+, P, " + (rsCadena.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, stack, t0, t" + rsCadena.getValor() + "\n";
+                        codigo += "=, heap, t" + rsCadena.getValor() + ", t" + tmpCiclo + "\n";
+                        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                        codigo += etqCiclo + ":\n";
+                        codigo += "je, t" + tmpCiclo + ", 0, " + result.getEtiquetaV() + "\n";
+                        codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
+                        codigo += result.getEtiquetaF() + ":\n";
+
+                        String etqV = NuevaEtiqueta();
+                        String etqF = NuevaEtiqueta();
+                        String etqV2 = NuevaEtiqueta();
+                        String etqF2 = NuevaEtiqueta();
+
+                        codigo += "jl, t" + tmpCiclo + ", 97, " + etqV + "\n";
+                        codigo += "jmp, , , " + etqF + "\n";
+                        codigo += etqF + ":\n";
+                        codigo += "jg, t" + tmpCiclo + ", 122, " + etqV2 + "\n";
+                        codigo += "jmp, , , " + etqF2 + "\n";
+                        codigo += etqF2 + ":\n";
+                        codigo += "-, t" + tmpCiclo + ", 32, t" + tmpCiclo + "\n";
+                        codigo += etqV2 + ":\n";
+                        codigo += etqV + ":\n";
+
+                        codigo += "=, H, t" + tmpCiclo + ", heap\n";
+                        codigo += "+, H, 1, H\n";
+
+                        codigo += "+, t" + rsCadena.getValor() + ", 1, t" + rsCadena.getValor() + "\n";
+                        codigo += "+, P, " + (rsCadena.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + rsCadena.getValor() + ", stack\n";
+                        codigo += "=, heap, t" + rsCadena.getValor() + ", t" + tmpCiclo + "\n";
+                        codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                        codigo += "jmp, , , " + etqCiclo + "\n";
+                        codigo += result.getEtiquetaV() + ":\n";
+                        codigo += "=, H, 0, heap\n";
+                        codigo += "+, H, 1, H\n";
+
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función toUpperCase necesita un String o Word como parámetro."));
+                    }
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función toUpperCase necesita un String o Word como parámetro."));
+                }
+                break;
+            case "equals":
+                if (Parametros != null) {
+                    if (Parametros.size() >= 2) {
+                        if (Parametros.size() > 2) {
+                            errores.add(new ErrorC("Semántico", Linea, Columna, "La función equals solo necesita dos String o Word como parámetros."));
+                        }
+
+                        Expresion cadena1 = Parametros.get(0);
+                        Expresion cadena2 = Parametros.get(1);
+
+                        Result rsCadena1 = cadena1.GetCuadruplos(e, errores);
+
+                        if (cadena1.getTipo().IsString() || cadena1.getTipo().IsWord()) {
+                            Result rsCadena2 = cadena2.GetCuadruplos(e, errores);
+
+                            if (cadena2.getTipo().IsString() || cadena2.getTipo().IsWord()) {
+                                Tipo.setTipo(Type.BOOLEAN);
+                                codigo += rsCadena1.getCodigo();
+                                codigo += rsCadena2.getCodigo();
+
+                                result.setEtiquetaV(NuevaEtiqueta());
+                                result.setEtiquetaF(NuevaEtiqueta());
+                                String etqCiclo = NuevaEtiqueta();
+                                result.setValor(NuevoTemporal());
+                                int tmpCiclo = NuevoTemporal();
+
+                                String etqV = NuevaEtiqueta();
+                                String etqF = NuevaEtiqueta();
+                                int tmpCiclo2 = NuevoTemporal();
+                                String etqSalida = NuevaEtiqueta();
+
+                                codigo += "=, 0, , t" + result.getValor() + "\n";
+                                codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                                //Valor
+                                codigo += "+, P, " + (rsCadena1.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, stack, t0, t" + rsCadena1.getValor() + "\n";
+
+                                codigo += "+, P, " + (rsCadena2.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, stack, t0, t" + rsCadena2.getValor() + "\n";
+
+                                codigo += "=, heap, t" + rsCadena2.getValor() + ", t" + tmpCiclo2 + "\n";
+                                codigo += "+, P, " + (tmpCiclo2 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo2 + ", stack\n";
+
+                                codigo += "=, heap, t" + rsCadena1.getValor() + ", t" + tmpCiclo + "\n";
+                                codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+
+                                codigo += "jne, t" + tmpCiclo + ", t" + tmpCiclo2 + ", " + etqSalida + "\n";
+                                codigo += "=, 1, , t" + result.getValor() + "\n";
+                                codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                                codigo += etqCiclo + ":\n";
+                                codigo += "je, t" + tmpCiclo + ", 0, " + result.getEtiquetaV() + "\n";
+                                codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
+                                codigo += result.getEtiquetaF() + ":\n";
+
+                                codigo += "=, heap, t" + rsCadena2.getValor() + ", t" + tmpCiclo2 + "\n";
+                                codigo += "+, P, " + (tmpCiclo2 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo2 + ", stack\n";
+
+                                codigo += "je, t" + tmpCiclo + ", t" + tmpCiclo2 + ", " + etqV + "\n";
+                                codigo += "jmp, , , " + etqF + "\n";
+                                codigo += etqF + ":\n";
+                                codigo += "=, 0, , t" + result.getValor() + "\n";
+                                codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                                codigo += "jmp, , , " + etqSalida + "\n";
+                                codigo += etqV + ":\n";
+
+                                codigo += "+, t" + rsCadena2.getValor() + ", 1, t" + rsCadena2.getValor() + "\n";
+                                codigo += "+, P, " + (rsCadena2.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + rsCadena2.getValor() + ", stack\n";
+                                codigo += "=, heap, t" + rsCadena2.getValor() + ", t" + tmpCiclo2 + "\n";
+                                codigo += "+, P, " + (tmpCiclo2 - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo2 + ", stack\n";
+
+                                codigo += "+, t" + rsCadena1.getValor() + ", 1, t" + rsCadena1.getValor() + "\n";
+                                codigo += "+, P, " + (rsCadena1.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + rsCadena1.getValor() + ", stack\n";
+                                codigo += "=, heap, t" + rsCadena1.getValor() + ", t" + tmpCiclo + "\n";
+                                codigo += "+, P, " + (tmpCiclo - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpCiclo + ", stack\n";
+                                codigo += "jmp, , , " + etqCiclo + "\n";
+                                codigo += result.getEtiquetaV() + ":\n";
+                                codigo += "je, t" + tmpCiclo + ", t" + tmpCiclo2 + ", " + etqSalida + "\n";
+                                codigo += "=, 0, , t" + result.getValor() + "\n";
+                                codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                                codigo += etqSalida + ":\n";
+
+                            } else {
+                                errores.add(new ErrorC("Semántico", Linea, Columna, "La función equals necesita dos String o Word como parámetros."));
+                            }
+                        } else {
+                            errores.add(new ErrorC("Semántico", Linea, Columna, "La función equals necesita dos String o Word como parámetros."));
+                        }
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función equals necesita dos String o Word como parámetros."));
+                    }
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función equals necesita dos String o Word como parámetros."));
+                }
+                break;
+            case "trunk":
+                if (Parametros != null) {
+                    if (Parametros.size() > 1) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función trunk solo necesita un Real como parámetro."));
+                    }
+
+                    Expresion real = Parametros.get(0);
+                    Result rsReal = real.GetCuadruplos(e, errores);
+
+                    if (real.getTipo().IsReal()) {
+                        Tipo.setTipo(Type.INTEGER);
+
+                        codigo += rsReal.getCodigo();
+
+                        int tmp = NuevoTemporal();
+                        result.setValor(NuevoTemporal());
+
+                        codigo += "+, P, " + (rsReal.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, stack, t0, t" + rsReal.getValor() + "\n";
+
+                        codigo += "=, t" + rsReal.getValor() + ", , t" + result.getValor() + "\n";
+
+                        codigo += "*, t" + result.getValor() + ", 10, t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                        codigo += "%, t" + result.getValor() + ", 10, t" + tmp + "\n";
+                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmp + ", stack\n";
+
+                        codigo += "-, t" + result.getValor() + ", t" + tmp + ", t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                        codigo += "/, t" + result.getValor() + ", 10, t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función trunk necesita un Real como parámetro."));
+                    }
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función trunk necesita un Real como parámetro."));
+                }
+                break;
+            case "round":
+                if (Parametros != null) {
+                    if (Parametros.size() > 1) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función trunk solo necesita un Real como parámetro."));
+                    }
+
+                    Expresion real = Parametros.get(0);
+                    Result rsReal = real.GetCuadruplos(e, errores);
+
+                    if (real.getTipo().IsReal()) {
+                        Tipo.setTipo(Type.INTEGER);
+
+                        codigo += rsReal.getCodigo();
+
+                        int tmp = NuevoTemporal();
+                        result.setValor(NuevoTemporal());
+
+                        codigo += "+, P, " + (rsReal.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, stack, t0, t" + rsReal.getValor() + "\n";
+
+                        codigo += "=, t" + rsReal.getValor() + ", , t" + result.getValor() + "\n";
+
+                        codigo += "*, t" + result.getValor() + ", 10, t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                        codigo += "%, t" + result.getValor() + ", 10, t" + tmp + "\n";
+                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmp + ", stack\n";
+
+                        int condicion = NuevoTemporal();
+                        result.setEtiquetaV(NuevaEtiqueta());
+                        result.setEtiquetaF(NuevaEtiqueta());
+                        
+                        codigo += "=, 0, , t" + condicion + "\n";
+                        codigo += "+, P, " + (condicion - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + condicion + ", stack\n";
+                        
+                        codigo += "jl, t" + tmp + ", 5, " + result.getEtiquetaV() + "\n";
+                        codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
+                        codigo += result.getEtiquetaF() + ":\n";
+                        codigo += "=, 1, , t" + condicion + "\n";
+                        codigo += "+, P, " + (condicion - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + condicion + ", stack\n";
+                        codigo += result.getEtiquetaV() + ":\n";
+                        
+                        codigo += "-, t" + result.getValor() + ", t" + tmp + ", t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                        codigo += "/, t" + result.getValor() + ", 10, t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                        
+                        result.setEtiquetaV(NuevaEtiqueta());
+                        result.setEtiquetaF(NuevaEtiqueta());
+                        
+                        codigo += "jne, t" + condicion + ", 1, " + result.getEtiquetaV() + "\n";
+                        codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
+                        codigo += result.getEtiquetaF() + ":\n";
+                        codigo += "+, t" + result.getValor() + ", 1, t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                        codigo += result.getEtiquetaV() + ":\n";
+                        
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "La función trunk necesita un Real como parámetro."));
+                    }
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "La función trunk necesita un Real como parámetro."));
                 }
                 break;
         }
