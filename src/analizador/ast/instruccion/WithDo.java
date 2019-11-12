@@ -75,7 +75,7 @@ public class WithDo extends Instruccion {
                     
                     tmp.getSimbolos().addAll(s.getEntorno().getSimbolos());//agregar tmpinicio y fin
                     tmp.setTmpP(rsTarget.getValor()); //Sirve Calcular posicion;
-                    
+                    tmp.setSizeTotal(local.getSizeTotal());
                     local = tmp;
                 } else {
                     errores.add(new ErrorC("Semántico", Linea, Columna, s.getId() + " no es de tipo record."));

@@ -35,18 +35,20 @@ public class Simbolo {
         this.NumParam = NumParam;
         this.TipoParam = TipoParam;
         this.Entorno = null;
+        this.Firma = null;
         this.Nil = false;
         this.Constante = false;
         this.Record = null;
     }
-    
+
     /**
      * Constructor para Types
+     *
      * @param Id the Id to set
      * @param Tipo the Tipo to set
      * @param Ambito the Ambito to set
      */
-    public Simbolo(String Id, Tipo Tipo, String Ambito){
+    public Simbolo(String Id, Tipo Tipo, String Ambito) {
         this.Id = Id;
         this.Tipo = Tipo;
         this.Rol = Rol.TYPE;
@@ -56,19 +58,21 @@ public class Simbolo {
         this.NumParam = -1;
         this.TipoParam = -1;
         this.Entorno = null;
+        this.Firma = null;
         this.Nil = false;
         this.Constante = false;
         this.Record = null;
     }
-    
+
     /**
      * Constructor para Var
+     *
      * @param Id the Id to set
      * @param Tipo the Tipo to set
      * @param Pos the Pos to set
      * @param Ambito the Ambito to set
      */
-    public Simbolo(String Id, Tipo Tipo, int Pos, String Ambito){
+    public Simbolo(String Id, Tipo Tipo, int Pos, String Ambito) {
         this.Id = Id;
         this.Tipo = Tipo;
         this.Rol = Rol.LOCAL;
@@ -78,19 +82,21 @@ public class Simbolo {
         this.NumParam = -1;
         this.TipoParam = -1;
         this.Entorno = null;
+        this.Firma = null;
         this.Nil = false;
         this.Constante = false;
         this.Record = null;
     }
-    
+
     /**
      * Constructor para Var de un record
+     *
      * @param Id the Id to set
      * @param Tipo the Tipo to set
      * @param Pos the Pos to set
      * @param Ambito the Ambito to set
      */
-    public Simbolo(String Id, Tipo Tipo, int Pos, String Ambito, Simbolo Record){
+    public Simbolo(String Id, Tipo Tipo, int Pos, String Ambito, Simbolo Record) {
         this.Id = Id;
         this.Tipo = Tipo;
         this.Rol = Rol.LOCAL;
@@ -100,11 +106,89 @@ public class Simbolo {
         this.NumParam = -1;
         this.TipoParam = -1;
         this.Entorno = null;
+        this.Firma = null;
         this.Nil = false;
         this.Constante = false;
         this.Record = Record;
     }
 
+    /**
+     * Constructor para parametro
+     *
+     * @param Id the Id to set
+     * @param Tipo the Tipo to set
+     * @param Pos the Pos to set
+     * @param Ambito the Ambito to set
+     * @param TipoParam he TipoParam to set
+     */
+    public Simbolo(String Id, Tipo Tipo, int Pos, String Ambito, int TipoParam) {
+        this.Id = Id;
+        this.Tipo = Tipo;
+        this.Rol = Rol.PARAMETER;
+        this.Tam = -1;
+        this.Pos = Pos;
+        this.Ambito = Ambito;
+        this.NumParam = -1;
+        this.TipoParam = TipoParam;
+        this.Entorno = null;
+        this.Firma = null;
+        this.Nil = false;
+        this.Constante = false;
+        this.Record = null;
+    }
+
+    /**
+     * Constructor para Funcion
+     *
+     * @param Id the Id to set
+     * @param Tipo the Tipo to set
+     * @param Tam the Tam to set
+     * @param Ambito the Ambito to set
+     * @param NumParam the NumParam to set
+     * @param Entorno the Entorno to set
+     * @param Firma the Firma to set
+     */
+    public Simbolo(String Id, Tipo Tipo, int Tam, String Ambito, int NumParam, Entorno Entorno, String Firma) {
+        this.Id = Id;
+        this.Tipo = Tipo;
+        this.Rol = Rol.FUNCION;
+        this.Tam = Tam;
+        this.Pos = -1;
+        this.Ambito = Ambito;
+        this.NumParam = NumParam;
+        this.TipoParam = -1;
+        this.Entorno = Entorno;
+        this.Firma = Firma;
+        this.Nil = false;
+        this.Constante = false;
+        this.Record = null;
+    }
+
+    /**
+     * Constructor para Metodo
+     *
+     * @param Id the Id to set
+     * @param Tam the Tam to set
+     * @param Ambito the Ambito to set
+     * @param NumParam the NumParam to set
+     * @param Entorno the Entorno to set
+     * @param Firma the Firma to set
+     */
+    public Simbolo(String Id, int Tam, String Ambito, int NumParam, Entorno Entorno, String Firma) {
+        this.Id = Id;
+        this.Tipo = new Tipo(Type.UNDEFINED);
+        this.Rol = Rol.METHOD;
+        this.Tam = Tam;
+        this.Pos = -1;
+        this.Ambito = Ambito;
+        this.NumParam = NumParam;
+        this.TipoParam = -1;
+        this.Entorno = Entorno;
+        this.Firma = Firma;
+        this.Nil = false;
+        this.Constante = false;
+        this.Record = null;
+    }
 
     /**
      * @return the Id

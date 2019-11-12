@@ -39,16 +39,16 @@ public class Identificador extends Expresion {
         Simbolo sim = e.Get(Id);
 
         if (sim != null) {
-            
+
             result.setSimbolo(sim);
-            
+
             if (ObtenerTipo || ObtenerSim) {
                 Tipo = sim.getTipo();
-                
-                if(sim.getTipo().IsArray()){
+
+                if (sim.getTipo().IsArray()) {
                     Tipo = sim.getTipo().getTipoArray();
                 }
-                
+
                 result.setCodigo("");
                 return result;
             }
@@ -62,7 +62,6 @@ public class Identificador extends Expresion {
 //                    codigo += "+, P, " + sim.getRecord().getPos() + ", t" + tmp + "\n";
 //                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
 //                    codigo += "=, t0, t" + tmp + ", stack\n";
-
                     int tmpValor = NuevoTemporal();
                     codigo += "+, t" + e.getTmpP() + ", " + sim.getPos() + ", t" + tmpValor + "\n";
                     codigo += "+, P, " + (tmpValor - e.getTmpInicio() + e.getSize()) + ", t0\n";
@@ -100,6 +99,57 @@ public class Identificador extends Expresion {
                         }
                     }
                 }
+            } else if (sim.getRol() == Rol.PARAMETER) {
+                Tipo = sim.getTipo();
+                int tmp = NuevoTemporal();
+
+                codigo += "+, P, " + sim.getPos() + ", t" + tmp + "\n";
+                codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                codigo += "=, t0, t" + tmp + ", stack\n";
+
+                if (Acceso) {
+                    result.setValor(NuevoTemporal());
+                    codigo += "=, stack, t" + tmp + ", t" + result.getValor() + "\n";
+                    codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                    if (sim.getTipoParam() == 0) {
+                        tmp = NuevoTemporal();
+                        codigo += "+, P, " + (sim.getPos() + 1) + ", t" + tmp + "\n";
+                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmp + ", stack\n";
+
+                        int tmpEstruc = NuevoTemporal();
+                        codigo += "=, stack, t" + tmp + ", t" + tmpEstruc + "\n";
+                        codigo += "+, P, " + (tmpEstruc - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpEstruc + ", stack\n";
+
+                        result.setEtiquetaV(NuevaEtiqueta());
+                        result.setEtiquetaF(NuevaEtiqueta());
+                        String etqSalida = NuevaEtiqueta();
+                        
+                        int res = NuevoTemporal();
+                        
+                        codigo += "jne, t" + tmpEstruc + ", 0, " + result.getEtiquetaV() + "\n";
+                        codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
+                        codigo += result.getEtiquetaF() + ":\n";
+                        codigo += "=, stack, t" + result.getValor() + ", t" + res + "\n";
+                        codigo += "jmp, , , " + etqSalida + "\n";
+                        codigo += result.getEtiquetaV() + ":\n";
+                        codigo += "=, heap, t" + result.getValor() + ", t" + res + "\n";
+                        codigo += etqSalida + ":\n";
+                        
+                        codigo += "+, P, " + (res - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + res + ", stack\n";
+                        
+                        result.setValor(res);
+                    }
+
+                } else {
+                    result.setEstructura("stack");
+                    result.setValor(tmp);
+                }
+
             } else if (sim.getTipo().IsEnum()) {
                 if (!sim.getId().equalsIgnoreCase(Id)) {
                     if (Acceso) {

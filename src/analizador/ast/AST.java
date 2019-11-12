@@ -10,8 +10,11 @@ import analizador.Lexico;
 import analizador.Sintactico;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
+import analizador.ast.entorno.Rol;
+import analizador.ast.entorno.Simbolo;
 import analizador.ast.expresion.Expresion;
 import analizador.ast.instruccion.Instruccion;
+import analizador.ast.instruccion.Metodo;
 import analizador.ast.instruccion.TipoDef;
 import analizador.ast.instruccion.VarDef;
 import java.io.StringReader;
@@ -29,14 +32,16 @@ public class AST {
     private ArrayList<TipoDef> Tipos;
     private ArrayList<VarDef> Constantes;
     private ArrayList<VarDef> Variables;
+    private ArrayList<Metodo> Metodos;
     private ArrayList<NodoAST> Sentencias;
 
-    public AST(String Nombre, ArrayList<String> Uses, ArrayList<TipoDef> Tipos, ArrayList<VarDef> Constantes, ArrayList<VarDef> Variables, ArrayList<NodoAST> Sentencias) {
+    public AST(String Nombre, ArrayList<String> Uses, ArrayList<TipoDef> Tipos, ArrayList<VarDef> Constantes, ArrayList<VarDef> Variables, ArrayList<Metodo> Metodos, ArrayList<NodoAST> Sentencias) {
         this.Nombre = Nombre;
         this.Uses = Uses;
         this.Tipos = Tipos;
         this.Constantes = Constantes;
         this.Variables = Variables;
+        this.Metodos = Metodos;
         this.Sentencias = Sentencias;
     }
 
@@ -79,6 +84,16 @@ public class AST {
                 variable.GetCuadruplos(local, errores, global);
             });
         }
+        
+        /**
+         * Ejecuto declaracion Métodos
+         */
+        if(Metodos != null){
+            Metodos.forEach((metodo) ->{
+                metodo.setDeclaracion(true);
+                metodo.GetCuadruplos(local, errores, global);
+            });
+        }
 
         /**
          * Ejecuto Sentencias
@@ -102,7 +117,8 @@ public class AST {
 
         //Temporales en ambito
         local.setTmpFin(NodoAST.Temporales);
-
+        local.setSizeTotal(local.getSize() + (local.getTmpFin() - local.getTmpInicio()+1) );
+        
         System.out.println("inicio: " + local.getTmpInicio() + " fin " + local.getTmpFin());
 
         //Reinicio el contador de las variables locales y tmp etc
@@ -165,9 +181,27 @@ public class AST {
                 }
             });
         }
+        
+        /**
+         * Ejecuto declaracion Métodos
+         */
+        if(Metodos != null){
+            Metodos.forEach((metodo) ->{
+                metodo.setDeclaracion(true);
+                metodo.GetCuadruplos(local, errores, global);
+            });
+        }
 
         //Agrego Simbolos que se mostraran en reporte
-        global.getSimbolos().addAll(local.getSimbolos());
+        for(Simbolo s: local.getSimbolos()){
+            global.Add(s);
+            
+            if(s.getRol() == Rol.FUNCION || s.getRol() == Rol.METHOD){
+                global.getSimbolos().addAll(s.getEntorno().getSimbolos());
+            }
+        }
+        //global.getSimbolos().addAll(local.getSimbolos());
+        
 
         //Seteo etiqueta Exit
         NodoAST.Etiquetas++;
@@ -191,7 +225,19 @@ public class AST {
             });
         }
         
-        result.setCodigo(result.getCodigo() + local.getEtqSalida() + ":\n");
+        result.setCodigo(result.getCodigo() + local.getEtqSalida() + ":\n\n\n");
+        
+        
+        /**
+         * Ejecuto definicion Métodos
+         */
+        if(Metodos != null){
+            Metodos.forEach((metodo) ->{
+                metodo.setDeclaracion(false);
+                result.setCodigo(result.getCodigo() + metodo.GetCuadruplos(local, errores, global).getCodigo());
+            });
+        }
+        
         
         return result.getCodigo();
     }
@@ -278,6 +324,20 @@ public class AST {
      */
     public void setConstantes(ArrayList<VarDef> Constantes) {
         this.Constantes = Constantes;
+    }
+
+    /**
+     * @return the Metodos
+     */
+    public ArrayList<Metodo> getMetodos() {
+        return Metodos;
+    }
+
+    /**
+     * @param Metodos the Metodos to set
+     */
+    public void setMetodos(ArrayList<Metodo> Metodos) {
+        this.Metodos = Metodos;
     }
 
 }

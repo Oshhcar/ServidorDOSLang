@@ -25,7 +25,9 @@ public class Entorno {
     private Stack<String> ContinueCiclo; //cuando agrege aqui lo de exit, añadirlo a ent en withdo
     private String EtqSalida;
     private int TmpP; //Apuntador al ambito de las variables de record.
-            
+    private int SizeTotal; //Size total con temporales
+    private boolean GuardarGlobal; //Guardar en tabla global
+    
     public Entorno(String Ambito) {
         Simbolos = new ArrayList<>();
         Pos = 0;
@@ -38,6 +40,8 @@ public class Entorno {
         ContinueCiclo = new Stack<>();
         EtqSalida = "";
         TmpP = 0;
+        SizeTotal = 0;
+        GuardarGlobal = false;
     }
 
     public Entorno(String Ambito, Entorno Padre) {
@@ -52,6 +56,8 @@ public class Entorno {
         ContinueCiclo = new Stack<>();
         EtqSalida = "";
         TmpP = 0;
+        SizeTotal = 0;
+        GuardarGlobal = false;
     }
 
     public void Add(Simbolo s) {
@@ -65,15 +71,15 @@ public class Entorno {
                 if (s.getId().equalsIgnoreCase(id)) {
                     return s;
                 }
-                
-                if(s.getTipo().IsEnum()){
-                    if(s.getTipo().ExisteEnum(id)){
+
+                if (s.getTipo().IsEnum()) {
+                    if (s.getTipo().ExisteEnum(id)) {
                         return s;
                     }
                 }
             }
         }
-        
+
         return Padre != null ? Padre.Get(id) : null;
     }
 
@@ -82,6 +88,40 @@ public class Entorno {
         for (Simbolo s : Simbolos) {
             if (s.getRol() != Rol.METHOD && s.getRol() != Rol.FUNCION) {
                 if (s.getId().equalsIgnoreCase(id)) {
+                    return s;
+                }
+                
+                if (s.getTipo().IsEnum()) {
+                    if (s.getTipo().ExisteEnum(id)) {
+                        return s;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+    
+    public Simbolo GetMetodo(String firma) {
+
+        for (Simbolo s : Simbolos) {
+            if (s.getRol() == Rol.METHOD || s.getRol() == Rol.FUNCION) {
+                //System.out.println(s.getFirma()+  " == " + firma);
+                if (s.getFirma().equals(firma)) {
+                    return s;
+                }
+            }
+        }
+
+        return Padre != null ? Padre.GetMetodo(firma) : null;
+    }
+
+
+    public Simbolo GetMetodoLocal(String firma) {
+
+        for (Simbolo s : Simbolos) {
+            if (s.getRol() == Rol.METHOD || s.getRol() == Rol.FUNCION) {
+                if (s.getFirma().equals(firma)) {
                     return s;
                 }
             }
@@ -167,10 +207,6 @@ public class Entorno {
      */
     public int getSize() {
         return Size;
-    }
-
-    public int getSizeTotal() {
-        return Size + (TmpFin - TmpInicio);
     }
 
     /**
@@ -263,5 +299,33 @@ public class Entorno {
     public void setEtqSalida(String EtqSalida) {
         this.EtqSalida = EtqSalida;
     }
-    
+
+    /**
+     * @return the SizeTotal
+     */
+    public int getSizeTotal() {
+        return SizeTotal;
+    }
+
+    /**
+     * @param SizeTotal the SizeTotal to set
+     */
+    public void setSizeTotal(int SizeTotal) {
+        this.SizeTotal = SizeTotal;
+    }
+
+    /**
+     * @return the GuardarGlobal
+     */
+    public boolean isGuardarGlobal() {
+        return GuardarGlobal;
+    }
+
+    /**
+     * @param GuardarGlobal the GuardarGlobal to set
+     */
+    public void setGuardarGlobal(boolean GuardarGlobal) {
+        this.GuardarGlobal = GuardarGlobal;
+    }
+
 }

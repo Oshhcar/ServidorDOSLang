@@ -8,6 +8,7 @@ package analizador.ast.instruccion;
 import analizador.ErrorC;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
+import analizador.ast.entorno.Rol;
 import analizador.ast.entorno.Simbolo;
 import analizador.ast.entorno.Tipo;
 import analizador.ast.expresion.Acceso;
@@ -77,6 +78,10 @@ public class Asignacion extends Instruccion {
 
                     codigo += rsTarget.getCodigo();
                     codigo += rsValor.getCodigo();
+                    
+                    //Vuelvo a acceder al target por si se cambio de ambito
+                    codigo += "+, P, " + (rsTarget.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, stack, t0, t" + rsTarget.getValor() + "\n";
 
                     Expresion limiteInf = Target.getTipo().getLimiteInf();
                     Expresion limiteSup = Target.getTipo().getLimiteSup();
@@ -126,7 +131,42 @@ public class Asignacion extends Instruccion {
                         codigo += etqSalida + ":\n";
 
                     } else {
-                        codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
+                        if (rsTarget.getSimbolo().getRol() != Rol.PARAMETER) {
+                            codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
+                        } else {
+                            if (rsTarget.getSimbolo().getTipoParam() == 0) {
+                                int tmpDir = NuevoTemporal();
+                                codigo += "=, stack, t" + rsTarget.getValor() + ", t" + tmpDir + "\n";
+                                codigo += "+, P, " + (tmpDir - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpDir + ", stack\n";
+
+                                int tmp = NuevoTemporal();
+                                codigo += "+, P, " + (rsTarget.getSimbolo().getPos() + 1) + ", t" + tmp + "\n";
+                                codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmp + ", stack\n";
+
+                                int tmpEstruc = NuevoTemporal();
+                                codigo += "=, stack, t" + tmp + ", t" + tmpEstruc + "\n";
+                                codigo += "+, P, " + (tmpEstruc - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpEstruc + ", stack\n";
+
+                                result.setEtiquetaV(NuevaEtiqueta());
+                                result.setEtiquetaF(NuevaEtiqueta());
+                                String etqSalida = NuevaEtiqueta();
+
+                                codigo += "jne, t" + tmpEstruc + ", 0, " + result.getEtiquetaV() + "\n";
+                                codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
+                                codigo += result.getEtiquetaF() + ":\n";
+                                codigo += "=, t" + tmpDir + ", t" + rsValor.getValor() + ", stack\n";
+                                codigo += "jmp, , , " + etqSalida + "\n";
+                                codigo += result.getEtiquetaV() + ":\n";
+                                codigo += "=, t" + tmpDir + ", t" + rsValor.getValor() + ", heap\n";
+                                codigo += etqSalida + ":\n";
+
+                            } else {
+                                codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
+                            }
+                        }
                     }
                 } else {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "El valor de la expresión no corresponde al Tipo de la variable."));
@@ -156,7 +196,7 @@ public class Asignacion extends Instruccion {
             }
         } else if (target.IsArray()) {
             if (valor.IsArray()) {
-                
+
                 int dimTarget;
                 int dimValor;
                 //Validar Dimensiones

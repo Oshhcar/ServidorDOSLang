@@ -12,10 +12,7 @@ import analizador.ast.entorno.Result;
 import analizador.ast.entorno.Rol;
 import analizador.ast.entorno.Simbolo;
 import analizador.ast.entorno.Tipo;
-import analizador.ast.entorno.Type;
 import analizador.ast.expresion.Expresion;
-import analizador.ast.expresion.Identificador;
-import analizador.ast.expresion.Literal;
 import analizador.ast.expresion.operacion.Aritmetica;
 import analizador.ast.expresion.operacion.Operador;
 import java.util.ArrayList;
@@ -24,32 +21,24 @@ import java.util.ArrayList;
  *
  * @author oscar
  */
-public class VarDef extends Instruccion {
+public class Parametro extends Instruccion {
 
+    private boolean Referencia;
     private ArrayList<String> Id;
     private Tipo Tipo;
-    private Expresion Expr;
-    private boolean Constante;
+    private boolean Declaracion;
 
-    public VarDef(ArrayList<String> Id, Tipo Tipo, int Linea, int Columna) {
+    public Parametro(boolean Referencia, ArrayList<String> Id, Tipo Tipo, int Linea, int Columna) {
         super(Linea, Columna);
+        this.Referencia = Referencia;
         this.Id = Id;
         this.Tipo = Tipo;
-        this.Expr = null;
-        this.Constante = false;
-    }
-
-    public VarDef(ArrayList<String> Id, Tipo Tipo, Expresion Expr, int Linea, int Columna) {
-        super(Linea, Columna);
-        this.Id = Id;
-        this.Tipo = Tipo;
-        this.Expr = Expr;
-        this.Constante = false;
     }
 
     @Override
     public Result GetCuadruplos(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         Result result = new Result();
+        result.setEstructura("");
         String codigo = "";
 
         //Si es un tipo definido
@@ -176,8 +165,13 @@ public class VarDef extends Instruccion {
 
         for (String id : Id) {
             if (e.GetLocal(id) == null) {
-                Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito());
-                s.setConstante(Constante);
+                Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito(), Referencia ? 0 : 1);
+
+                result.setEstructura(result.getEstructura() + "_" + Tipo.toString());
+                
+                if (Referencia) {
+                    e.getPos();
+                }
 
                 if (Tipo.IsRecord()) {
                     s.setEntorno(new Entorno(id));
@@ -198,32 +192,23 @@ public class VarDef extends Instruccion {
                         });
                     }
 
-                    int tmp = NuevoTemporal();
-                    codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
-                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                    codigo += "=, t0, t" + tmp + ", stack\n";
+                    if (!Declaracion) {
+                        int tmp = NuevoTemporal();
+                        codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
+                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmp + ", stack\n";
 
-                    codigo += "=, t" + tmp + ", H, stack\n";
+                        codigo += "=, t" + tmp + ", H, stack\n";
 
-                    codigo += LlenarDimension(0, e, errores);
-                    //codigo += "+, H, t" + rsSuma.getValor() + ", H\n"; //reservo memoria
+                        codigo += LlenarDimension(0, e, errores);
+                    }
                 }
 
                 e.Add(s);
-                if(e.isGuardarGlobal()){
-                    global.Add(s);
-                }
+                //global.Add(s);
             } else {
-                errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
-            }
-        }
-
-        if (Expr != null) {
-            for (String id : Id) {
-                Identificador target = new Identificador(id, Linea, Columna);
-                Asignacion asigna = new Asignacion(target, Expr, Linea, Columna);
-
-                codigo += asigna.GetCuadruplos(e, errores, global).getCodigo();
+                errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido un Parámetro con el id: " + id + "."));
+                return null;
             }
         }
 
@@ -237,7 +222,7 @@ public class VarDef extends Instruccion {
         Dimension dim = Tipo.getDimensiones().get(pos);
 
         //Cálculo su tamaño
-        Aritmetica suma = /*new Aritmetica(*/new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna)/*, new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna)*/;
+        Aritmetica suma = /*new Aritmetica(*/ new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna)/*, new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna)*/;
         Result rsSuma = suma.GetCuadruplos(e, errores);
 
         //Guardo el tamaño en su primera posicion
@@ -310,6 +295,20 @@ public class VarDef extends Instruccion {
     }
 
     /**
+     * @return the Referencia
+     */
+    public boolean isReferencia() {
+        return Referencia;
+    }
+
+    /**
+     * @param Referencia the Referencia to set
+     */
+    public void setReferencia(boolean Referencia) {
+        this.Referencia = Referencia;
+    }
+
+    /**
      * @return the Id
      */
     public ArrayList<String> getId() {
@@ -338,31 +337,17 @@ public class VarDef extends Instruccion {
     }
 
     /**
-     * @return the Expr
+     * @return the Declaracion
      */
-    public Expresion getExpr() {
-        return Expr;
+    public boolean isDeclaracion() {
+        return Declaracion;
     }
 
     /**
-     * @param Expr the Expr to set
+     * @param Declaracion the Declaracion to set
      */
-    public void setExpr(Expresion Expr) {
-        this.Expr = Expr;
-    }
-
-    /**
-     * @return the Constante
-     */
-    public boolean isConstante() {
-        return Constante;
-    }
-
-    /**
-     * @param Constante the Constante to set
-     */
-    public void setConstante(boolean Constante) {
-        this.Constante = Constante;
+    public void setDeclaracion(boolean Declaracion) {
+        this.Declaracion = Declaracion;
     }
 
 }

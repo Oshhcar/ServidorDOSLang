@@ -79,14 +79,14 @@ non terminal ArrayList<VarDef> VARDEF;
 non terminal ArrayList<VarDef> VAR_LIST;
 non terminal VarDef VAR;
 non terminal ArrayList<VarDef> CONSTDEF;
-non terminal PROCEDUREDEF;
-non terminal METHOD_LIST;
-non terminal METHOD;
-non terminal FUNDEF;
-non terminal PARAMETERS;
-non terminal PARAMETERS_LIST;
-non terminal PARAMETER;
-non terminal PROCDEF;
+non terminal ArrayList<Metodo> PROCEDUREDEF;
+non terminal ArrayList<Metodo> METHOD_LIST;
+non terminal Metodo METHOD;
+non terminal Metodo FUNDEF;
+non terminal ArrayList<Parametro> PARAMETERS;
+non terminal ArrayList<Parametro> PARAMETERS_LIST;
+non terminal Parametro PARAMETER;
+non terminal Metodo PROCDEF;
 non terminal Bloque BLOQUE;
 non terminal ArrayList<NodoAST> SENTENCIAS;
 non terminal NodoAST SENTENCIA;
@@ -139,7 +139,7 @@ INICIO ::= PROGRAM:a
 ;
 
 PROGRAM ::= PROGRAM_NAME:a USES:b TYPEDEF:c CONSTDEF:d VARDEF:e PROCEDUREDEF:f BLOQUE:g punto
-        {: RESULT = new AST(a, b, c, d, e, g.getSentencias()); :}
+        {: RESULT = new AST(a, b, c, d, e, f, g.getSentencias()); :}
 ;
 
 PROGRAM_NAME ::= program_ id:a puntoycoma {: RESULT = a; :}
@@ -239,36 +239,39 @@ CONSTDEF ::= const_ VAR_LIST:a {: RESULT = a; :}
         | {: RESULT = null; :} 
 ;
 
-PROCEDUREDEF ::= {: :}
-            | METHOD_LIST
+PROCEDUREDEF ::= {: RESULT = null; :}
+            | METHOD_LIST:a {: RESULT = a; :}
 ;
 
-METHOD_LIST ::= METHOD_LIST METHOD 
-            | METHOD
+METHOD_LIST ::= METHOD_LIST:a METHOD:b {: RESULT = a; RESULT.add(b); :} 
+            | METHOD:a {: RESULT = new ArrayList<>(); RESULT.add(a); :}
 ;
 
-METHOD ::= FUNDEF puntoycoma
-        | FUNDEF
-        | PROCDEF puntoycoma
-        | PROCDEF
+METHOD ::= FUNDEF:a puntoycoma {: RESULT = a; :}
+        | FUNDEF:a {: RESULT = a; :}
+        | PROCDEF:a puntoycoma {: RESULT = a; :}
+        | PROCDEF:a {: RESULT = a; :}
 ;
 
-FUNDEF ::= function_ id PARAMETERS dospuntos TYPE_SPECIFIER puntoycoma VARDEF PROCEDUREDEF BLOQUE 
+FUNDEF ::= function_:a id:b PARAMETERS:c dospuntos TYPE_SPECIFIER:d puntoycoma VARDEF:e PROCEDUREDEF:f BLOQUE:g
+            {: RESULT = new Metodo(b, c, d, e, f, g.getSentencias(), aleft, aright); :}
 ;
 
-PARAMETERS ::= parIzquierda PARAMETERS_LIST parDerecha
-            | {: :}
+PARAMETERS ::= parIzquierda PARAMETERS_LIST:a parDerecha {: RESULT = a; :}
+            | parIzquierda parDerecha {: RESULT = null; :}
+            | {: RESULT = null; :}
 ;
 
-PARAMETERS_LIST ::= PARAMETERS_LIST puntoycoma PARAMETER
-                | PARAMETER
+PARAMETERS_LIST ::= PARAMETERS_LIST:a puntoycoma PARAMETER:b {: RESULT = a; RESULT.add(b); :}
+                | PARAMETER:a {: RESULT = new ArrayList<>(); RESULT.add(a); :}
 ;
 
-PARAMETER ::= ID_LIST dospuntos TYPE_SPECIFIER
-            | var_ ID_LIST dospuntos TYPE_SPECIFIER
+PARAMETER ::= ID_LIST:a dospuntos:b TYPE_SPECIFIER:c {: RESULT = new Parametro(false, a, c, bleft, bright); :}
+            | var_:a ID_LIST:b dospuntos TYPE_SPECIFIER:c {: RESULT = new Parametro(true, b, c, aleft, aright); :}
 ;
 
-PROCDEF ::= procedure_ id PARAMETERS puntoycoma VARDEF PROCEDUREDEF BLOQUE
+PROCDEF ::= procedure_:a id:b PARAMETERS:c puntoycoma VARDEF:d PROCEDUREDEF:e BLOQUE:f
+            {: RESULT = new Metodo(b, c, d, e, f.getSentencias(), aleft, aright); :}
 ;
 
 BLOQUE ::= begin_:a SENTENCIAS:b end_ {: RESULT = new Bloque(b, aleft, aright); :}

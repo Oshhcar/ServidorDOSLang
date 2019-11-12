@@ -9,6 +9,8 @@ import analizador.ErrorC;
 import analizador.ast.entorno.Dimension;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
+import analizador.ast.entorno.Rol;
+import analizador.ast.entorno.Simbolo;
 import analizador.ast.entorno.Tipo;
 import analizador.ast.entorno.Type;
 import java.util.ArrayList;
@@ -181,7 +183,7 @@ public class Call extends Expresion {
                             }
 
                             int tmpAmbito = NuevoTemporal();
-                            codigo += "+, P, " + (e.getSize() + e.getTmpFin() - e.getTmpInicio() + 1) + ", t" + tmpAmbito + "\n"; //cambio simulado
+                            codigo += "+, P, " + e.getSizeTotal() + ", t" + tmpAmbito + "\n"; //cambio simulado
                             codigo += "+, P, " + (tmpAmbito - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, t0, t" + tmpAmbito + ", stack\n";
 
@@ -210,9 +212,9 @@ public class Call extends Expresion {
                                 codigo += "=, t" + posStruc + ", 1, stack\n";
                             }
 
-                            codigo += "+, P, " + (e.getSize() + e.getTmpFin() - e.getTmpInicio() + 1) + ", P\n";
+                            codigo += "+, P, " + e.getSizeTotal() + ", P\n";
                             codigo += "call, , , $_in_value\n";
-                            codigo += "-, P, " + (e.getSize() + e.getTmpFin() - e.getTmpInicio() + 1) + ", P\n";
+                            codigo += "-, P, " + e.getSizeTotal() + ", P\n";
 
                         }
                     } else {
@@ -965,11 +967,11 @@ public class Call extends Expresion {
                         int condicion = NuevoTemporal();
                         result.setEtiquetaV(NuevaEtiqueta());
                         result.setEtiquetaF(NuevaEtiqueta());
-                        
+
                         codigo += "=, 0, , t" + condicion + "\n";
                         codigo += "+, P, " + (condicion - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + condicion + ", stack\n";
-                        
+
                         codigo += "jl, t" + tmp + ", 5, " + result.getEtiquetaV() + "\n";
                         codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
                         codigo += result.getEtiquetaF() + ":\n";
@@ -977,7 +979,7 @@ public class Call extends Expresion {
                         codigo += "+, P, " + (condicion - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + condicion + ", stack\n";
                         codigo += result.getEtiquetaV() + ":\n";
-                        
+
                         codigo += "-, t" + result.getValor() + ", t" + tmp + ", t" + result.getValor() + "\n";
                         codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + result.getValor() + ", stack\n";
@@ -985,10 +987,10 @@ public class Call extends Expresion {
                         codigo += "/, t" + result.getValor() + ", 10, t" + result.getValor() + "\n";
                         codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + result.getValor() + ", stack\n";
-                        
+
                         result.setEtiquetaV(NuevaEtiqueta());
                         result.setEtiquetaF(NuevaEtiqueta());
-                        
+
                         codigo += "jne, t" + condicion + ", 1, " + result.getEtiquetaV() + "\n";
                         codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
                         codigo += result.getEtiquetaF() + ":\n";
@@ -996,13 +998,133 @@ public class Call extends Expresion {
                         codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + result.getValor() + ", stack\n";
                         codigo += result.getEtiquetaV() + ":\n";
-                        
+
                     } else {
                         errores.add(new ErrorC("Semántico", Linea, Columna, "La función trunk necesita un Real como parámetro."));
                     }
                 } else {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "La función trunk necesita un Real como parámetro."));
                 }
+                break;
+            default:
+                String firma = Id.toLowerCase();
+
+                ArrayList<Result> rsParametros = new ArrayList<>();
+                String codigoParametro = "";
+
+                if (Parametros != null) {
+                    for (Expresion parametro : Parametros) {
+                        Result rsParametro = parametro.GetCuadruplos(e, errores);
+                        if (!parametro.getTipo().IsUndefined()) {
+                            firma += "_" + parametro.getTipo().toString();
+                            rsParametros.add(rsParametro);
+                            codigoParametro += rsParametro.getCodigo();
+                        } else {
+                            errores.add(new ErrorC("Semántico", Linea, Columna, "Error en pámetros."));
+                            break;
+                        }
+                    }
+                }
+
+                Simbolo metodo = e.GetMetodo(firma);
+
+                if (metodo != null) {
+                    Tipo = metodo.getTipo();
+                    codigo += codigoParametro;
+
+                    if (Parametros != null) {
+                        for (int i = 0; i < Parametros.size(); i++) {
+                            Result rsParametro = rsParametros.get(i);
+
+                            Simbolo simParametro;
+                            if(metodo.getRol() == Rol.FUNCION){
+                                simParametro = metodo.getEntorno().getSimbolos().get(i + 1);
+                            } else {
+                                simParametro = metodo.getEntorno().getSimbolos().get(i);
+                            }
+
+                            if (simParametro.getTipoParam() == 0) {
+                                //si es por referencia vuelvo a ejecutar su valor;
+                                Expresion parametro = Parametros.get(i);
+                                if (parametro instanceof Identificador) {
+                                    ((Identificador) parametro).setAcceso(false);
+                                } else if (parametro instanceof Atributo) {
+                                    ((Atributo) parametro).setAcceso(false);
+                                } else if (parametro instanceof Acceso) {
+                                    ((Acceso) parametro).setAcceso(false);
+                                } else {
+                                    errores.add(new ErrorC("Semántico", Linea, Columna, "El parámetro no se puede enviar como referencia en: " + Id + "."));
+                                    Tipo = new Tipo(Type.UNDEFINED);
+                                    result.setCodigo("");
+                                    return result;
+                                }
+
+                                rsParametro = parametro.GetCuadruplos(e, errores);
+
+                                if (rsParametro.getEstructura() == null) {
+                                    errores.add(new ErrorC("Semántico", Linea, Columna, "El parámetro no se puede enviar como referencia en: " + Id + "."));
+                                    Tipo = new Tipo(Type.UNDEFINED);
+                                    result.setCodigo("");
+                                    return result;
+                                }
+                                codigo += rsParametro.getCodigo();
+                            }
+
+                            int tmpAmbito = NuevoTemporal();
+                            codigo += "+, P, " + e.getSizeTotal() + ", t" + tmpAmbito + "\n"; //cambio simulado
+                            codigo += "+, P, " + (tmpAmbito - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + tmpAmbito + ", stack\n";
+
+                            int posDireccion = NuevoTemporal();
+                            codigo += "+, t" + tmpAmbito + ", " + simParametro.getPos() + ", t" + posDireccion + "\n";
+                            codigo += "+, P, " + (posDireccion - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + posDireccion + ", stack\n";
+
+                            codigo += "=, t" + posDireccion + ", t" + rsParametro.getValor() + ", stack\n";
+
+                            if (simParametro.getTipoParam() == 0) {
+                                //Envio la estructura en su siguiente posicion
+                                posDireccion = NuevoTemporal();
+                                codigo += "+, t" + tmpAmbito + ", " + (simParametro.getPos() + 1) + ", t" + posDireccion + "\n";
+                                codigo += "+, P, " + (posDireccion - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + posDireccion + ", stack\n";
+
+                                if (rsParametro.getEstructura().equals("stack")) {
+                                    codigo += "=, t" + posDireccion + ", 0, stack\n";
+                                } else {
+                                    codigo += "=, t" + posDireccion + ", 1, stack\n";
+                                }
+                            }
+
+                        }
+                    }
+
+                    codigo += "+, P, " + e.getSizeTotal() + ", P\n";
+                    codigo += "call, , , " + metodo.getAmbito() + "_" + firma + "\n";
+                    codigo += "-, P, " + e.getSizeTotal() + ", P\n";
+
+                    if (metodo.getRol() == Rol.FUNCION) {
+                        int tmpAmbito = NuevoTemporal();
+                        codigo += "+, P, " + e.getSizeTotal() + ", t" + tmpAmbito + "\n"; //cambio simulado
+                        codigo += "+, P, " + (tmpAmbito - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmpAmbito + ", stack\n";
+
+                        int posDireccion = NuevoTemporal();
+                        codigo += "+, t" + tmpAmbito + ", 0, t" + posDireccion + "\n";
+                        codigo += "+, P, " + (posDireccion - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + posDireccion + ", stack\n";
+
+                        result.setValor(NuevoTemporal());
+                        codigo += "=, stack, t" + posDireccion + ", t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                    }
+
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "No se ha definido un método con la firma de: " + Id + "."));
+                }
+
                 break;
         }
 

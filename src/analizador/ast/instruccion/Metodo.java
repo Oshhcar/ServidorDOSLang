@@ -6,6 +6,7 @@
 package analizador.ast.instruccion;
 
 import analizador.ErrorC;
+import analizador.ast.NodoAST;
 import analizador.ast.entorno.Dimension;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
@@ -14,7 +15,6 @@ import analizador.ast.entorno.Simbolo;
 import analizador.ast.entorno.Tipo;
 import analizador.ast.entorno.Type;
 import analizador.ast.expresion.Expresion;
-import analizador.ast.expresion.Identificador;
 import analizador.ast.expresion.Literal;
 import analizador.ast.expresion.operacion.Aritmetica;
 import analizador.ast.expresion.operacion.Operador;
@@ -24,27 +24,39 @@ import java.util.ArrayList;
  *
  * @author oscar
  */
-public class VarDef extends Instruccion {
+public class Metodo extends Instruccion {
 
-    private ArrayList<String> Id;
+    private boolean Funcion;
+    private String Id;
+    private ArrayList<Parametro> Parametros;
     private Tipo Tipo;
-    private Expresion Expr;
-    private boolean Constante;
+    private ArrayList<VarDef> Variables;
+    private ArrayList<Metodo> Metodos;
+    private ArrayList<NodoAST> Sentencias;
+    private boolean Declaracion;
 
-    public VarDef(ArrayList<String> Id, Tipo Tipo, int Linea, int Columna) {
+    public Metodo(String Id, ArrayList<Parametro> Parametros, Tipo Tipo, ArrayList<VarDef> Variables, ArrayList<Metodo> Metodos, ArrayList<NodoAST> Sentencias, int Linea, int Columna) {
         super(Linea, Columna);
+        this.Funcion = true;
         this.Id = Id;
+        this.Parametros = Parametros;
         this.Tipo = Tipo;
-        this.Expr = null;
-        this.Constante = false;
+        this.Variables = Variables;
+        this.Metodos = Metodos;
+        this.Sentencias = Sentencias;
+        this.Declaracion = false;
     }
 
-    public VarDef(ArrayList<String> Id, Tipo Tipo, Expresion Expr, int Linea, int Columna) {
+    public Metodo(String Id, ArrayList<Parametro> Parametros, ArrayList<VarDef> Variables, ArrayList<Metodo> Metodos, ArrayList<NodoAST> Sentencias, int Linea, int Columna) {
         super(Linea, Columna);
+        this.Funcion = false;
         this.Id = Id;
-        this.Tipo = Tipo;
-        this.Expr = Expr;
-        this.Constante = false;
+        this.Parametros = Parametros;
+        this.Tipo = null;
+        this.Variables = Variables;
+        this.Metodos = Metodos;
+        this.Sentencias = Sentencias;
+        this.Declaracion = false;
     }
 
     @Override
@@ -52,6 +64,173 @@ public class VarDef extends Instruccion {
         Result result = new Result();
         String codigo = "";
 
+        Entorno local = new Entorno(Id, e);
+        local.setTmpInicio(NodoAST.Temporales + 1);
+
+        if (Funcion) {
+
+            if (DefinirTipo(e, errores, global) == null) {
+                return null;
+            }
+
+            Simbolo s = new Simbolo(Id, Tipo, local.getPos(), local.getAmbito());
+
+            if (Tipo.IsRecord()) {
+                s.setEntorno(new Entorno(Id));
+                Tipo.getEntorno().getSimbolos().forEach((sim) -> {
+                    s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), Id, s));
+                });
+            }
+
+            if (Tipo.IsArray()) {
+
+                //Si es record guardo simbolos
+                if (Tipo.getTipoArray().IsRecord()) {
+                    s.setEntorno(new Entorno(Id));
+                    Tipo.getTipoArray().getEntorno().getSimbolos().forEach((sim) -> {
+                        s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), Id, s));
+                    });
+                }
+
+                if (!Declaracion) {
+                    int tmp = NuevoTemporal();
+                    codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
+                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + tmp + ", stack\n";
+
+                    codigo += "=, t" + tmp + ", H, stack\n";
+
+                    codigo += LlenarDimension(0, e, errores);
+                }
+            }
+
+            local.Add(s); //Simolo retorno.
+        } else {
+            //reservo siempre un espacio return
+            local.getPos();
+        }
+
+        String firma = Id.toLowerCase();
+
+        if (Parametros != null) {
+            for (Parametro parametro : Parametros) {
+                parametro.setDeclaracion(Declaracion);
+                Result rsParametro = parametro.GetCuadruplos(local, errores, global);
+
+                if (rsParametro != null) {
+                    firma += rsParametro.getEstructura();
+                    if (!Declaracion) {
+                        codigo += rsParametro.getCodigo();
+                    }
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        Simbolo metodo = e.GetMetodoLocal(firma);
+        if (metodo == null) {
+            Simbolo s;
+
+            if (Funcion) {
+                s = new Simbolo(Id, Tipo, 0, e.getAmbito(), local.getSimbolos().size() - 1, local, firma);
+            } else {
+                s = new Simbolo(Id, 0, e.getAmbito(), local.getSimbolos().size(), local, firma);
+            }
+            //Uso la variable constante para saber si ya lo definí:
+
+            e.Add(s);
+        } else {
+            if (!Declaracion) {
+                if (!metodo.isConstante()) {
+                    metodo.setConstante(true); //para saber si ya generé
+
+                    int temporales = NodoAST.Temporales; //temporales al iniciar;
+
+                    /**
+                     * Ejecuto declaracion Variables
+                     */
+                    if (Variables != null) {
+                        for (VarDef variable : Variables) {
+                            variable.GetCuadruplos(local, new ArrayList<>(), new Entorno(""));
+                        }
+                    }
+
+                    /**
+                     * Ejecuto Sentencias
+                     */
+                    if (Sentencias != null) {
+                        for (NodoAST nodo : Sentencias) {
+                            if (nodo instanceof Instruccion) {
+                                ((Instruccion) nodo).GetCuadruplos(local, new ArrayList<>(), new Entorno(""));
+                            } else if (nodo instanceof Expresion) {
+                                ((Expresion) nodo).GetCuadruplos(local, new ArrayList<>());
+                            }
+                        }
+                    }
+
+                    metodo.getEntorno().setTmpInicio(local.getTmpInicio());
+                    metodo.getEntorno().setSize(local.getPos());
+                    metodo.setTam(metodo.getEntorno().getSize());
+                    metodo.getEntorno().setTmpFin(NodoAST.Temporales);
+                    local = metodo.getEntorno();
+                    local.setSizeTotal(local.getSize() + (local.getTmpFin() - local.getTmpInicio() + 1));
+                    local.setGuardarGlobal(true);
+                    
+                    System.out.println("inicio metodo: " + local.getTmpInicio() + " fin " + local.getTmpFin());
+                    
+                    NodoAST.Temporales = temporales;
+
+                    codigo = "begin, , , " + metodo.getAmbito() + "_" + metodo.getFirma() + "\n" + codigo;
+                    //Seunda pasada ya con el size
+                    /**
+                     * Ejecuto declaracion Variables
+                     */
+                    if (Variables != null) {
+                        for (VarDef variable : Variables) {
+                            Result rsVar = variable.GetCuadruplos(local, errores, global);
+                            if (rsVar != null) {
+                                codigo += rsVar.getCodigo();
+                            }
+                        }
+                    }
+
+                    //Seteo etiqueta Exit
+                    NodoAST.Etiquetas++;
+                    local.setEtqSalida("L" + NodoAST.Etiquetas);
+
+                    /**
+                     * Ejecuto Sentencias
+                     */
+                    if (Sentencias != null) {
+                        for(NodoAST nodo: Sentencias){
+                            Result rsNodo = null;
+
+                            if (nodo instanceof Instruccion) {
+                                rsNodo = ((Instruccion) nodo).GetCuadruplos(local, errores, global);
+                            } else if (nodo instanceof Expresion) {
+                                rsNodo = ((Expresion) nodo).GetCuadruplos(local, errores);
+                            }
+
+                            if (rsNodo != null) {
+                                codigo += rsNodo.getCodigo();
+                            }
+                        }
+                    }
+                    
+                    codigo += local.getEtqSalida() + ":\n";
+                    codigo += "end, , , " + metodo.getAmbito() + "_" + metodo.getFirma() + "\n\n";
+                }
+            } else {
+                errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido un Método con la misma firma de: " + Id + "."));
+            }
+        }
+
+        result.setCodigo(codigo);
+        return result;
+    }
+
+    public String DefinirTipo(Entorno e, ArrayList<ErrorC> errores, Entorno global) {
         //Si es un tipo definido
         if (Tipo.getId() != null) {
             Simbolo type = e.Get(Tipo.getId());
@@ -173,62 +352,7 @@ public class VarDef extends Instruccion {
                 }
             }
         }
-
-        for (String id : Id) {
-            if (e.GetLocal(id) == null) {
-                Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito());
-                s.setConstante(Constante);
-
-                if (Tipo.IsRecord()) {
-                    s.setEntorno(new Entorno(id));
-                    Tipo.getEntorno().getSimbolos().forEach((sim) -> {
-                        s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id, s));
-                    });
-
-                }
-
-                //Si es arreglo lo instancio
-                if (Tipo.IsArray()) {
-
-                    //Si es record guardo simbolos
-                    if (Tipo.getTipoArray().IsRecord()) {
-                        s.setEntorno(new Entorno(id));
-                        Tipo.getTipoArray().getEntorno().getSimbolos().forEach((sim) -> {
-                            s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id, s));
-                        });
-                    }
-
-                    int tmp = NuevoTemporal();
-                    codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
-                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                    codigo += "=, t0, t" + tmp + ", stack\n";
-
-                    codigo += "=, t" + tmp + ", H, stack\n";
-
-                    codigo += LlenarDimension(0, e, errores);
-                    //codigo += "+, H, t" + rsSuma.getValor() + ", H\n"; //reservo memoria
-                }
-
-                e.Add(s);
-                if(e.isGuardarGlobal()){
-                    global.Add(s);
-                }
-            } else {
-                errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
-            }
-        }
-
-        if (Expr != null) {
-            for (String id : Id) {
-                Identificador target = new Identificador(id, Linea, Columna);
-                Asignacion asigna = new Asignacion(target, Expr, Linea, Columna);
-
-                codigo += asigna.GetCuadruplos(e, errores, global).getCodigo();
-            }
-        }
-
-        result.setCodigo(codigo);
-        return result;
+        return "";
     }
 
     public String LlenarDimension(int pos, Entorno e, ArrayList<ErrorC> errores) {
@@ -237,7 +361,7 @@ public class VarDef extends Instruccion {
         Dimension dim = Tipo.getDimensiones().get(pos);
 
         //Cálculo su tamaño
-        Aritmetica suma = /*new Aritmetica(*/new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna)/*, new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna)*/;
+        Aritmetica suma = new Aritmetica(new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna), new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna);
         Result rsSuma = suma.GetCuadruplos(e, errores);
 
         //Guardo el tamaño en su primera posicion
@@ -310,17 +434,45 @@ public class VarDef extends Instruccion {
     }
 
     /**
+     * @return the Funcion
+     */
+    public boolean isFuncion() {
+        return Funcion;
+    }
+
+    /**
+     * @param Funcion the Funcion to set
+     */
+    public void setFuncion(boolean Funcion) {
+        this.Funcion = Funcion;
+    }
+
+    /**
      * @return the Id
      */
-    public ArrayList<String> getId() {
+    public String getId() {
         return Id;
     }
 
     /**
      * @param Id the Id to set
      */
-    public void setId(ArrayList<String> Id) {
+    public void setId(String Id) {
         this.Id = Id;
+    }
+
+    /**
+     * @return the Parametros
+     */
+    public ArrayList<Parametro> getParametros() {
+        return Parametros;
+    }
+
+    /**
+     * @param Parametros the Parametros to set
+     */
+    public void setParametros(ArrayList<Parametro> Parametros) {
+        this.Parametros = Parametros;
     }
 
     /**
@@ -338,31 +490,59 @@ public class VarDef extends Instruccion {
     }
 
     /**
-     * @return the Expr
+     * @return the Variables
      */
-    public Expresion getExpr() {
-        return Expr;
+    public ArrayList<VarDef> getVariables() {
+        return Variables;
     }
 
     /**
-     * @param Expr the Expr to set
+     * @param Variables the Variables to set
      */
-    public void setExpr(Expresion Expr) {
-        this.Expr = Expr;
+    public void setVariables(ArrayList<VarDef> Variables) {
+        this.Variables = Variables;
     }
 
     /**
-     * @return the Constante
+     * @return the Metodos
      */
-    public boolean isConstante() {
-        return Constante;
+    public ArrayList<Metodo> getMetodos() {
+        return Metodos;
     }
 
     /**
-     * @param Constante the Constante to set
+     * @param Metodos the Metodos to set
      */
-    public void setConstante(boolean Constante) {
-        this.Constante = Constante;
+    public void setMetodos(ArrayList<Metodo> Metodos) {
+        this.Metodos = Metodos;
+    }
+
+    /**
+     * @return the Sentencias
+     */
+    public ArrayList<NodoAST> getSentencias() {
+        return Sentencias;
+    }
+
+    /**
+     * @param Sentencias the Sentencias to set
+     */
+    public void setSentencias(ArrayList<NodoAST> Sentencias) {
+        this.Sentencias = Sentencias;
+    }
+
+    /**
+     * @return the Declaracion
+     */
+    public boolean isDeclaracion() {
+        return Declaracion;
+    }
+
+    /**
+     * @param Declaracion the Declaracion to set
+     */
+    public void setDeclaracion(boolean Declaracion) {
+        this.Declaracion = Declaracion;
     }
 
 }
