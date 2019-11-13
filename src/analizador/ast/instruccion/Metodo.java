@@ -92,16 +92,16 @@ public class Metodo extends Instruccion {
                     });
                 }
 
-                if (!Declaracion) {
-                    int tmp = NuevoTemporal();
-                    codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
-                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                    codigo += "=, t0, t" + tmp + ", stack\n";
-
-                    codigo += "=, t" + tmp + ", H, stack\n";
-
-                    codigo += LlenarDimension(0, e, errores);
-                }
+//                if (!Declaracion) {
+//                    int tmp = NuevoTemporal();
+//                    codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
+//                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+//                    codigo += "=, t0, t" + tmp + ", stack\n";
+//
+//                    codigo += "=, t" + tmp + ", H, stack\n";
+//
+//                    codigo += LlenarDimension(0, e, errores);
+//                }
             }
 
             local.Add(s); //Simolo retorno.
@@ -147,6 +147,14 @@ public class Metodo extends Instruccion {
 
                     int temporales = NodoAST.Temporales; //temporales al iniciar;
 
+                    if (Funcion) {
+                        if (Tipo.IsArray()) {
+                            int tmp = NuevoTemporal();
+                            LlenarDimension(0, e, errores);
+
+                        }
+                    }
+
                     /**
                      * Ejecuto declaracion Variables
                      */
@@ -176,13 +184,27 @@ public class Metodo extends Instruccion {
                     local = metodo.getEntorno();
                     local.setSizeTotal(local.getSize() + (local.getTmpFin() - local.getTmpInicio() + 1));
                     local.setGuardarGlobal(true);
-                    
+
                     System.out.println("inicio metodo: " + local.getTmpInicio() + " fin " + local.getTmpFin());
-                    
+
                     NodoAST.Temporales = temporales;
 
-                    codigo = "begin, , , " + metodo.getAmbito() + "_" + metodo.getFirma() + "\n" + codigo;
+                    codigo = "begin, , , " + metodo.getAmbito().toLowerCase() + "_" + metodo.getFirma() + "\n" + codigo;
                     //Seunda pasada ya con el size
+
+                    if (Funcion) {
+                        if (Tipo.IsArray()) {
+                            int tmp = NuevoTemporal();
+                            codigo += "+, P, 0, t" + tmp + "\n";
+                            codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + tmp + ", stack\n";
+
+                            codigo += "=, t" + tmp + ", H, stack\n";
+
+                            codigo += LlenarDimension(0, e, errores);
+                        }
+                    }
+
                     /**
                      * Ejecuto declaracion Variables
                      */
@@ -203,7 +225,7 @@ public class Metodo extends Instruccion {
                      * Ejecuto Sentencias
                      */
                     if (Sentencias != null) {
-                        for(NodoAST nodo: Sentencias){
+                        for (NodoAST nodo : Sentencias) {
                             Result rsNodo = null;
 
                             if (nodo instanceof Instruccion) {
@@ -217,9 +239,9 @@ public class Metodo extends Instruccion {
                             }
                         }
                     }
-                    
+
                     codigo += local.getEtqSalida() + ":\n";
-                    codigo += "end, , , " + metodo.getAmbito() + "_" + metodo.getFirma() + "\n\n";
+                    codigo += "end, , , " + metodo.getAmbito().toLowerCase() + "_" + metodo.getFirma() + "\n\n";
                 }
             } else {
                 errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido un Método con la misma firma de: " + Id + "."));
@@ -361,7 +383,7 @@ public class Metodo extends Instruccion {
         Dimension dim = Tipo.getDimensiones().get(pos);
 
         //Cálculo su tamaño
-        Aritmetica suma = new Aritmetica(new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna), new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna);
+        Aritmetica suma = /*new Aritmetica(*/new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna)/*, new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna)*/;
         Result rsSuma = suma.GetCuadruplos(e, errores);
 
         //Guardo el tamaño en su primera posicion

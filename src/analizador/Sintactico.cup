@@ -348,8 +348,8 @@ IF_STMT ::= if_:a EXPRESSION:b then_ STATEMENT:c else_ STATEMENT:d {: RESULT = n
           | if_:a EXPRESSION:b then_ STATEMENT:c {: RESULT = new If(b, c, aleft, aright); :}
 ;
 
-CASE_STMT ::= case_:a EXPRESSION:b of_ CASE_LIST:c default_ STATEMENT:d end_ {: RESULT = new Switch(b, c, d, aleft, aright); :}
-            | case_:a EXPRESSION:b of_ CASE_LIST:c else_ STATEMENT:d end_ {: RESULT = new Switch(b, c, d, aleft, aright); :}
+CASE_STMT ::= case_:a EXPRESSION:b of_ CASE_LIST:c default_ dospuntos STATEMENT:d end_ {: RESULT = new Switch(b, c, d, aleft, aright); :}
+            | case_:a EXPRESSION:b of_ CASE_LIST:c else_ dospuntos STATEMENT:d end_ {: RESULT = new Switch(b, c, d, aleft, aright); :}
             | case_:a EXPRESSION:b of_ CASE_LIST:c end_ {: RESULT = new Switch(b, c, aleft, aright); :}
 ;
 

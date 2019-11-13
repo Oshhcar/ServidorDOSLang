@@ -1043,7 +1043,7 @@ public class Call extends Expresion {
                                 simParametro = metodo.getEntorno().getSimbolos().get(i);
                             }
 
-                            if (simParametro.getTipoParam() == 0) {
+                            if (simParametro.getTipoParam() == 0 && !(simParametro.getTipo().IsArray() || simParametro.getTipo().IsRecord())) {
                                 //si es por referencia vuelvo a ejecutar su valor;
                                 Expresion parametro = Parametros.get(i);
                                 if (parametro instanceof Identificador) {
@@ -1082,7 +1082,7 @@ public class Call extends Expresion {
 
                             codigo += "=, t" + posDireccion + ", t" + rsParametro.getValor() + ", stack\n";
 
-                            if (simParametro.getTipoParam() == 0) {
+                            if (simParametro.getTipoParam() == 0 && !(simParametro.getTipo().IsArray() || simParametro.getTipo().IsRecord())) {
                                 //Envio la estructura en su siguiente posicion
                                 posDireccion = NuevoTemporal();
                                 codigo += "+, t" + tmpAmbito + ", " + (simParametro.getPos() + 1) + ", t" + posDireccion + "\n";
@@ -1100,7 +1100,7 @@ public class Call extends Expresion {
                     }
 
                     codigo += "+, P, " + e.getSizeTotal() + ", P\n";
-                    codigo += "call, , , " + metodo.getAmbito() + "_" + firma + "\n";
+                    codigo += "call, , , " + metodo.getAmbito().toLowerCase() + "_" + firma + "\n";
                     codigo += "-, P, " + e.getSizeTotal() + ", P\n";
 
                     if (metodo.getRol() == Rol.FUNCION) {

@@ -192,16 +192,16 @@ public class Parametro extends Instruccion {
                         });
                     }
 
-                    if (!Declaracion) {
-                        int tmp = NuevoTemporal();
-                        codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
-                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                        codigo += "=, t0, t" + tmp + ", stack\n";
-
-                        codigo += "=, t" + tmp + ", H, stack\n";
-
-                        codigo += LlenarDimension(0, e, errores);
-                    }
+//                    if (!Declaracion) {
+//                        int tmp = NuevoTemporal();
+//                        codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
+//                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+//                        codigo += "=, t0, t" + tmp + ", stack\n";
+//
+//                        codigo += "=, t" + tmp + ", H, stack\n";
+//
+//                        codigo += LlenarDimension(0, e, errores);
+//                    }
                 }
 
                 e.Add(s);

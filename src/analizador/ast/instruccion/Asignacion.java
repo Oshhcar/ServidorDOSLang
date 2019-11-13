@@ -134,7 +134,7 @@ public class Asignacion extends Instruccion {
                         if (rsTarget.getSimbolo().getRol() != Rol.PARAMETER) {
                             codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
                         } else {
-                            if (rsTarget.getSimbolo().getTipoParam() == 0) {
+                            if (rsTarget.getSimbolo().getTipoParam() == 0 && !(rsTarget.getSimbolo().getTipo().IsArray() || rsTarget.getSimbolo().getTipo().IsRecord())) {
                                 int tmpDir = NuevoTemporal();
                                 codigo += "=, stack, t" + rsTarget.getValor() + ", t" + tmpDir + "\n";
                                 codigo += "+, P, " + (tmpDir - e.getTmpInicio() + e.getSize()) + ", t0\n";

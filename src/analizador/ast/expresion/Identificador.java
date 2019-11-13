@@ -113,7 +113,7 @@ public class Identificador extends Expresion {
                     codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                     codigo += "=, t0, t" + result.getValor() + ", stack\n";
 
-                    if (sim.getTipoParam() == 0) {
+                    if (sim.getTipoParam() == 0 && !(sim.getTipo().IsArray() || sim.getTipo().IsRecord())) {
                         tmp = NuevoTemporal();
                         codigo += "+, P, " + (sim.getPos() + 1) + ", t" + tmp + "\n";
                         codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
