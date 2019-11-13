@@ -1080,6 +1080,9 @@ public class Call extends Expresion {
                             codigo += "+, P, " + (posDireccion - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, t0, t" + posDireccion + ", stack\n";
 
+                            codigo += "+, P, " +(rsParametro.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, stack, t0, t" + rsParametro.getValor() + "\n";
+                            
                             codigo += "=, t" + posDireccion + ", t" + rsParametro.getValor() + ", stack\n";
 
                             if (simParametro.getTipoParam() == 0 && !(simParametro.getTipo().IsArray() || simParametro.getTipo().IsRecord())) {
