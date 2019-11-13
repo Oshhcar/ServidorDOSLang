@@ -32,7 +32,7 @@ public class NodoAST {
     /**
      * @return NuevoTemporal
      */
-    public int NuevoTemporal(){
+    public static int NuevoTemporal(){
         return ++Temporales;
     }
 

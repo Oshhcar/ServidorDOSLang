@@ -56,6 +56,10 @@ public class AST {
         Entorno local = new Entorno(Nombre);
         local.setTmpInicio(NodoAST.Temporales + 1);
 
+        //Temporal apuntador al entorno
+        int tmpEntorno = NodoAST.NuevoTemporal();
+        local.setTmpEntorno(tmpEntorno);
+        
         /*Primera pasada para saber size y total temporales*/
         /**
          * Ejecuto declaracion Tipos
@@ -148,7 +152,15 @@ public class AST {
         } catch (Exception ex) {
             System.out.println("Parse2: " + ex);
         }
+        
+        //Temporal apuntador al entorno
+        tmpEntorno = NodoAST.NuevoTemporal();
+        local.setTmpEntorno(tmpEntorno);
 
+        result.setCodigo(result.getCodigo() + "=, P, , t" + tmpEntorno + "\n");
+        result.setCodigo(result.getCodigo() + "+, P, " + (tmpEntorno - local.getTmpInicio() + local.getSize()) + ", t0\n");
+        result.setCodigo(result.getCodigo() + "=, t0, t" +tmpEntorno + ", stack\n");
+        
         /**
          * Ejecuto declaracion Tipos
          */
@@ -163,6 +175,7 @@ public class AST {
          */
         if (Constantes != null) {
             Constantes.forEach((constante) -> {
+                constante.setConstante(true);
                 Result rsCons = constante.GetCuadruplos(local, errores, global);
                 if (rsCons != null) {
                     result.setCodigo(result.getCodigo() + rsCons.getCodigo());

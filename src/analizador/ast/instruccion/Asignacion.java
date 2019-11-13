@@ -25,11 +25,13 @@ public class Asignacion extends Instruccion {
 
     private Expresion Target;
     private Expresion Valor;
+    private boolean Inicializacion;
 
     public Asignacion(Expresion Target, Expresion Valor, int Linea, int Columna) {
         super(Linea, Columna);
         this.Target = Target;
         this.Valor = Valor;
+        this.Inicializacion = false;
     }
 
     @Override
@@ -56,6 +58,15 @@ public class Asignacion extends Instruccion {
         }
 
         if (rsTarget.getEstructura() != null) {
+
+            if (rsTarget.getSimbolo().isConstante()) {
+                if (!Inicializacion) {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, rsTarget.getSimbolo().getId() + " es una constante, no se puede cambiar el valor."));
+                    result.setCodigo("");
+                    return result;
+                }
+            }
+
             Result rsValor = Valor.GetCuadruplos(e, errores);
 
             if (!Valor.getTipo().IsUndefined()) {
@@ -78,7 +89,7 @@ public class Asignacion extends Instruccion {
 
                     codigo += rsTarget.getCodigo();
                     codigo += rsValor.getCodigo();
-                    
+
                     //Vuelvo a acceder al target por si se cambio de ambito
                     codigo += "+, P, " + (rsTarget.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                     codigo += "=, stack, t0, t" + rsTarget.getValor() + "\n";
@@ -172,7 +183,6 @@ public class Asignacion extends Instruccion {
                     errores.add(new ErrorC("Semántico", Linea, Columna, "El valor de la expresión no corresponde al Tipo de la variable."));
                 }
             }
-
         }
 
         result.setCodigo(codigo);
@@ -273,6 +283,20 @@ public class Asignacion extends Instruccion {
      */
     public void setValor(Expresion Valor) {
         this.Valor = Valor;
+    }
+
+    /**
+     * @return the Inicializacion
+     */
+    public boolean isInicializacion() {
+        return Inicializacion;
+    }
+
+    /**
+     * @param Inicializacion the Inicializacion to set
+     */
+    public void setInicializacion(boolean Inicializacion) {
+        this.Inicializacion = Inicializacion;
     }
 
 }

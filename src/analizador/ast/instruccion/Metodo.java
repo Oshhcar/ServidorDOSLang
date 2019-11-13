@@ -155,6 +155,9 @@ public class Metodo extends Instruccion {
                         }
                     }
 
+                    int tmpEntorno = NuevoTemporal();
+                    local.setTmpEntorno(tmpEntorno);
+                    
                     /**
                      * Ejecuto declaracion Variables
                      */
@@ -204,6 +207,12 @@ public class Metodo extends Instruccion {
                             codigo += LlenarDimension(0, e, errores);
                         }
                     }
+                    
+                    tmpEntorno = NuevoTemporal();
+                    codigo += "=, P, , t" +tmpEntorno + "\n";
+                    codigo += "+, P, " + (tmpEntorno - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + tmpEntorno + ", stack\n";
+                    local.setTmpEntorno(tmpEntorno);
 
                     /**
                      * Ejecuto declaracion Variables

@@ -222,7 +222,7 @@ public class VarDef extends Instruccion {
             for (String id : Id) {
                 Identificador target = new Identificador(id, Linea, Columna);
                 Asignacion asigna = new Asignacion(target, Expr, Linea, Columna);
-
+                asigna.setInicializacion(true);
                 codigo += asigna.GetCuadruplos(e, errores, global).getCodigo();
             }
         }

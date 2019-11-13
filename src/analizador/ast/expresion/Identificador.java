@@ -78,13 +78,13 @@ public class Identificador extends Expresion {
                     }
 
                 } else {
-                    if (!Acceso && sim.isConstante()) {
-                        errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es una constante, no se puede cambiar el valor."));
-                    } else {
+                    //if (!Acceso && sim.isConstante()) {
+                    //    errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es una constante, no se puede cambiar el valor."));
+                    //} else {
                         Tipo = sim.getTipo();
                         int tmp = NuevoTemporal();
 
-                        codigo += "+, P, " + sim.getPos() + ", t" + tmp + "\n";
+                        codigo += "+, t" + sim.getTmpEntorno() + ", " + sim.getPos() + ", t" + tmp + "\n";
                         codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + tmp + ", stack\n";
 
@@ -97,7 +97,7 @@ public class Identificador extends Expresion {
                             result.setEstructura("stack");
                             result.setValor(tmp);
                         }
-                    }
+                    //}
                 }
             } else if (sim.getRol() == Rol.PARAMETER) {
                 Tipo = sim.getTipo();
