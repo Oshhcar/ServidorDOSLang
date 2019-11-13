@@ -98,7 +98,7 @@ public class Acceso extends Expresion {
                         String etqF = NuevaEtiqueta();
                         String salida = NuevaEtiqueta();
 
-                        codigo += "jle, t" + rsDim.getValor() + ", t" + tmpSup + ", " + etqV + "\n";
+                        codigo += "jl, t" + rsDim.getValor() + ", t" + tmpSup + ", " + etqV + "\n";
                         codigo += "jmp, , , " + etqF + "\n";
                         codigo += etqV + ":\n";
 
