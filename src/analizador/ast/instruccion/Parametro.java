@@ -167,7 +167,7 @@ public class Parametro extends Instruccion {
             if (e.GetLocal(id) == null) {
                 Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito(), Referencia ? 0 : 1);
 
-                result.setEstructura(result.getEstructura() + "_" + Tipo.toString());
+                result.setEstructura(result.getEstructura() + "_" + Tipo.toStringMetodo());
                 
                 if (Referencia) {
                     e.getPos();

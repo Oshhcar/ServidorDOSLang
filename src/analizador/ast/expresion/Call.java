@@ -1016,7 +1016,7 @@ public class Call extends Expresion {
                     for (Expresion parametro : Parametros) {
                         Result rsParametro = parametro.GetCuadruplos(e, errores);
                         if (!parametro.getTipo().IsUndefined()) {
-                            firma += "_" + parametro.getTipo().toString();
+                            firma += "_" + parametro.getTipo().toStringMetodo();
                             rsParametros.add(rsParametro);
                             codigoParametro += rsParametro.getCodigo();
                         } else {

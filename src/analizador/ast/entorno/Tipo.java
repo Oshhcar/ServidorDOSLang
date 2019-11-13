@@ -238,6 +238,10 @@ public class Tipo {
         }
         return Tipo.name().toLowerCase();
     }
+    
+     public String toStringMetodo() {
+        return Tipo.name().toLowerCase();
+    }
 
     /**
      * No lo voy a usar porque dicen que no se valida
