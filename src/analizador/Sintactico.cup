@@ -400,8 +400,8 @@ WRITE_STMT ::= write_:a parIzquierda EXPRESSION_LIST:b parDerecha  //agregar en 
                 {: RESULT = new Write(true, b, aleft, aright); :}
 ;
 
-EXPRESSION_STMT ::= CALL:a {: RESULT = a; :}
-                | id:a {: RESULT = new Call(a, aleft, aright); :}
+EXPRESSION_STMT ::= CALL:a {: RESULT = a; ((Call) RESULT).setValor(false); :}
+                | id:a {: RESULT = new Call(a, false, aleft, aright); :}
 ;
 
 EXPRESSION_LIST ::= EXPRESSION_LIST:a coma EXPRESSION:b {: RESULT = a; RESULT.add(b); :}
@@ -489,6 +489,6 @@ ATTRIBUTEREF ::= PRIMARY:a punto:b id:c {: RESULT = new Atributo(a, c, bleft, br
 ACCESS ::= PRIMARY:a corcheteIzquierda:b EXPRESSION_LIST:c corcheteDerecha {: RESULT = new Acceso(a, c, bleft, bright); :}
 ;
 
-CALL ::=  id:a parIzquierda parDerecha {: RESULT = new Call(a, aleft, aright); :}
-        | id:a parIzquierda EXPRESSION_LIST:b parDerecha {: RESULT =  new Call(a, b, aleft, aright); :}
+CALL ::=  id:a parIzquierda parDerecha {: RESULT = new Call(a, true, aleft, aright); :}
+        | id:a parIzquierda EXPRESSION_LIST:b parDerecha {: RESULT =  new Call(a, b, true, aleft, aright); :}
 ;

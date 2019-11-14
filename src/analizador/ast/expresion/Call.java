@@ -23,17 +23,20 @@ public class Call extends Expresion {
 
     private String Id;
     private ArrayList<Expresion> Parametros;
+    private boolean Valor;
 
-    public Call(String Id, int Linea, int Columna) {
+    public Call(String Id, boolean Valor, int Linea, int Columna) {
         super(Linea, Columna);
         this.Id = Id;
         this.Parametros = null;
+        this.Valor = Valor;
     }
 
-    public Call(String Id, ArrayList<Expresion> Parametros, int Linea, int Columna) {
+    public Call(String Id, ArrayList<Expresion> Parametros, boolean Valor, int Linea, int Columna) {
         super(Linea, Columna);
         this.Id = Id;
         this.Parametros = Parametros;
+        this.Valor = Valor;
     }
 
     @Override
@@ -1009,16 +1012,11 @@ public class Call extends Expresion {
             default:
                 String firma = Id.toLowerCase();
 
-                ArrayList<Result> rsParametros = new ArrayList<>();
-                String codigoParametro = "";
-
                 if (Parametros != null) {
                     for (Expresion parametro : Parametros) {
                         Result rsParametro = parametro.GetCuadruplos(e, errores);
                         if (!parametro.getTipo().IsUndefined()) {
                             firma += "_" + parametro.getTipo().toStringMetodo();
-                            rsParametros.add(rsParametro);
-                            codigoParametro += rsParametro.getCodigo();
                         } else {
                             errores.add(new ErrorC("Semántico", Linea, Columna, "Error en pámetros."));
                             break;
@@ -1030,22 +1028,23 @@ public class Call extends Expresion {
 
                 if (metodo != null) {
                     Tipo = metodo.getTipo();
-                    codigo += codigoParametro;
 
                     if (Parametros != null) {
                         for (int i = 0; i < Parametros.size(); i++) {
-                            Result rsParametro = rsParametros.get(i);
+                            Result rsParametro;
 
                             Simbolo simParametro;
-                            if(metodo.getRol() == Rol.FUNCION){
+                            if (metodo.getRol() == Rol.FUNCION) {
                                 simParametro = metodo.getEntorno().getSimbolos().get(i + 1);
                             } else {
                                 simParametro = metodo.getEntorno().getSimbolos().get(i);
                             }
 
+                            Expresion parametro = Parametros.get(i);
+                            
                             if (simParametro.getTipoParam() == 0 && !(simParametro.getTipo().IsArray() || simParametro.getTipo().IsRecord())) {
                                 //si es por referencia vuelvo a ejecutar su valor;
-                                Expresion parametro = Parametros.get(i);
+                                
                                 if (parametro instanceof Identificador) {
                                     ((Identificador) parametro).setAcceso(false);
                                 } else if (parametro instanceof Atributo) {
@@ -1067,9 +1066,13 @@ public class Call extends Expresion {
                                     result.setCodigo("");
                                     return result;
                                 }
-                                codigo += rsParametro.getCodigo();
+                                
+                            } else {
+                                rsParametro = parametro.GetCuadruplos(e, errores);
                             }
 
+                            codigo += rsParametro.getCodigo();
+                            
                             int tmpAmbito = NuevoTemporal();
                             codigo += "+, P, " + e.getSizeTotal() + ", t" + tmpAmbito + "\n"; //cambio simulado
                             codigo += "+, P, " + (tmpAmbito - e.getTmpInicio() + e.getSize()) + ", t0\n";
@@ -1080,9 +1083,9 @@ public class Call extends Expresion {
                             codigo += "+, P, " + (posDireccion - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, t0, t" + posDireccion + ", stack\n";
 
-                            codigo += "+, P, " +(rsParametro.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "+, P, " + (rsParametro.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, stack, t0, t" + rsParametro.getValor() + "\n";
-                            
+
                             codigo += "=, t" + posDireccion + ", t" + rsParametro.getValor() + ", stack\n";
 
                             if (simParametro.getTipoParam() == 0 && !(simParametro.getTipo().IsArray() || simParametro.getTipo().IsRecord())) {
@@ -1106,7 +1109,7 @@ public class Call extends Expresion {
                     codigo += "call, , , " + metodo.getAmbito().toLowerCase() + "_" + firma + "\n";
                     codigo += "-, P, " + e.getSizeTotal() + ", P\n";
 
-                    if (metodo.getRol() == Rol.FUNCION) {
+                    if (metodo.getRol() == Rol.FUNCION && Valor) {
                         int tmpAmbito = NuevoTemporal();
                         codigo += "+, P, " + e.getSizeTotal() + ", t" + tmpAmbito + "\n"; //cambio simulado
                         codigo += "+, P, " + (tmpAmbito - e.getTmpInicio() + e.getSize()) + ", t0\n";
@@ -1122,6 +1125,10 @@ public class Call extends Expresion {
                         codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + result.getValor() + ", stack\n";
 
+                    }
+
+                    if (metodo.getRol() == Rol.METHOD && Valor) {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "El metodo: " + Id + " no retorna un valor."));
                     }
 
                 } else {
@@ -1161,5 +1168,19 @@ public class Call extends Expresion {
      */
     public void setParametros(ArrayList<Expresion> Parametros) {
         this.Parametros = Parametros;
+    }
+
+    /**
+     * @return the Valor
+     */
+    public boolean isValor() {
+        return Valor;
+    }
+
+    /**
+     * @param Valor the Valor to set
+     */
+    public void setValor(boolean Valor) {
+        this.Valor = Valor;
     }
 }
