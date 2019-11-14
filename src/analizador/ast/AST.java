@@ -16,6 +16,7 @@ import analizador.ast.expresion.Expresion;
 import analizador.ast.instruccion.Instruccion;
 import analizador.ast.instruccion.Metodo;
 import analizador.ast.instruccion.TipoDef;
+import analizador.ast.instruccion.Use;
 import analizador.ast.instruccion.VarDef;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -28,14 +29,14 @@ import servidordoslang.File;
 public class AST {
 
     private String Nombre;
-    private ArrayList<String> Uses;
+    private ArrayList<Use> Uses;
     private ArrayList<TipoDef> Tipos;
     private ArrayList<VarDef> Constantes;
     private ArrayList<VarDef> Variables;
     private ArrayList<Metodo> Metodos;
     private ArrayList<NodoAST> Sentencias;
 
-    public AST(String Nombre, ArrayList<String> Uses, ArrayList<TipoDef> Tipos, ArrayList<VarDef> Constantes, ArrayList<VarDef> Variables, ArrayList<Metodo> Metodos, ArrayList<NodoAST> Sentencias) {
+    public AST(String Nombre, ArrayList<Use> Uses, ArrayList<TipoDef> Tipos, ArrayList<VarDef> Constantes, ArrayList<VarDef> Variables, ArrayList<Metodo> Metodos, ArrayList<NodoAST> Sentencias) {
         this.Nombre = Nombre;
         this.Uses = Uses;
         this.Tipos = Tipos;
@@ -95,7 +96,18 @@ public class AST {
                 metodo.GetCuadruplos(local, errores, global);
             });
         }
-
+        
+        /**
+         * Ejecuto declaracion Métodos Use
+         */
+        if(Uses != null){
+            Uses.forEach((Use) ->{
+                Use.setFiles(files);
+                Use.setDeclaracion(true);
+                Use.GetCuadruplos(local, errores, global);
+            });
+        }
+        
         /**
          * Ejecuto Sentencias
          */
@@ -140,9 +152,11 @@ public class AST {
 
             if (ast != null) {
                 /*uses y nombre creo que no*/
+                Uses = ast.getUses();
                 Tipos = ast.getTipos();
                 Constantes = ast.getConstantes();
                 Variables = ast.getVariables();
+                Metodos = ast.getMetodos();
                 Sentencias = ast.getSentencias();
             }
 
@@ -195,6 +209,17 @@ public class AST {
                 metodo.GetCuadruplos(local, errores, global);
             });
         }
+        
+        /**
+         * Ejecuto declaracion Métodos Use
+         */
+        if(Uses != null){
+            Uses.forEach((Use) ->{
+                Use.setFiles(files);
+                Use.setDeclaracion(true);
+                Use.GetCuadruplos(local, errores, global);
+            });
+        }
 
         //Agrego Simbolos que se mostraran en reporte
         for(Simbolo s: local.getSimbolos()){
@@ -238,6 +263,17 @@ public class AST {
                 metodo.setDeclaracion(false);
                 metodo.setAmbito(Nombre);
                 result.setCodigo(result.getCodigo() + metodo.GetCuadruplos(local, errores, global).getCodigo());
+            });
+        }
+        
+        /**
+         * Ejecuto definición Métodos Use
+         */
+        if(Uses != null){
+            Uses.forEach((Use) ->{
+                Use.setFiles(files);
+                Use.setDeclaracion(false);
+                result.setCodigo(result.getCodigo()+ Use.GetCuadruplos(local, errores, global).getCodigo());
             });
         }
         
@@ -288,14 +324,14 @@ public class AST {
     /**
      * @return the Uses
      */
-    public ArrayList<String> getUses() {
+    public ArrayList<Use> getUses() {
         return Uses;
     }
 
     /**
      * @param Uses the Uses to set
      */
-    public void setUses(ArrayList<String> Uses) {
+    public void setUses(ArrayList<Use> Uses) {
         this.Uses = Uses;
     }
 

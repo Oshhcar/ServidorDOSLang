@@ -64,7 +64,8 @@ terminal case_, default_, while_, repeat_, until_, for_, to_, downto_, write_, w
 non terminal INICIO;
 non terminal AST PROGRAM;
 non terminal String PROGRAM_NAME;
-non terminal ArrayList<String> USES;
+non terminal ArrayList<Use> USES;
+non terminal ArrayList<Use> USES_LIST;
 non terminal ArrayList<String> ID_LIST;
 non terminal Type TYPE_PRIMITIVE;
 non terminal ArrayList<TipoDef> TYPEDEF;
@@ -145,9 +146,22 @@ PROGRAM ::= PROGRAM_NAME:a USES:b TYPEDEF:c CONSTDEF:d VARDEF:e PROCEDUREDEF:f B
 PROGRAM_NAME ::= program_ id:a puntoycoma {: RESULT = a; :}
 ;
 
-USES ::= uses_ ID_LIST:a puntoycoma {: RESULT = a; :}
+USES ::= uses_ USES_LIST:a puntoycoma {: RESULT = a; :}
         | {: RESULT = null; :}
 ;
+
+USES_LIST ::= USES_LIST:a coma id:b
+                {:
+                    RESULT = a;
+                    RESULT.add(new Use(b, bleft, bright));
+                :}
+            | id:a 
+                {:
+                    RESULT = new ArrayList<>();
+                    RESULT.add(new Use(a, aleft, aright));
+                :}
+;
+
 
 ID_LIST ::= ID_LIST:a coma id:b
                 {:
