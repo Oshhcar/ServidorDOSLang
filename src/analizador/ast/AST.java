@@ -156,7 +156,8 @@ public class AST {
         //Temporal apuntador al entorno
         tmpEntorno = NodoAST.NuevoTemporal();
         local.setTmpEntorno(tmpEntorno);
-
+        local.setFactorTmp(local.getSize() - local.getTmpInicio());
+        
         result.setCodigo(result.getCodigo() + "=, P, , t" + tmpEntorno + "\n");
         result.setCodigo(result.getCodigo() + "+, P, " + (tmpEntorno - local.getTmpInicio() + local.getSize()) + ", t0\n");
         result.setCodigo(result.getCodigo() + "=, t0, t" +tmpEntorno + ", stack\n");

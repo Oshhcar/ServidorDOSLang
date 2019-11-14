@@ -150,7 +150,7 @@ public class Metodo extends Instruccion {
                     if (Funcion) {
                         if (Tipo.IsArray()) {
                             int tmp = NuevoTemporal();
-                            LlenarDimension(0, e, errores);
+                            LlenarDimension(0, local, errores);
 
                         }
                     }
@@ -199,21 +199,22 @@ public class Metodo extends Instruccion {
                         if (Tipo.IsArray()) {
                             int tmp = NuevoTemporal();
                             codigo += "+, P, 0, t" + tmp + "\n";
-                            codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "+, P, " + (tmp - local.getTmpInicio() + local.getSize()) + ", t0\n";
                             codigo += "=, t0, t" + tmp + ", stack\n";
 
                             codigo += "=, t" + tmp + ", H, stack\n";
 
-                            codigo += LlenarDimension(0, e, errores);
+                            codigo += LlenarDimension(0, local, errores);
                         }
                     }
                     
                     tmpEntorno = NuevoTemporal();
                     codigo += "=, P, , t" +tmpEntorno + "\n";
-                    codigo += "+, P, " + (tmpEntorno - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "+, P, " + (tmpEntorno - local.getTmpInicio() + local.getSize()) + ", t0\n";
                     codigo += "=, t0, t" + tmpEntorno + ", stack\n";
                     local.setTmpEntorno(tmpEntorno);
-
+                    local.setFactorTmp(local.getSize() - local.getTmpInicio());
+                    
                     /**
                      * Ejecuto declaracion Variables
                      */

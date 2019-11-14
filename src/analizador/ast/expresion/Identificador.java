@@ -83,7 +83,10 @@ public class Identificador extends Expresion {
                     //} else {
                         Tipo = sim.getTipo();
                         int tmp = NuevoTemporal();
-
+                        
+                        codigo += "+, P, " + (sim.getTmpEntorno() + sim.getFactorTmp()) + ", t0\n";
+                        codigo += "=, stack, t0, t" + sim.getTmpEntorno() + "\n";
+                        
                         codigo += "+, t" + sim.getTmpEntorno() + ", " + sim.getPos() + ", t" + tmp + "\n";
                         codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + tmp + ", stack\n";

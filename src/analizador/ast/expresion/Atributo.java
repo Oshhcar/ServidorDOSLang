@@ -81,6 +81,9 @@ public class Atributo extends Expresion {
                 } else {
                     int tmp = NuevoTemporal();
                     //Valor record
+                    codigo += "+, P, " + (rsTarget.getSimbolo().getTmpEntorno() + rsTarget.getSimbolo().getFactorTmp()) + ", t0\n";
+                    codigo += "=, stack, t0, t" + rsTarget.getSimbolo().getTmpEntorno() + "\n";
+                    
                     codigo += "+, t" + rsTarget.getSimbolo().getTmpEntorno() + ", " + rsTarget.getSimbolo().getPos() + ", t" + tmp + "\n";
                     codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
                     codigo += "=, t0, t" + tmp + ", stack\n";
