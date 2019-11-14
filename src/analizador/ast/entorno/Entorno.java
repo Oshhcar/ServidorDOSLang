@@ -27,8 +27,6 @@ public class Entorno {
     private int TmpP; //Apuntador al ambito de las variables de record.
     private int SizeTotal; //Size total con temporales
     private boolean GuardarGlobal; //Guardar en tabla global
-    private int TmpEntorno; //apuntador al entorno.
-    private int FactorTmp; //Factor para calcular el tmp
     
     public Entorno(String Ambito) {
         Simbolos = new ArrayList<>();
@@ -44,8 +42,6 @@ public class Entorno {
         TmpP = 0;
         SizeTotal = 0;
         GuardarGlobal = false;
-        TmpEntorno = 0;
-        FactorTmp = 0;
     }
 
     public Entorno(String Ambito, Entorno Padre) {
@@ -62,8 +58,6 @@ public class Entorno {
         TmpP = 0;
         SizeTotal = 0;
         GuardarGlobal = false;
-        TmpEntorno = 0;
-        FactorTmp = 0;
     }
 
     public void Add(Simbolo s) {
@@ -75,15 +69,11 @@ public class Entorno {
         for (Simbolo s : Simbolos) {
             if (s.getRol() != Rol.METHOD && s.getRol() != Rol.FUNCION) {
                 if (s.getId().equalsIgnoreCase(id)) {
-                    s.setTmpEntorno(TmpEntorno);
-                    s.setFactorTmp(FactorTmp);
                     return s;
                 }
 
                 if (s.getTipo().IsEnum()) {
                     if (s.getTipo().ExisteEnum(id)) {
-                        s.setTmpEntorno(TmpEntorno);
-                        s.setFactorTmp(FactorTmp);
                         return s;
                     }
                 }
@@ -98,15 +88,11 @@ public class Entorno {
         for (Simbolo s : Simbolos) {
             if (s.getRol() != Rol.METHOD && s.getRol() != Rol.FUNCION) {
                 if (s.getId().equalsIgnoreCase(id)) {
-                    s.setTmpEntorno(TmpEntorno);
-                    s.setFactorTmp(FactorTmp);
                     return s;
                 }
                 
                 if (s.getTipo().IsEnum()) {
                     if (s.getTipo().ExisteEnum(id)) {
-                        s.setTmpEntorno(TmpEntorno);
-                        s.setFactorTmp(FactorTmp);
                         return s;
                     }
                 }
@@ -341,33 +327,5 @@ public class Entorno {
     public void setGuardarGlobal(boolean GuardarGlobal) {
         this.GuardarGlobal = GuardarGlobal;
     }
-
-    /**
-     * @return the TmpEntorno
-     */
-    public int getTmpEntorno() {
-        return TmpEntorno;
-    }
-
-    /**
-     * @param TmpEntorno the TmpEntorno to set
-     */
-    public void setTmpEntorno(int TmpEntorno) {
-        this.TmpEntorno = TmpEntorno;
-    }
-
-    /**
-     * @return the FactorTmp
-     */
-    public int getFactorTmp() {
-        return FactorTmp;
-    }
-
-    /**
-     * @param FactorTmp the FactorTmp to set
-     */
-    public void setFactorTmp(int FactorTmp) {
-        this.FactorTmp = FactorTmp;
-    }
-
+    
 }

@@ -24,8 +24,6 @@ public class Simbolo {
     private boolean Nil;
     private boolean Constante;
     private Simbolo Record;
-    private int TmpEntorno;
-    private int FactorTmp;
 
     public Simbolo(String Id, Tipo Tipo, Rol Rol, int Tam, int Pos, String Ambito, int NumParam, int TipoParam) {
         this.Id = Id;
@@ -41,8 +39,6 @@ public class Simbolo {
         this.Nil = false;
         this.Constante = false;
         this.Record = null;
-        this.TmpEntorno = 0;
-        this.FactorTmp = 0;
     }
 
     /**
@@ -66,8 +62,6 @@ public class Simbolo {
         this.Nil = false;
         this.Constante = false;
         this.Record = null;
-        this.TmpEntorno = 0;
-        this.FactorTmp = 0;
     }
 
     /**
@@ -92,8 +86,6 @@ public class Simbolo {
         this.Nil = false;
         this.Constante = false;
         this.Record = null;
-        this.TmpEntorno = 0;
-        this.FactorTmp = 0;
     }
 
     /**
@@ -118,8 +110,6 @@ public class Simbolo {
         this.Nil = false;
         this.Constante = false;
         this.Record = Record;
-        this.TmpEntorno = 0;
-        this.FactorTmp = 0;
     }
 
     /**
@@ -145,8 +135,6 @@ public class Simbolo {
         this.Nil = false;
         this.Constante = false;
         this.Record = null;
-        this.TmpEntorno = 0;
-        this.FactorTmp = 0;
     }
 
     /**
@@ -174,8 +162,6 @@ public class Simbolo {
         this.Nil = false;
         this.Constante = false;
         this.Record = null;
-        this.TmpEntorno = 0;
-        this.FactorTmp = 0;
     }
 
     /**
@@ -202,8 +188,6 @@ public class Simbolo {
         this.Nil = false;
         this.Constante = false;
         this.Record = null;
-        this.TmpEntorno = 0;
-        this.FactorTmp = 0;
     }
 
     /**
@@ -386,33 +370,5 @@ public class Simbolo {
      */
     public void setRecord(Simbolo Record) {
         this.Record = Record;
-    }
-
-    /**
-     * @return the TmpEntorno
-     */
-    public int getTmpEntorno() {
-        return TmpEntorno;
-    }
-
-    /**
-     * @param TmpEntorno the TmpEntorno to set
-     */
-    public void setTmpEntorno(int TmpEntorno) {
-        this.TmpEntorno = TmpEntorno;
-    }
-
-    /**
-     * @return the FactorTmp
-     */
-    public int getFactorTmp() {
-        return FactorTmp;
-    }
-
-    /**
-     * @param FactorTmp the FactorTmp to set
-     */
-    public void setFactorTmp(int FactorTmp) {
-        this.FactorTmp = FactorTmp;
     }
 }
