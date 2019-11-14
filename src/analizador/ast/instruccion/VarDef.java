@@ -210,9 +210,9 @@ public class VarDef extends Instruccion {
                 }
 
                 e.Add(s);
-                if(e.isGuardarGlobal()){
-                    global.Add(s);
-                }
+                //if(e.isGuardarGlobal()){
+                //    global.Add(s);
+                //}
             } else {
                 errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
             }

@@ -95,6 +95,7 @@ public class AST {
         if(Metodos != null){
             Metodos.forEach((metodo) ->{
                 metodo.setDeclaracion(true);
+                metodo.setAmbito(Nombre);
                 metodo.GetCuadruplos(local, errores, global);
             });
         }
@@ -202,16 +203,15 @@ public class AST {
         if(Metodos != null){
             Metodos.forEach((metodo) ->{
                 metodo.setDeclaracion(true);
+                metodo.setAmbito(Nombre);
                 metodo.GetCuadruplos(local, errores, global);
             });
         }
 
         //Agrego Simbolos que se mostraran en reporte
         for(Simbolo s: local.getSimbolos()){
-            global.Add(s);
-            
-            if(s.getRol() == Rol.FUNCION || s.getRol() == Rol.METHOD){
-                global.getSimbolos().addAll(s.getEntorno().getSimbolos());
+            if(s.getRol() != Rol.FUNCION && s.getRol() != Rol.METHOD){
+                global.Add(s);
             }
         }
         //global.getSimbolos().addAll(local.getSimbolos());
@@ -248,10 +248,23 @@ public class AST {
         if(Metodos != null){
             Metodos.forEach((metodo) ->{
                 metodo.setDeclaracion(false);
+                metodo.setAmbito(Nombre);
                 result.setCodigo(result.getCodigo() + metodo.GetCuadruplos(local, errores, global).getCodigo());
             });
         }
         
+        //Agrego Simbolos que se mostraran en reporte
+        for(Simbolo s: local.getSimbolos()){
+            if(s.getRol() == Rol.FUNCION || s.getRol() == Rol.METHOD){
+                global.Add(s);
+                //global.getSimbolos().addAll(s.getEntorno().getSimbolos());
+                for(Simbolo s2: s.getEntorno().getSimbolos()){
+                    if(s2.getRol() != Rol.FUNCION && s2.getRol() != Rol.METHOD){
+                        global.Add(s2);
+                    }
+                }
+            }
+        }
         
         return result.getCodigo();
     }

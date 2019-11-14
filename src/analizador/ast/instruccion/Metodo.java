@@ -34,6 +34,7 @@ public class Metodo extends Instruccion {
     private ArrayList<Metodo> Metodos;
     private ArrayList<NodoAST> Sentencias;
     private boolean Declaracion;
+    private String Ambito;
 
     public Metodo(String Id, ArrayList<Parametro> Parametros, Tipo Tipo, ArrayList<VarDef> Variables, ArrayList<Metodo> Metodos, ArrayList<NodoAST> Sentencias, int Linea, int Columna) {
         super(Linea, Columna);
@@ -133,9 +134,9 @@ public class Metodo extends Instruccion {
             Simbolo s;
 
             if (Funcion) {
-                s = new Simbolo(Id, Tipo, 0, e.getAmbito(), local.getSimbolos().size() - 1, local, firma);
+                s = new Simbolo(Id, Tipo, 0, Ambito, local.getSimbolos().size() - 1, local, firma);
             } else {
-                s = new Simbolo(Id, 0, e.getAmbito(), local.getSimbolos().size(), local, firma);
+                s = new Simbolo(Id, 0, Ambito, local.getSimbolos().size(), local, firma);
             }
             //Uso la variable constante para saber si ya lo definí:
 
@@ -157,13 +158,24 @@ public class Metodo extends Instruccion {
 
                     int tmpEntorno = NuevoTemporal();
                     local.setTmpEntorno(tmpEntorno);
-                    
+
                     /**
                      * Ejecuto declaracion Variables
                      */
                     if (Variables != null) {
                         for (VarDef variable : Variables) {
                             variable.GetCuadruplos(local, new ArrayList<>(), new Entorno(""));
+                        }
+                    }
+
+                    /**
+                     * Ejecuto declaracion Métodos
+                     */
+                    if (Metodos != null) {
+                        for (Metodo met : Metodos) {
+                            met.setDeclaracion(true);
+                            met.setAmbito(metodo.getAmbito() + "_" + metodo.getId().toLowerCase());
+                            met.GetCuadruplos(local, errores, global);
                         }
                     }
 
@@ -207,14 +219,14 @@ public class Metodo extends Instruccion {
                             codigo += LlenarDimension(0, local, errores);
                         }
                     }
-                    
+
                     tmpEntorno = NuevoTemporal();
-                    codigo += "=, P, , t" +tmpEntorno + "\n";
+                    codigo += "=, P, , t" + tmpEntorno + "\n";
                     codigo += "+, P, " + (tmpEntorno - local.getTmpInicio() + local.getSize()) + ", t0\n";
                     codigo += "=, t0, t" + tmpEntorno + ", stack\n";
                     local.setTmpEntorno(tmpEntorno);
                     local.setFactorTmp(local.getSize() - local.getTmpInicio());
-                    
+
                     /**
                      * Ejecuto declaracion Variables
                      */
@@ -224,6 +236,17 @@ public class Metodo extends Instruccion {
                             if (rsVar != null) {
                                 codigo += rsVar.getCodigo();
                             }
+                        }
+                    }
+
+                    /**
+                     * Ejecuto declaracion Métodos
+                     */
+                    if (Metodos != null) {
+                        for (Metodo met : Metodos) {
+                            met.setDeclaracion(true);
+                            met.setAmbito(metodo.getAmbito() + "_" + metodo.getId().toLowerCase());
+                            met.GetCuadruplos(local, errores, global);
                         }
                     }
 
@@ -252,6 +275,31 @@ public class Metodo extends Instruccion {
 
                     codigo += local.getEtqSalida() + ":\n";
                     codigo += "end, , , " + metodo.getAmbito().toLowerCase() + "_" + metodo.getFirma() + "\n\n";
+
+                    /**
+                     * Ejecuto definicion Métodos
+                     */
+                    if (Metodos != null) {
+                        for (Metodo met : Metodos) {
+                            met.setDeclaracion(false);
+                            met.setAmbito(metodo.getAmbito() + "_" + metodo.getId().toLowerCase());
+                            codigo += met.GetCuadruplos(local, errores, global).getCodigo();
+                        }
+                    }
+
+                    //Agrego Simbolos que se mostraran en reporte
+                    for (Simbolo s : local.getSimbolos()) {
+                        if (s.getRol() == Rol.FUNCION || s.getRol() == Rol.METHOD) {
+                            global.Add(s);
+                            //global.getSimbolos().addAll(s.getEntorno().getSimbolos());
+                            for(Simbolo s2: s.getEntorno().getSimbolos()){
+                                if(s2.getRol() != Rol.FUNCION && s2.getRol() != Rol.METHOD){
+                                    global.Add(s2);
+                                }
+                            }
+                        }
+                    }
+
                 }
             } else {
                 errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido un Método con la misma firma de: " + Id + "."));
@@ -393,7 +441,7 @@ public class Metodo extends Instruccion {
         Dimension dim = Tipo.getDimensiones().get(pos);
 
         //Cálculo su tamaño
-        Aritmetica suma = /*new Aritmetica(*/new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna)/*, new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna)*/;
+        Aritmetica suma = /*new Aritmetica(*/ new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna)/*, new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna)*/;
         Result rsSuma = suma.GetCuadruplos(e, errores);
 
         //Guardo el tamaño en su primera posicion
@@ -575,6 +623,20 @@ public class Metodo extends Instruccion {
      */
     public void setDeclaracion(boolean Declaracion) {
         this.Declaracion = Declaracion;
+    }
+
+    /**
+     * @return the Ambito
+     */
+    public String getAmbito() {
+        return Ambito;
+    }
+
+    /**
+     * @param Ambito the Ambito to set
+     */
+    public void setAmbito(String Ambito) {
+        this.Ambito = Ambito;
     }
 
 }
