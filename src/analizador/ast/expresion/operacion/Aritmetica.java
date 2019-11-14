@@ -483,7 +483,8 @@ public class Aritmetica extends Operacion {
             codigo += "+, P, " + (contador - e.getTmpInicio() + e.getSize()) + ", t0\n";
             codigo += "=, t0, t" + contador + ", stack\n";
             codigo += "*, t" + rsOp.getValor() + ", 10, t" + rsOp.getValor() + "\n";
-            codigo += "=, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t" + rsOp.getValor() + ", stack\n";
+            codigo += "+, P, " + (rsOp.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+            codigo += "=, t0, t" + rsOp.getValor() + ", stack\n";
 
             codigo += etqCiclo + ":\n";
             //Obtengo el valor de la pila
