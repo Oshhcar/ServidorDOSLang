@@ -67,8 +67,8 @@ public class Repeat extends Instruccion {
             rsCondicion.setEtiquetaV(NuevaEtiqueta());
             rsCondicion.setEtiquetaF(NuevaEtiqueta());
 
-            cod += "je, t" + rsCondicion.getValor() + ", 1, " + rsCondicion.getEtiquetaV() + "\n";
-            cod += "jmp, , , " + rsCondicion.getEtiquetaF() + "\n";
+            cod += "je, t" + rsCondicion.getValor() + ", 1, " + rsCondicion.getEtiquetaF() + "\n";
+            cod += "jmp, , , " + rsCondicion.getEtiquetaV() + "\n";
 
             rsCondicion.setEtiquetaV(rsCondicion.getEtiquetaV() + ":\n");
             rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaF() + ":\n");
