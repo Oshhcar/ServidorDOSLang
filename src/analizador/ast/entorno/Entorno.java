@@ -166,6 +166,13 @@ public class Entorno {
     public int getPos() {
         return Pos++;
     }
+    
+    /**
+     * @return the Pos
+     */
+    public int getPos2() {
+        return Pos;
+    }
 
     /**
      * @param Pos the Pos to set

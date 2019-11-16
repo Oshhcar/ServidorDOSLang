@@ -81,23 +81,22 @@ public class Identificador extends Expresion {
                     //if (!Acceso && sim.isConstante()) {
                     //    errores.add(new ErrorC("Semántico", Linea, Columna, Id + " es una constante, no se puede cambiar el valor."));
                     //} else {
-                        Tipo = sim.getTipo();
-                        int tmp = NuevoTemporal();
-                        
-                        
-                        codigo += "+, P, " + sim.getPos() + ", t" + tmp + "\n";
-                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                        codigo += "=, t0, t" + tmp + ", stack\n";
+                    Tipo = sim.getTipo();
+                    int tmp = NuevoTemporal();
 
-                        if (Acceso) {
-                            result.setValor(NuevoTemporal());
-                            codigo += "=, stack, t" + tmp + ", t" + result.getValor() + "\n";
-                            codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                            codigo += "=, t0, t" + result.getValor() + ", stack\n";
-                        } else {
-                            result.setEstructura("stack");
-                            result.setValor(tmp);
-                        }
+                    codigo += "+, P, " + sim.getPos() + ", t" + tmp + "\n";
+                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + tmp + ", stack\n";
+
+                    if (Acceso) {
+                        result.setValor(NuevoTemporal());
+                        codigo += "=, stack, t" + tmp + ", t" + result.getValor() + "\n";
+                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                    } else {
+                        result.setEstructura("stack");
+                        result.setValor(tmp);
+                    }
                     //}
                 }
             } else if (sim.getRol() == Rol.PARAMETER) {
@@ -128,9 +127,9 @@ public class Identificador extends Expresion {
                         result.setEtiquetaV(NuevaEtiqueta());
                         result.setEtiquetaF(NuevaEtiqueta());
                         String etqSalida = NuevaEtiqueta();
-                        
+
                         int res = NuevoTemporal();
-                        
+
                         codigo += "jne, t" + tmpEstruc + ", 0, " + result.getEtiquetaV() + "\n";
                         codigo += "jmp, , , " + result.getEtiquetaF() + "\n";
                         codigo += result.getEtiquetaF() + ":\n";
@@ -139,16 +138,43 @@ public class Identificador extends Expresion {
                         codigo += result.getEtiquetaV() + ":\n";
                         codigo += "=, heap, t" + result.getValor() + ", t" + res + "\n";
                         codigo += etqSalida + ":\n";
-                        
+
                         codigo += "+, P, " + (res - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + res + ", stack\n";
-                        
+
                         result.setValor(res);
                     }
 
                 } else {
                     result.setEstructura("stack");
                     result.setValor(tmp);
+                }
+
+            } else if (sim.getRol() == Rol.GLOBAL) {
+                Tipo = sim.getTipo();
+                int tmp = NuevoTemporal();
+
+                codigo += "+, P, " + sim.getPos() + ", t" + tmp + "\n";
+                codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                codigo += "=, t0, t" + tmp + ", stack\n";
+
+                result.setValor(NuevoTemporal());
+                codigo += "=, stack, t" + tmp + ", t" + result.getValor() + "\n";
+                codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                codigo += "=, t0, t" + result.getValor() + ", stack\n";
+
+                if (Acceso) {
+                    if (!(sim.getTipo().IsArray() || sim.getTipo().IsRecord())) {
+                        tmp = NuevoTemporal();
+
+                        codigo += "=, stack, t" + result.getValor() + ", t" + tmp + "\n";
+                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmp + ", stack\n";
+                        result.setValor(tmp);
+                    }
+
+                } else {
+                    result.setEstructura("stack");
                 }
 
             } else if (sim.getTipo().IsEnum()) {

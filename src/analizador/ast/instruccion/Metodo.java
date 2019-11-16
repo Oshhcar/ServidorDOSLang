@@ -68,6 +68,8 @@ public class Metodo extends Instruccion {
         Entorno local = new Entorno(Id, e);
         local.setTmpInicio(NodoAST.Temporales + 1);
 
+        ArrayList<Simbolo> Simbolos = new ArrayList<>();
+
         if (Funcion) {
 
             if (DefinirTipo(e, errores, global) == null) {
@@ -129,6 +131,8 @@ public class Metodo extends Instruccion {
             }
         }
 
+        Simbolos.addAll(local.getSimbolos());
+
         Simbolo metodo = e.GetMetodoLocal(firma);
         if (metodo == null) {
             Simbolo s;
@@ -139,7 +143,28 @@ public class Metodo extends Instruccion {
                 s = new Simbolo(Id, 0, Ambito, local.getSimbolos().size(), local, firma);
             }
             //Uso la variable constante para saber si ya lo definí:
+            
+            /**
+             * Ejecuto declaracion Variables
+             */
+            if (Variables != null) {
+                for (VarDef variable : Variables) {
+                    variable.GetCuadruplos(local, new ArrayList<>(), global);
+                }
+            }
 
+            /**
+             * Meto al Entorno
+             */
+            for (Simbolo sim : e.getSimbolos()) {
+                if (sim.getRol() != Rol.FUNCION && sim.getRol() != Rol.METHOD && sim.getRol() != Rol.TYPE) {
+                    Simbolo tmpS = new Simbolo(sim.getId(), sim.getTipo(), local.getPos(), sim.getAmbito());
+                    tmpS.setConstante(sim.isConstante());
+                    tmpS.setRol(Rol.GLOBAL);
+                    local.Add(tmpS);
+                }
+            }
+            
             e.Add(s);
         } else {
             if (!Declaracion) {
@@ -147,7 +172,8 @@ public class Metodo extends Instruccion {
                     metodo.setConstante(true); //para saber si ya generé
 
                     int temporales = NodoAST.Temporales; //temporales al iniciar;
-
+                    int posicion = local.getPos2();
+                    
                     if (Funcion) {
                         if (Tipo.IsArray()) {
                             int tmp = NuevoTemporal();
@@ -161,7 +187,19 @@ public class Metodo extends Instruccion {
                      */
                     if (Variables != null) {
                         for (VarDef variable : Variables) {
-                            variable.GetCuadruplos(local, new ArrayList<>(), new Entorno(""));
+                            variable.GetCuadruplos(local, new ArrayList<>(), global);
+                        }
+                    }
+
+                    /**
+                     * Meto al Entorno
+                     */
+                    for (Simbolo sim : e.getSimbolos()) {
+                        if (sim.getRol() != Rol.FUNCION && sim.getRol() != Rol.METHOD && sim.getRol() != Rol.TYPE) {
+                            Simbolo tmpS = new Simbolo(sim.getId(), sim.getTipo(), local.getPos(), sim.getAmbito());
+                            tmpS.setConstante(sim.isConstante());
+                            tmpS.setRol(Rol.GLOBAL);
+                            local.Add(tmpS);
                         }
                     }
 
@@ -182,7 +220,7 @@ public class Metodo extends Instruccion {
                     if (Sentencias != null) {
                         for (NodoAST nodo : Sentencias) {
                             if (nodo instanceof Instruccion) {
-                                ((Instruccion) nodo).GetCuadruplos(local, new ArrayList<>(), new Entorno(""));
+                                ((Instruccion) nodo).GetCuadruplos(local, new ArrayList<>(), global);
                             } else if (nodo instanceof Expresion) {
                                 ((Expresion) nodo).GetCuadruplos(local, new ArrayList<>());
                             }
@@ -194,6 +232,9 @@ public class Metodo extends Instruccion {
                     metodo.setTam(metodo.getEntorno().getSize());
                     metodo.getEntorno().setTmpFin(NodoAST.Temporales);
                     local = metodo.getEntorno();
+                    local.setSimbolos(Simbolos);
+                    local.setPos(posicion);
+
                     local.setSizeTotal(local.getSize() + (local.getTmpFin() - local.getTmpInicio() + 1));
                     local.setGuardarGlobal(true);
 
@@ -226,6 +267,18 @@ public class Metodo extends Instruccion {
                             if (rsVar != null) {
                                 codigo += rsVar.getCodigo();
                             }
+                        }
+                    }
+
+                    /**
+                     * Meto al Entorno
+                     */
+                    for (Simbolo sim : e.getSimbolos()) {
+                        if (sim.getRol() != Rol.FUNCION && sim.getRol() != Rol.METHOD && sim.getRol() != Rol.TYPE) {
+                            Simbolo tmpS = new Simbolo(sim.getId(), sim.getTipo(), local.getPos(), sim.getAmbito());
+                            tmpS.setConstante(sim.isConstante());
+                            tmpS.setRol(Rol.GLOBAL);
+                            local.Add(tmpS);
                         }
                     }
 
@@ -282,8 +335,8 @@ public class Metodo extends Instruccion {
                         if (s.getRol() == Rol.FUNCION || s.getRol() == Rol.METHOD) {
                             global.Add(s);
                             //global.getSimbolos().addAll(s.getEntorno().getSimbolos());
-                            for(Simbolo s2: s.getEntorno().getSimbolos()){
-                                if(s2.getRol() != Rol.FUNCION && s2.getRol() != Rol.METHOD){
+                            for (Simbolo s2 : s.getEntorno().getSimbolos()) {
+                                if (s2.getRol() != Rol.FUNCION && s2.getRol() != Rol.METHOD) {
                                     global.Add(s2);
                                 }
                             }

@@ -1041,10 +1041,10 @@ public class Call extends Expresion {
                             }
 
                             Expresion parametro = Parametros.get(i);
-                            
+
                             if (simParametro.getTipoParam() == 0 && !(simParametro.getTipo().IsArray() || simParametro.getTipo().IsRecord())) {
                                 //si es por referencia vuelvo a ejecutar su valor;
-                                
+
                                 if (parametro instanceof Identificador) {
                                     ((Identificador) parametro).setAcceso(false);
                                 } else if (parametro instanceof Atributo) {
@@ -1066,13 +1066,13 @@ public class Call extends Expresion {
                                     result.setCodigo("");
                                     return result;
                                 }
-                                
+
                             } else {
                                 rsParametro = parametro.GetCuadruplos(e, errores);
                             }
 
                             codigo += rsParametro.getCodigo();
-                            
+
                             int tmpAmbito = NuevoTemporal();
                             codigo += "+, P, " + e.getSizeTotal() + ", t" + tmpAmbito + "\n"; //cambio simulado
                             codigo += "+, P, " + (tmpAmbito - e.getTmpInicio() + e.getSize()) + ", t0\n";
@@ -1102,6 +1102,35 @@ public class Call extends Expresion {
                                 }
                             }
 
+                        }
+                    }
+
+                    /**
+                     * Envio las variables locales por referencia
+                     */
+                    for (Simbolo global : metodo.getEntorno().getSimbolos()) {
+                        if (global.getRol() == Rol.GLOBAL) {
+                            Identificador idGlobal = new Identificador(global.getId(), Linea, Columna);
+                            idGlobal.setAcceso(false);
+
+                            Result rsIdentificador = idGlobal.GetCuadruplos(e, errores);
+
+                            if (rsIdentificador.getEstructura() != null) {
+
+                                codigo += rsIdentificador.getCodigo();
+                                
+                                int tmpAmbito = NuevoTemporal();
+                                codigo += "+, P, " + e.getSizeTotal() + ", t" + tmpAmbito + "\n"; //cambio simulado
+                                codigo += "+, P, " + (tmpAmbito - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmpAmbito + ", stack\n";
+
+                                int posDireccion = NuevoTemporal();
+                                codigo += "+, t" + tmpAmbito + ", " + global.getPos() + ", t" + posDireccion + "\n";
+                                codigo += "+, P, " + (posDireccion - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + posDireccion + ", stack\n";
+
+                                codigo += "=, t" + posDireccion + ", t" + rsIdentificador.getValor() + ", stack\n";
+                            }
                         }
                     }
 

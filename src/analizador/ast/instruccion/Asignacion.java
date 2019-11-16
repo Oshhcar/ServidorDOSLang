@@ -116,6 +116,7 @@ public class Asignacion extends Instruccion {
                         codigo += "jmp, , , " + rsLimiteSup.getEtiquetaF() + "\n";
                         codigo += rsLimiteSup.getEtiquetaV() + ":\n";
 
+                        //meter lo de parametro
                         codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
 
                         String etqSalida = NuevaEtiqueta();
@@ -142,9 +143,7 @@ public class Asignacion extends Instruccion {
                         codigo += etqSalida + ":\n";
 
                     } else {
-                        if (rsTarget.getSimbolo().getRol() != Rol.PARAMETER) {
-                            codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
-                        } else {
+                        if (rsTarget.getSimbolo().getRol() == Rol.PARAMETER) {
                             if (rsTarget.getSimbolo().getTipoParam() == 0 && !(rsTarget.getSimbolo().getTipo().IsArray() || rsTarget.getSimbolo().getTipo().IsRecord())) {
                                 int tmpDir = NuevoTemporal();
                                 codigo += "=, stack, t" + rsTarget.getValor() + ", t" + tmpDir + "\n";
@@ -177,6 +176,8 @@ public class Asignacion extends Instruccion {
                             } else {
                                 codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
                             }
+                        } else {
+                            codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
                         }
                     }
                 } else {
