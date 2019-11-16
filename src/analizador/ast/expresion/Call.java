@@ -1012,11 +1012,16 @@ public class Call extends Expresion {
             default:
                 String firma = Id.toLowerCase();
 
+                ArrayList<Result> rsParametros = new ArrayList<>();
+                String codigoParametro = "";
+                
                 if (Parametros != null) {
                     for (Expresion parametro : Parametros) {
                         Result rsParametro = parametro.GetCuadruplos(e, errores);
                         if (!parametro.getTipo().IsUndefined()) {
                             firma += "_" + parametro.getTipo().toStringMetodo();
+                            rsParametros.add(rsParametro);
+                            codigoParametro += rsParametro.getCodigo();
                         } else {
                             errores.add(new ErrorC("Semántico", Linea, Columna, "Error en pámetros."));
                             break;
@@ -1028,10 +1033,11 @@ public class Call extends Expresion {
 
                 if (metodo != null) {
                     Tipo = metodo.getTipo();
-
+                    codigo += codigoParametro;
+                    
                     if (Parametros != null) {
                         for (int i = 0; i < Parametros.size(); i++) {
-                            Result rsParametro;
+                            Result rsParametro = rsParametros.get(i);
 
                             Simbolo simParametro;
                             if (metodo.getRol() == Rol.FUNCION) {
@@ -1066,12 +1072,10 @@ public class Call extends Expresion {
                                     result.setCodigo("");
                                     return result;
                                 }
+                                
+                                codigo += rsParametro.getCodigo();
 
-                            } else {
-                                rsParametro = parametro.GetCuadruplos(e, errores);
-                            }
-
-                            codigo += rsParametro.getCodigo();
+                            } 
 
                             int tmpAmbito = NuevoTemporal();
                             codigo += "+, P, " + e.getSizeTotal() + ", t" + tmpAmbito + "\n"; //cambio simulado
