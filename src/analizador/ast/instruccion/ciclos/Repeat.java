@@ -67,8 +67,8 @@ public class Repeat extends Instruccion {
             rsCondicion.setEtiquetaV(NuevaEtiqueta());
             rsCondicion.setEtiquetaF(NuevaEtiqueta());
 
-            cod += "je, t" + rsCondicion.getValor() + ", 1, " + rsCondicion.getEtiquetaF() + "\n";
-            cod += "jmp, , , " + rsCondicion.getEtiquetaV() + "\n";
+            cod += "je, t" + rsCondicion.getValor() + ", 1, " + rsCondicion.getEtiquetaV() + "\n";
+            cod += "jmp, , , " + rsCondicion.getEtiquetaF() + "\n";
 
             rsCondicion.setEtiquetaV(rsCondicion.getEtiquetaV() + ":\n");
             rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaF() + ":\n");
@@ -83,9 +83,9 @@ public class Repeat extends Instruccion {
         }
         
         codigo += rsCondicion.getCodigo();
-        codigo += rsCondicion.getEtiquetaF();
-        codigo += "jmp, , , " + etqCiclo +"\n";
         codigo += rsCondicion.getEtiquetaV();
+        codigo += "jmp, , , " + etqCiclo +"\n";
+        codigo += rsCondicion.getEtiquetaF();
         codigo += e.getSalidaCiclo().pop() + ":\n";
         
         e.getContinueCiclo().pop();
