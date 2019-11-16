@@ -603,7 +603,7 @@ public class Call extends Expresion {
                         codigo += "+, H, 1, H\n";
                         codigo += "=, H, 0, heap\n";
                         codigo += "+, H, 1, H\n";
-                        codigo += "-, t" + length + ", 1, t" + length + "\n";
+                        //codigo += "-, t" + length + ", 1, t" + length + "\n";
 
                         codigo += "=, H, t" + length + ", heap\n";
                         codigo += "+, H, 1, H\n";
