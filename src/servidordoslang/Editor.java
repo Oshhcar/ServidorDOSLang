@@ -140,6 +140,7 @@ public class Editor extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         if(server == null){
             server = new SocketServidor();
+            server.setText(jTextArea2);
             server.start();
         }
     }//GEN-LAST:event_jButton2ActionPerformed
@@ -147,6 +148,7 @@ public class Editor extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         if(server != null){
             System.out.println("Fin de la conexión");
+            this.jTextArea2.setText(this.jTextArea2.getText() + "Se apagó el servidor.\n");
             try {
                 server.ServidorSocket.close();
             } catch (IOException ex) {

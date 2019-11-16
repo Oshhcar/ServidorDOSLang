@@ -21,6 +21,7 @@ import java.io.StringWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import javax.swing.JTextArea;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -33,19 +34,23 @@ import org.json.simple.parser.ParseException;
 public class SocketServidor extends Thread {
 
     public ServerSocket ServidorSocket;
+    private JTextArea Text;
 
     public void StartServer() {
         String cadena = "cadena para enviar";
         Socket socket;
-
+        this.Text.setText("Iniciando el Servidor.\n");
+        
         try {
             // se instancia y se abre un puerto
             ServidorSocket = new ServerSocket(1234);
             while (true) {
                 //aceptamos la conexion del cliente
                 System.out.println("Esperando...");
+                this.Text.setText(this.Text.getText() + "Esperando...\n" );
                 socket = ServidorSocket.accept();
                 System.out.println("Se conecto un Cliente.");
+                this.Text.setText(this.Text.getText() + "Se conecto un Cliente.\n" );
                 //entrada se recibe los mensajaes del cliente
                 BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -121,6 +126,7 @@ public class SocketServidor extends Thread {
                     }
                 } else {
                     respuesta = "No se encontro el archivo principal";
+                    this.Text.setText(this.Text.getText() + "No se encontro el archivo principal.\n" );
                     //Agregar a los errore que no se econtro el main
                 }
 
@@ -193,6 +199,7 @@ public class SocketServidor extends Thread {
                 entrada.close();
                 //cerramos la conexion
                 socket.close();
+                this.Text.setText(this.Text.getText() + "Se termino la conexión.\n" );
                 //ServidorSocket.close();
             }
 
@@ -205,6 +212,20 @@ public class SocketServidor extends Thread {
     @Override
     public void run() {
         StartServer();
+    }
+
+    /**
+     * @return the Text
+     */
+    public JTextArea getText() {
+        return Text;
+    }
+
+    /**
+     * @param Text the Text to set
+     */
+    public void setText(JTextArea Text) {
+        this.Text = Text;
     }
 
 }
