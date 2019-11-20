@@ -210,20 +210,52 @@ public class VarDef extends Instruccion {
                 }
 
                 e.Add(s);
+
+                Identificador target;
+                Asignacion asigna;
+
+                if (Expr != null) {
+                    target = new Identificador(id, Linea, Columna);
+                    asigna = new Asignacion(target, Expr, Linea, Columna);
+                    asigna.setInicializacion(true);
+                    codigo += asigna.GetCuadruplos(e, errores, global).getCodigo();
+                } else {
+                    /*Valores por defecto*/
+                    if (Tipo.IsNumeric() || Tipo.IsEnum() || Tipo.IsBoolean()) {
+                        int tmp = NuevoTemporal();
+                        codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
+                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                        codigo += "=, t0, t" + tmp + ", stack\n";
+                        
+                        if(Tipo.getLimiteInf() == null){
+                            codigo += "=, t" + tmp + ", 0, stack\n";
+                        } else {
+                            Result rsLimite = Tipo.getLimiteInf().GetCuadruplos(e, errores);
+                            codigo += rsLimite.getCodigo();
+                            codigo += "=, t" + tmp + ", t" + rsLimite.getValor() + ", stack\n";
+                        }
+                    } else {
+                        if (Tipo.IsString() || Tipo.IsRecord()) {
+                            int tmp = NuevoTemporal();
+                            codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
+                            codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + tmp + ", stack\n";
+
+                            int tmpVal = NuevoTemporal();
+                            codigo += "-, 0, 1, t" + tmpVal + "\n";
+                            codigo += "+, P, " + (tmpVal - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                            codigo += "=, t0, t" + tmpVal + ", stack\n";
+
+                            codigo += "=, t" + tmp + ", t" + tmpVal + ", stack\n";
+                        }
+                    }
+                }
+
                 //if(e.isGuardarGlobal()){
                 //    global.Add(s);
                 //}
             } else {
                 errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
-            }
-        }
-
-        if (Expr != null) {
-            for (String id : Id) {
-                Identificador target = new Identificador(id, Linea, Columna);
-                Asignacion asigna = new Asignacion(target, Expr, Linea, Columna);
-                asigna.setInicializacion(true);
-                codigo += asigna.GetCuadruplos(e, errores, global).getCodigo();
             }
         }
 
@@ -237,7 +269,7 @@ public class VarDef extends Instruccion {
         Dimension dim = Tipo.getDimensiones().get(pos);
 
         //Cálculo su tamaño
-        Aritmetica suma = /*new Aritmetica(*/new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna)/*, new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna)*/;
+        Aritmetica suma = /*new Aritmetica(*/ new Aritmetica(dim.getLimiteSup(), dim.getLimiteInf(), Operador.RESTA, Linea, Columna)/*, new Literal(new Tipo(Type.INTEGER), 1, Linea, Columna), Operador.SUMA, Linea, Columna)*/;
         Result rsSuma = suma.GetCuadruplos(e, errores);
 
         //Guardo el tamaño en su primera posicion

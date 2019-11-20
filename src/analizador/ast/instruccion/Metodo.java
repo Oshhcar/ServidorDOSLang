@@ -199,6 +199,7 @@ public class Metodo extends Instruccion {
                             Simbolo tmpS = new Simbolo(sim.getId(), sim.getTipo(), local.getPos(), sim.getAmbito());
                             tmpS.setConstante(sim.isConstante());
                             tmpS.setRol(Rol.GLOBAL);
+                            tmpS.setEntorno(sim.getEntorno());
                             local.Add(tmpS);
                         }
                     }
@@ -278,6 +279,7 @@ public class Metodo extends Instruccion {
                             Simbolo tmpS = new Simbolo(sim.getId(), sim.getTipo(), local.getPos(), sim.getAmbito());
                             tmpS.setConstante(sim.isConstante());
                             tmpS.setRol(Rol.GLOBAL);
+                            tmpS.setEntorno(sim.getEntorno());
                             local.Add(tmpS);
                         }
                     }
