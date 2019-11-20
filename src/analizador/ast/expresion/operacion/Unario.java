@@ -101,7 +101,7 @@ public class Unario extends Operacion {
 
                 codigo += rsOp1.getCodigo();
 
-                if(Op1 instanceof Unario){
+                if(Op1 instanceof Unario || Op1 instanceof Logica){
                     String copy = rsOp1.getEtiquetaF();
                     rsOp1.setEtiquetaF(rsOp1.getEtiquetaV());
                     rsOp1.setEtiquetaV(copy);
