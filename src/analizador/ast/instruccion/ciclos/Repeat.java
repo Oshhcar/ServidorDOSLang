@@ -9,7 +9,11 @@ import analizador.ErrorC;
 import analizador.ast.NodoAST;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
+import analizador.ast.expresion.Acceso;
+import analizador.ast.expresion.Atributo;
+import analizador.ast.expresion.Call;
 import analizador.ast.expresion.Expresion;
+import analizador.ast.expresion.Identificador;
 import analizador.ast.expresion.Literal;
 import analizador.ast.expresion.operacion.Logica;
 import analizador.ast.expresion.operacion.Relacional;
@@ -37,20 +41,6 @@ public class Repeat extends Instruccion {
         Result result = new Result();
         String codigo = "";
 
-        String etqCiclo = NuevaEtiqueta();
-
-        codigo += etqCiclo + ":\n";
-        e.getSalidaCiclo().push(NuevaEtiqueta());
-        e.getContinueCiclo().push(etqCiclo);
-        
-        for (NodoAST nodo : Sentencias) {
-            if (nodo instanceof Instruccion) {
-                codigo += ((Instruccion) nodo).GetCuadruplos(e, errores, global).getCodigo();
-            } else if (nodo instanceof Expresion) {
-                codigo += ((Expresion) nodo).GetCuadruplos(e, errores).getCodigo();
-            }
-        }
-        
         if (Condicion instanceof Relacional) {
             ((Relacional) Condicion).setCortoCircuito(true);
         } else if (Condicion instanceof Logica) {
@@ -58,38 +48,58 @@ public class Repeat extends Instruccion {
         } else if (Condicion instanceof Unario) {
             ((Unario) Condicion).setEvaluar(true);
         }
-        
+
         Result rsCondicion = Condicion.GetCuadruplos(e, errores);
-        
-        if (Condicion instanceof Literal) {
-            String cod = rsCondicion.getCodigo();
 
-            rsCondicion.setEtiquetaV(NuevaEtiqueta());
-            rsCondicion.setEtiquetaF(NuevaEtiqueta());
+        if (Condicion.getTipo().IsBoolean()) {
+            String etqCiclo = NuevaEtiqueta();
 
-            cod += "je, t" + rsCondicion.getValor() + ", 1, " + rsCondicion.getEtiquetaF() + "\n";
-            cod += "jmp, , , " + rsCondicion.getEtiquetaV() + "\n";
+            codigo += etqCiclo + ":\n";
+            e.getSalidaCiclo().push(NuevaEtiqueta());
+            e.getContinueCiclo().push(etqCiclo);
 
-            rsCondicion.setEtiquetaV(rsCondicion.getEtiquetaV() + ":\n");
-            rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaF() + ":\n");
+            for (NodoAST nodo : Sentencias) {
+                if (nodo instanceof Instruccion) {
+                    codigo += ((Instruccion) nodo).GetCuadruplos(e, errores, global).getCodigo();
+                } else if (nodo instanceof Expresion) {
+                    codigo += ((Expresion) nodo).GetCuadruplos(e, errores).getCodigo();
+                }
+            }
 
-            rsCondicion.setCodigo(cod);
+            if (Condicion instanceof Literal || Condicion instanceof Call || Condicion instanceof Identificador
+                    || Condicion instanceof Acceso || Condicion instanceof Atributo) {
+                String cod = rsCondicion.getCodigo();
+
+                rsCondicion.setEtiquetaV(NuevaEtiqueta());
+                rsCondicion.setEtiquetaF(NuevaEtiqueta());
+
+                cod += "je, t" + rsCondicion.getValor() + ", 1, " + rsCondicion.getEtiquetaF() + "\n";
+                cod += "jmp, , , " + rsCondicion.getEtiquetaV() + "\n";
+
+                rsCondicion.setEtiquetaV(rsCondicion.getEtiquetaV() + ":\n");
+                rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaF() + ":\n");
+
+                rsCondicion.setCodigo(cod);
+            }
+
+            if (Condicion instanceof Relacional || Condicion instanceof Literal || Condicion instanceof Call
+                    || Condicion instanceof Identificador || Condicion instanceof Acceso
+                    || Condicion instanceof Atributo) {
+                String copy = rsCondicion.getEtiquetaF();
+                rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaV());
+                rsCondicion.setEtiquetaV(copy);
+            }
+
+            codigo += rsCondicion.getCodigo();
+            codigo += rsCondicion.getEtiquetaV();
+            codigo += "jmp, , , " + etqCiclo + "\n";
+            codigo += rsCondicion.getEtiquetaF();
+            codigo += e.getSalidaCiclo().pop() + ":\n";
+
+            e.getContinueCiclo().pop();
+        } else {
+            errores.add(new ErrorC("Semántico", Linea, Columna, "La condición del Repeat debe ser boolean."));
         }
-        
-        if (Condicion instanceof Relacional || Condicion instanceof Literal) {
-            String copy = rsCondicion.getEtiquetaF();
-            rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaV());
-            rsCondicion.setEtiquetaV(copy);
-        }
-        
-        codigo += rsCondicion.getCodigo();
-        codigo += rsCondicion.getEtiquetaV();
-        codigo += "jmp, , , " + etqCiclo +"\n";
-        codigo += rsCondicion.getEtiquetaF();
-        codigo += e.getSalidaCiclo().pop() + ":\n";
-        
-        e.getContinueCiclo().pop();
-        
         result.setCodigo(codigo);
         return result;
     }

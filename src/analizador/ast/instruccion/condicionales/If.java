@@ -9,7 +9,11 @@ import analizador.ErrorC;
 import analizador.ast.NodoAST;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
+import analizador.ast.expresion.Acceso;
+import analizador.ast.expresion.Atributo;
+import analizador.ast.expresion.Call;
 import analizador.ast.expresion.Expresion;
+import analizador.ast.expresion.Identificador;
 import analizador.ast.expresion.Literal;
 import analizador.ast.expresion.operacion.Logica;
 import analizador.ast.expresion.operacion.Relacional;
@@ -59,74 +63,82 @@ public class If extends Instruccion {
 
         Result rsCondicion = Condicion.GetCuadruplos(e, errores);
 
-        if (Condicion instanceof Literal) {
-            String cod = rsCondicion.getCodigo();
+        if (Condicion.getTipo().IsBoolean()) {
 
-            rsCondicion.setEtiquetaV(NuevaEtiqueta());
-            rsCondicion.setEtiquetaF(NuevaEtiqueta());
+            if (Condicion instanceof Literal || Condicion instanceof Call || Condicion instanceof Identificador
+                    || Condicion instanceof Acceso || Condicion instanceof Atributo) {
+                String cod = rsCondicion.getCodigo();
 
-            cod += "je, t" + rsCondicion.getValor() + ", 1, " + rsCondicion.getEtiquetaF() + "\n";
-            cod += "jmp, , , " + rsCondicion.getEtiquetaV() + "\n";
+                rsCondicion.setEtiquetaV(NuevaEtiqueta());
+                rsCondicion.setEtiquetaF(NuevaEtiqueta());
 
-            rsCondicion.setEtiquetaV(rsCondicion.getEtiquetaV() + ":\n");
-            rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaF() + ":\n");
+                cod += "je, t" + rsCondicion.getValor() + ", 1, " + rsCondicion.getEtiquetaF() + "\n";
+                cod += "jmp, , , " + rsCondicion.getEtiquetaV() + "\n";
 
-            rsCondicion.setCodigo(cod);
-        }
+                rsCondicion.setEtiquetaV(rsCondicion.getEtiquetaV() + ":\n");
+                rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaF() + ":\n");
 
-        if (Condicion instanceof Relacional || Condicion instanceof Literal) {
-            String copy = rsCondicion.getEtiquetaF();
-            rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaV());
-            rsCondicion.setEtiquetaV(copy);
-        }
-
-        codigo += rsCondicion.getCodigo();
-        codigo += rsCondicion.getEtiquetaV();
-        
-        boolean isPrincipal = false;
-        
-        if(EtqSalida == null){
-            EtqSalida = NuevaEtiqueta();
-            isPrincipal = true;
-        }
-        
-        //Bloque
-        if (Sentencia instanceof Instruccion) {
-            codigo += ((Instruccion) Sentencia).GetCuadruplos(e, errores, global).getCodigo();
-        } else if (Sentencia instanceof Expresion) {
-            codigo += ((Expresion) Sentencia).GetCuadruplos(e, errores).getCodigo();
-        }
-
-        codigo += "jmp, , , " + EtqSalida + "\n";
-        codigo += rsCondicion.getEtiquetaF();
-
-        //Else
-        if (SentenciaElse != null) {
-            
-            if(SentenciaElse instanceof If){
-                ((If) SentenciaElse).setEtqSalida(EtqSalida);
+                rsCondicion.setCodigo(cod);
             }
-            
-            if (SentenciaElse instanceof Instruccion) {
-                codigo += ((Instruccion) SentenciaElse).GetCuadruplos(e, errores, global).getCodigo();
-            } else if (SentenciaElse instanceof Expresion) {
-                codigo += ((Expresion) SentenciaElse).GetCuadruplos(e, errores).getCodigo();
+
+            if (Condicion instanceof Relacional || Condicion instanceof Literal || Condicion instanceof Call 
+                    || Condicion instanceof Identificador || Condicion instanceof Acceso 
+                    || Condicion instanceof Atributo) {
+                String copy = rsCondicion.getEtiquetaF();
+                rsCondicion.setEtiquetaF(rsCondicion.getEtiquetaV());
+                rsCondicion.setEtiquetaV(copy);
             }
-            
-            if(!(SentenciaElse instanceof If)){
-                codigo += "jmp, , , " + EtqSalida + "\n";
-            } else {
-                ((If) SentenciaElse).setEtqSalida(null);
+
+            codigo += rsCondicion.getCodigo();
+            codigo += rsCondicion.getEtiquetaV();
+
+            boolean isPrincipal = false;
+
+            if (EtqSalida == null) {
+                EtqSalida = NuevaEtiqueta();
+                isPrincipal = true;
             }
-            
-        } 
-        
-        if(isPrincipal){
-            codigo += EtqSalida +":\n";
+
+            //Bloque
+            if (Sentencia instanceof Instruccion) {
+                codigo += ((Instruccion) Sentencia).GetCuadruplos(e, errores, global).getCodigo();
+            } else if (Sentencia instanceof Expresion) {
+                codigo += ((Expresion) Sentencia).GetCuadruplos(e, errores).getCodigo();
+            }
+
+            codigo += "jmp, , , " + EtqSalida + "\n";
+            codigo += rsCondicion.getEtiquetaF();
+
+            //Else
+            if (SentenciaElse != null) {
+
+                if (SentenciaElse instanceof If) {
+                    ((If) SentenciaElse).setEtqSalida(EtqSalida);
+                }
+
+                if (SentenciaElse instanceof Instruccion) {
+                    codigo += ((Instruccion) SentenciaElse).GetCuadruplos(e, errores, global).getCodigo();
+                } else if (SentenciaElse instanceof Expresion) {
+                    codigo += ((Expresion) SentenciaElse).GetCuadruplos(e, errores).getCodigo();
+                }
+
+                if (!(SentenciaElse instanceof If)) {
+                    codigo += "jmp, , , " + EtqSalida + "\n";
+                } else {
+                    ((If) SentenciaElse).setEtqSalida(null);
+                }
+
+            }
+
+            if (isPrincipal) {
+                codigo += EtqSalida + ":\n";
+            }
+
+            EtqSalida = null;
+        } else {
+            errores.add(new ErrorC("Semántico", Linea, Columna, "La condición del If debe ser boolean."));
         }
-        
-        EtqSalida = null;
-        
+
         result.setCodigo(codigo);
         return result;
     }

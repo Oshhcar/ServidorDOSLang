@@ -9,7 +9,11 @@ import analizador.ErrorC;
 import analizador.ast.entorno.Entorno;
 import analizador.ast.entorno.Result;
 import analizador.ast.entorno.Type;
+import analizador.ast.expresion.Acceso;
+import analizador.ast.expresion.Atributo;
+import analizador.ast.expresion.Call;
 import analizador.ast.expresion.Expresion;
+import analizador.ast.expresion.Identificador;
 import analizador.ast.expresion.Literal;
 import java.util.ArrayList;
 
@@ -79,7 +83,8 @@ public class Unario extends Operacion {
             if (Op == Operador.NOT) {
                 Tipo.setTipo(Type.BOOLEAN);
 
-                if (Op1 instanceof Literal) {
+                if (Op1 instanceof Literal || Op1 instanceof Call || Op1 instanceof Identificador
+                    || Op1 instanceof Acceso || Op1 instanceof Atributo) {
                     String cod = rsOp1.getCodigo();
 
                     rsOp1.setEtiquetaV(NuevaEtiqueta());
@@ -96,6 +101,12 @@ public class Unario extends Operacion {
 
                 codigo += rsOp1.getCodigo();
 
+                if(Op1 instanceof Unario){
+                    String copy = rsOp1.getEtiquetaF();
+                    rsOp1.setEtiquetaF(rsOp1.getEtiquetaV());
+                    rsOp1.setEtiquetaV(copy);
+                }
+                
                 if (!Evaluar) {
 
                     result.setValor(NuevoTemporal());
