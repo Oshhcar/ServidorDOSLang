@@ -13,6 +13,7 @@ import analizador.ast.entorno.Simbolo;
 import analizador.ast.entorno.Tipo;
 import analizador.ast.expresion.Acceso;
 import analizador.ast.expresion.Atributo;
+import analizador.ast.expresion.Call;
 import analizador.ast.expresion.Expresion;
 import analizador.ast.expresion.Identificador;
 import java.util.ArrayList;
@@ -178,6 +179,48 @@ public class Asignacion extends Instruccion {
                             }
                         } else {
                             codigo += "=, t" + rsTarget.getValor() + ", t" + rsValor.getValor() + ", " + rsTarget.getEstructura() + "\n";
+                        }
+
+                        if (Target.getTipo().IsRecord()) {
+                            if (Valor instanceof Call) {
+                                if (((Call) Valor).getId().toLowerCase().equals("malloc")) {
+                                    //Inicializo valores si es record
+                                    if (rsTarget.getSimbolo().getEntorno() != null) {
+                                        for (Simbolo sim : rsTarget.getSimbolo().getEntorno().getSimbolos()) {
+
+                                            //Valores por defecto
+                                            if (sim.getTipo().IsNumeric() || sim.getTipo().IsEnum() || sim.getTipo().IsBoolean()) {
+                                                int tmp = NuevoTemporal();
+                                                codigo += "+, t" + rsValor.getValor() + ", " + sim.getPos() + ", t" + tmp + "\n";
+                                                codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                                codigo += "=, t0, t" + tmp + ", stack\n";
+
+                                                if (sim.getTipo().getLimiteInf() == null) {
+                                                    codigo += "=, t" + tmp + ", 0, heap\n";
+                                                } else {
+                                                    Result rsLimite = sim.getTipo().getLimiteInf().GetCuadruplos(e, errores);
+                                                    codigo += rsLimite.getCodigo();
+                                                    codigo += "=, t" + tmp + ", t" + rsLimite.getValor() + ", heap\n";
+                                                }
+                                            } else {
+                                                if (sim.getTipo().IsString() || sim.getTipo().IsRecord()) {
+                                                    int tmp = NuevoTemporal();
+                                                    codigo += "+, t" + rsValor.getValor() + ", " + sim.getPos() + ", t" + tmp + "\n";
+                                                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                                    codigo += "=, t0, t" + tmp + ", stack\n";
+
+                                                    int tmpVal = NuevoTemporal();
+                                                    codigo += "-, 0, 1, t" + tmpVal + "\n";
+                                                    codigo += "+, P, " + (tmpVal - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                                    codigo += "=, t0, t" + tmpVal + ", stack\n";
+
+                                                    codigo += "=, t" + tmp + ", t" + tmpVal + ", heap\n";
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 } else {
