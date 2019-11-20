@@ -39,18 +39,20 @@ public class SocketServidor extends Thread {
     public void StartServer() {
         String cadena = "cadena para enviar";
         Socket socket;
-        this.Text.setText("Iniciando el Servidor.\n");
-        
+        this.Text.setText(this.Text.getText() + "Iniciando el Servidor.\n");
+
         try {
             // se instancia y se abre un puerto
             ServidorSocket = new ServerSocket(1234);
+            System.out.println("Servidor Socket iniciado Puerto:1234");
+            this.Text.setText(this.Text.getText() + "Servidor Socket iniciado Puerto:1234\n");
             while (true) {
                 //aceptamos la conexion del cliente
-                System.out.println("Esperando...");
-                this.Text.setText(this.Text.getText() + "Esperando...\n" );
+                System.out.println("Esperando una conexión...");
+                this.Text.setText(this.Text.getText() + "Esperando una conexión...\n");
                 socket = ServidorSocket.accept();
                 System.out.println("Se conecto un Cliente.");
-                this.Text.setText(this.Text.getText() + "Se conecto un Cliente.\n" );
+                this.Text.setText(this.Text.getText() + "Se conecto un Cliente.\n");
                 //entrada se recibe los mensajaes del cliente
                 BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -90,12 +92,18 @@ public class SocketServidor extends Thread {
                 }
 
                 //se busca el archivo principal:
+                System.out.println("Se han recibido los siguientes archivos:");
+                this.Text.setText(this.Text.getText() + "Se han recibido los siguientes archivos:\n");
+
                 File main = null;
+                int i = 1;
                 for (File f : files) {
                     if (f.isMain()) {
                         main = f;
-                        break;
                     }
+                    System.out.println(i + "- " + f.getName());
+                    this.Text.setText(this.Text.getText() + i + "- " + f.getName() + "\n");
+                    i++;
                 }
 
                 //Si hay archivo principal, se ejecuta:
@@ -103,6 +111,9 @@ public class SocketServidor extends Thread {
                 Entorno global = new Entorno("Global");
 
                 if (main != null) {
+                    System.out.println("Archivo principal: " + main.getName());
+                    this.Text.setText(this.Text.getText() + "Archivo principal:" + main.getName() + "\n");
+
                     if (!(main.getContent().isEmpty() && main.getContent().isBlank())) {
                         Lexico lexico = new Lexico(new StringReader(main.getContent()));
                         Sintactico sintactico = new Sintactico(lexico);
@@ -121,12 +132,16 @@ public class SocketServidor extends Thread {
                             }
 
                         } catch (Exception ex) {
+                            System.out.println("Error al interpretar.");
+                            this.Text.setText(this.Text.getText() + "Error al interpretar.\n");
+
                             System.out.println("Parse: " + ex);
                         }
                     }
                 } else {
                     respuesta = "No se encontro el archivo principal";
-                    this.Text.setText(this.Text.getText() + "No se encontro el archivo principal.\n" );
+                    System.out.println("No se encontro el archivo principal.");
+                    this.Text.setText(this.Text.getText() + "No se encontro el archivo principal.\n");
                     //Agregar a los errore que no se econtro el main
                 }
 
@@ -156,25 +171,25 @@ public class SocketServidor extends Thread {
                     } else {
                         simObj.put("tipoParam", s.getTipoParam() == 1 ? "Valor" : "Referencia");
                     }
-                    
-                    if(s.getNumParam() < 0){
+
+                    if (s.getNumParam() < 0) {
                         simObj.put("numParam", "--");
                     } else {
-                        simObj.put("numParam", s.getNumParam()+"");
+                        simObj.put("numParam", s.getNumParam() + "");
                     }
-                    
+
                     simObj.put("ambito", s.getAmbito());
-                    
-                    if(s.getPos() < 0) {
+
+                    if (s.getPos() < 0) {
                         simObj.put("pos", "--");
                     } else {
-                        simObj.put("pos", s.getPos()+"");
+                        simObj.put("pos", s.getPos() + "");
                     }
-                    
-                    if(s.getTam() < 0) {
+
+                    if (s.getTam() < 0) {
                         simObj.put("tam", "--");
                     } else {
-                        simObj.put("tam", s.getTam()+"");
+                        simObj.put("tam", s.getTam() + "");
                     }
 
                     simObj.put("rol", s.getRol().name().toLowerCase());
@@ -190,7 +205,7 @@ public class SocketServidor extends Thread {
                 objFile.put("table", tableArray);
                 StringWriter out = new StringWriter();
                 objFile.writeJSONString(out);
-                
+
                 //salida.writeUTF("{\"foo-bar\": 12345}");
                 pw.println(out.toString());
 
@@ -199,12 +214,18 @@ public class SocketServidor extends Thread {
                 entrada.close();
                 //cerramos la conexion
                 socket.close();
-                this.Text.setText(this.Text.getText() + "Se termino la conexión.\n" );
+                System.out.println("Se responde al Cliente.");
+                this.Text.setText(this.Text.getText() + "Se responde al Cliente.\n");
+                
+                System.out.println("Conexión terminada.\n");
+                this.Text.setText(this.Text.getText() + "Conexión terminada.\n\n");
                 //ServidorSocket.close();
             }
 
         } catch (IOException e1) {
-            e1.printStackTrace();
+            System.out.println("ERROR!\nNo se pudo iniciar la conexión en el puerto:1234.\n");
+            this.Text.setText(this.Text.getText() + "ERROR!\nNo se pudo iniciar la conexión en el puerto:1234.\n\n");
+            //e1.printStackTrace();
             return;
         }
     }

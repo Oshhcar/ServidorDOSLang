@@ -10,11 +10,13 @@ import analizador.Lexico;
 import analizador.Sintactico;
 import analizador.ast.AST;
 import analizador.ast.entorno.Entorno;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.UIManager;
 
 /**
  *
@@ -26,14 +28,26 @@ public class Editor extends javax.swing.JFrame {
      * Creates new form Editor
      */
     SocketServidor server;
-    
+
     public Editor() {
         initComponents();
-        this.jTextArea1.setTabSize(2);
         this.jTextArea2.setTabSize(2);
-        
+
         server = null;
+
+        this.setLocationRelativeTo(null);
+        //this.setMinimumSize(new Dimension(500, 400));
+        //this.jPanel2.setLayout(new BorderLayout());
+        //this.jTabbedPane1.setLayout(new BorderLayout());
+        try {
+
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+
+        } catch (Exception e) {
+            // handle exception
+        }
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -43,28 +57,20 @@ public class Editor extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jButton1 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTextArea2 = new javax.swing.JTextArea();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Servidor DOSLang by Oscar Morales");
+        setPreferredSize(new java.awt.Dimension(430, 500));
+        setSize(new java.awt.Dimension(400, 500));
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
-
-        jButton1.setText("Ejecutar");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
+        jTextArea2.setEditable(false);
+        jTextArea2.setBackground(new java.awt.Color(204, 204, 204));
         jTextArea2.setColumns(20);
+        jTextArea2.setFont(new java.awt.Font("Arial", 0, 13)); // NOI18N
         jTextArea2.setRows(5);
         jScrollPane2.setViewportView(jTextArea2);
 
@@ -89,72 +95,54 @@ public class Editor extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 633, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1))
-                    .addComponent(jScrollPane2))
+                        .addComponent(jButton3)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 349, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 437, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton3)
+                    .addComponent(jButton2))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        
-        Lexico lexico = new Lexico(new StringReader(this.jTextArea1.getText()));
-        Sintactico sintactico = new Sintactico(lexico);
-        
-        try{
-            sintactico.parse();
-            AST ast = sintactico.getAST();
-            
-            if(ast != null){
-                ArrayList<ErrorC> errores = new ArrayList<>();
-                this.jTextArea2.setText(ast.GenerarCuadruplos(new Entorno("Global"), errores, new ArrayList<>(), this.jTextArea1.getText()));
-            }
-            
-        } catch(Exception ex){
-            System.out.println("Parse: "+ex);
-        }
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        if(server == null){
+        if (server == null) {
             server = new SocketServidor();
             server.setText(jTextArea2);
             server.start();
+        } else {
+            if(server.ServidorSocket == null){
+                server = new SocketServidor();
+                server.setText(jTextArea2);
+                server.start();
+            }
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        if(server != null){
-            System.out.println("Fin de la conexión");
-            this.jTextArea2.setText(this.jTextArea2.getText() + "Se apagó el servidor.\n");
-            try {
-                server.ServidorSocket.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+        if (server != null) {
+            if (server.ServidorSocket != null) {
+                System.out.println("Fin de la conexión");
+                this.jTextArea2.setText(this.jTextArea2.getText() + "Se apagó el servidor.\n\n");
+                try {
+                    server.ServidorSocket.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                server.stop();
             }
-            server.stop();
             server = null;
         }
     }//GEN-LAST:event_jButton3ActionPerformed
@@ -195,12 +183,9 @@ public class Editor extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextArea jTextArea2;
     // End of variables declaration//GEN-END:variables
 }

@@ -135,7 +135,7 @@ start with INICIO;
 INICIO ::= PROGRAM:a
         {: 
             parser.ast = a; 
-            System.out.println("DOCUMENTO OK"); 
+            //System.out.println("DOCUMENTO OK"); 
         :}
 ;
 

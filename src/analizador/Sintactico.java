@@ -1070,7 +1070,7 @@ class CUP$Sintactico$actions {
 		AST a = (AST)((java_cup.runtime.Symbol) CUP$Sintactico$stack.peek()).value;
 		 
             parser.ast = a; 
-            System.out.println("DOCUMENTO OK"); 
+            //System.out.println("DOCUMENTO OK"); 
         
               CUP$Sintactico$result = parser.getSymbolFactory().newSymbol("INICIO",0, ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), ((java_cup.runtime.Symbol)CUP$Sintactico$stack.peek()), RESULT);
             }
