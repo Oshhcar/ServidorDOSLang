@@ -87,6 +87,18 @@ public class AST {
         }
         
         /**
+         * Ejecuto declaracion Variables Use
+        */
+        if(Uses != null){
+            Uses.forEach((Use) ->{
+                Use.setFiles(files);
+                Use.setDeclaracion(true);
+                Use.setDeclararVar(true);
+                Use.GetCuadruplos(local, errores, global);
+            });
+        }
+        
+        /**
          * Ejecuto declaracion Métodos
          */
         if(Metodos != null){
@@ -104,6 +116,7 @@ public class AST {
             Uses.forEach((Use) ->{
                 Use.setFiles(files);
                 Use.setDeclaracion(true);
+                Use.setDeclararVar(false);
                 Use.GetCuadruplos(local, errores, global);
             });
         }
@@ -200,6 +213,19 @@ public class AST {
         }
         
         /**
+         * Ejecuto declaracion Variables Use
+        */
+        if(Uses != null){
+            Uses.forEach((Use) ->{
+                Use.setFiles(files);
+                Use.setDeclaracion(true);
+                Use.setDeclararVar(true);
+                Result rsUse = Use.GetCuadruplos(local, errores, global);
+                result.setCodigo(result.getCodigo() + rsUse.getCodigo());
+            });
+        }
+        
+        /**
          * Ejecuto declaracion Métodos
          */
         if(Metodos != null){
@@ -217,6 +243,7 @@ public class AST {
             Uses.forEach((Use) ->{
                 Use.setFiles(files);
                 Use.setDeclaracion(true);
+                Use.setDeclararVar(false);
                 Use.GetCuadruplos(local, errores, global);
             });
         }
@@ -273,6 +300,7 @@ public class AST {
             Uses.forEach((Use) ->{
                 Use.setFiles(files);
                 Use.setDeclaracion(false);
+                Use.setDeclararVar(false);
                 result.setCodigo(result.getCodigo()+ Use.GetCuadruplos(local, errores, global).getCodigo());
             });
         }

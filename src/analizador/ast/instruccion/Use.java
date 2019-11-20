@@ -24,6 +24,7 @@ public class Use extends Instruccion {
     private String Nombre;
     private ArrayList<File> Files;
     private boolean Declaracion;
+    private boolean DeclararVar;
 
     public Use(String Nombre, int Linea, int Columna) {
         super(Linea, Columna);
@@ -48,7 +49,10 @@ public class Use extends Instruccion {
         ArrayList<ErrorC> localErrores = new ArrayList<>();
 
         if (file != null) {
-
+            ArrayList<Use> Uses = null;
+            ArrayList<TipoDef> Tipos = null;
+            ArrayList<VarDef> Constantes = null;
+            ArrayList<VarDef> Variables = null;
             ArrayList<Metodo> Metodos = null;
 
             Lexico lexico = new Lexico(new StringReader(file.getContent()));
@@ -59,6 +63,10 @@ public class Use extends Instruccion {
                 AST ast = sintactico.getAST();
 
                 if (ast != null) {
+                    Uses = ast.getUses();
+                    Tipos = ast.getTipos();
+                    Constantes = ast.getConstantes();
+                    Variables = ast.getVariables();
                     Metodos = ast.getMetodos();
                 }
 
@@ -69,25 +77,71 @@ public class Use extends Instruccion {
             localErrores.addAll(lexico.getErrores());
             localErrores.addAll(sintactico.getErrores());
 
-            if (Metodos != null) {
-                for(Metodo metodo: Metodos) {
-                    metodo.setDeclaracion(Declaracion);
-                    metodo.setAmbito(Nombre);
-                    Result rsMetodo = metodo.GetCuadruplos(e, localErrores, global);
-                    
-                    if(!Declaracion){
+            if (DeclararVar) {
+                ArrayList<ErrorC> otrosErrores = new ArrayList<>();
+
+                if (Tipos != null) {
+                    Tipos.forEach((tipo) -> {
+                        tipo.GetCuadruplos(e, otrosErrores, global);
+                    });
+                }
+
+                if (Constantes != null) {
+                    for (VarDef constante : Constantes) {
+                        constante.setConstante(true);
+                        Result rsCons = constante.GetCuadruplos(e, otrosErrores, global);
+                        if (rsCons != null) {
+                            codigo += rsCons.getCodigo();
+                        }
+                    }
+                }
+
+                if (Variables != null) {
+                    for (VarDef variable : Variables) {
+                        Result rsVar = variable.GetCuadruplos(e, otrosErrores, global);
+                        if (rsVar != null) {
+                            codigo += rsVar.getCodigo();
+                        }
+                    }
+                }
+
+                if (Uses != null) {
+                    for(Use Use: Uses){
+                        Use.setFiles(Files);
+                        Use.setDeclaracion(Declaracion);
+                        Use.setDeclararVar(true);
+                        Result rsUse = Use.GetCuadruplos(e, otrosErrores, global);
+                        codigo += rsUse.getCodigo();
+                    }
+                }
+
+            } else {
+                if (Metodos != null) {
+                    for (Metodo metodo : Metodos) {
+                        metodo.setDeclaracion(Declaracion);
+                        metodo.setAmbito(Nombre);
+                        Result rsMetodo = metodo.GetCuadruplos(e, localErrores, global);
                         codigo += rsMetodo.getCodigo();
                     }
-                    
+                }
+                
+                if (Uses != null) {
+                    for(Use Use: Uses){
+                        Use.setFiles(Files);
+                        Use.setDeclaracion(Declaracion);
+                        Use.setDeclararVar(false);
+                        Result rsUse = Use.GetCuadruplos(e, localErrores, global);
+                        codigo += rsUse.getCodigo();
+                    }
                 }
             }
 
         } else {
             localErrores.add(new ErrorC("Semántico", Linea, Columna, "No se ha encontrado el archivo " + Nombre + "."));
         }
-        
-        if(!Declaracion){
-            for(ErrorC error: localErrores){
+
+        if (!Declaracion) {
+            for (ErrorC error : localErrores) {
                 error.setDescripcion(error.getDescripcion() + " en archivo " + Nombre);
             }
             errores.addAll(localErrores);
@@ -137,6 +191,20 @@ public class Use extends Instruccion {
      */
     public void setDeclaracion(boolean Declaracion) {
         this.Declaracion = Declaracion;
+    }
+
+    /**
+     * @return the DeclararVar
+     */
+    public boolean isDeclararVar() {
+        return DeclararVar;
+    }
+
+    /**
+     * @param DeclararVar the DeclararVar to set
+     */
+    public void setDeclararVar(boolean DeclararVar) {
+        this.DeclararVar = DeclararVar;
     }
 
 }
