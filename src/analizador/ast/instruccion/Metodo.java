@@ -239,7 +239,7 @@ public class Metodo extends Instruccion {
                     local.setSizeTotal(local.getSize() + (local.getTmpFin() - local.getTmpInicio() + 1));
                     local.setGuardarGlobal(true);
 
-                    System.out.println("inicio metodo: " + local.getTmpInicio() + " fin " + local.getTmpFin());
+                    //System.out.println("inicio metodo: " + local.getTmpInicio() + " fin " + local.getTmpFin());
 
                     NodoAST.Temporales = temporales;
 
@@ -339,7 +339,9 @@ public class Metodo extends Instruccion {
                             //global.getSimbolos().addAll(s.getEntorno().getSimbolos());
                             for (Simbolo s2 : s.getEntorno().getSimbolos()) {
                                 if (s2.getRol() != Rol.FUNCION && s2.getRol() != Rol.METHOD) {
-                                    global.Add(s2);
+                                    if(s2.getRol() != Rol.GLOBAL){
+                                        global.Add(s2);
+                                    }
                                 }
                             }
                         }

@@ -145,7 +145,7 @@ public class AST {
         local.setTmpFin(NodoAST.Temporales);
         local.setSizeTotal(local.getSize() + (local.getTmpFin() - local.getTmpInicio()+1) );
         
-        System.out.println("inicio: " + local.getTmpInicio() + " fin " + local.getTmpFin());
+        //System.out.println("inicio: " + local.getTmpInicio() + " fin " + local.getTmpFin());
 
         //Reinicio el contador de las variables locales y tmp etc
         local.setPos(0);
@@ -312,7 +312,9 @@ public class AST {
                 //global.getSimbolos().addAll(s.getEntorno().getSimbolos());
                 for(Simbolo s2: s.getEntorno().getSimbolos()){
                     if(s2.getRol() != Rol.FUNCION && s2.getRol() != Rol.METHOD){
-                        global.Add(s2);
+                        if(s2.getRol() != Rol.GLOBAL){
+                            global.Add(s2);
+                        }
                     }
                 }
             }
