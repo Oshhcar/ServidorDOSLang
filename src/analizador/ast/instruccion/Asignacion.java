@@ -241,13 +241,13 @@ public class Asignacion extends Instruccion {
                 }
             }
         } else if (target.IsRecord()) {
-            if (valor.IsInteger()) {
+            if (valor.IsInteger() || valor.IsNil()) {
                 return true;
             } else if (valor.IsRecord()) {
                 if (target.getIdRecord() == valor.getIdRecord()) {
                     return true;
                 }
-            }
+            } 
         } else if (target.IsArray()) {
             if (valor.IsArray()) {
 
