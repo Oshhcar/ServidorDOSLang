@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
         public void addError(){
             if(this.isError){
-                ErrorC error = new ErrorC("Léxico", yyline, this.columnaError, "Carácter " + this.valorError + " no reconocido.");
+                ErrorC error = new ErrorC("Léxico", yyline+1, this.columnaError, "Carácter " + this.valorError + " no reconocido.");
                 this.errores.add(error);
                 this.isError = false;
                 this.columnaError = 0;
@@ -61,16 +61,21 @@ identificador = ({letra}|"_")({letra}|{digito}|"_")*
 finLinea = \r|\n|\r\n
 espacioBlanco = {finLinea} | [ \t\f]
 
+/*
 COMENT_SIMPLE ="(*" [^\r\n]* "*)" {finLinea}?
 COMENT_MULTI ="{""{"*([^}])*"}"*"}"
+*/
 
 %state STRING
 %state CHAR
-
+%state COMENT_SIMPLE
+%state COMENT_MULTI
 %%
 
+/*
 {COMENT_SIMPLE} 	{/* se ignora */} 
 {COMENT_MULTI} 		{/* se ignora */} 
+*/
 
 /* Palabras Reservadas*/
 <YYINITIAL> "true"			{ return symbol(Sym.true_);}
@@ -120,7 +125,8 @@ COMENT_MULTI ="{""{"*([^}])*"}"*"}"
 
 \" 					{ string.setLength(0); yybegin(STRING); }
 \' 					{ string.setLength(0); yybegin(CHAR); }
-
+"{"                                     { yybegin(COMENT_MULTI); }
+"(*"                                    { yybegin(COMENT_SIMPLE); }
 ";"					{return symbol(Sym.puntoycoma);}
 ","					{return symbol(Sym.coma);}
 "..."					{return symbol(Sym.puntos3);}
@@ -173,7 +179,7 @@ COMENT_MULTI ="{""{"*([^}])*"}"*"}"
 <STRING> {
 \"                   { yybegin(YYINITIAL);
 					   return symbol(Sym.tstring, string.toString()); }
-[^\"\\]+               { string.append( yytext() ); }
+[^\"\\\n]+               { string.append( yytext() ); }
 \\\"                 { string.append('\"'); }
 \\\'                 { string.append('\''); }
 \\\\                 { string.append('\\'); }
@@ -185,12 +191,20 @@ COMENT_MULTI ="{""{"*([^}])*"}"*"}"
 \\n                  { string.append('\n'); }
 \\r                  { string.append('\r'); }
 \\v                  { string.append((char)11); }
+\n                   { yybegin(YYINITIAL);
+                        if(!this.isError){
+                            this.isError = true;
+                            this.columnaError = yycolumn+1;
+                        }
+                        this.valorError += yytext(); 
+			return symbol(Sym.tstring, string.toString()); 
+                     }
 }
 
 <CHAR> {
 \'                   { yybegin(YYINITIAL);
 					   return symbol(Sym.tchar, string.toString()); }
-[^\'\\]+             { string.append( yytext() ); }
+[^\'\\\n]+             { string.append( yytext() ); }
 \\\"                 { string.append('\"'); }
 \\\'                 { string.append('\''); }
 \\\\                 { string.append('\\'); }
@@ -202,6 +216,33 @@ COMENT_MULTI ="{""{"*([^}])*"}"*"}"
 \\n                  { string.append('\n'); }
 \\r                  { string.append('\r'); }
 \\v                  { string.append((char)11); }
+\n                   { yybegin(YYINITIAL);
+                        if(!this.isError){
+                            this.isError = true;
+                            this.columnaError = yycolumn+1;
+                        }
+                        this.valorError += yytext(); 
+                        return symbol(Sym.tchar, string.toString());
+                     }
+}
+
+<COMENT_MULTI>{
+"}"                   { yybegin(YYINITIAL); }
+
+[^}]+                 { }
+}
+
+<COMENT_SIMPLE>{
+"*)"                   { yybegin(YYINITIAL); }
+
+[^"*)"\n]+             { }
+\n                     { yybegin(YYINITIAL);
+                        if(!this.isError){
+                            this.isError = true;
+                            this.columnaError = yycolumn+1;
+                        }
+                        this.valorError += yytext(); 
+                        }
 }
 
 /* ERRORES LEXICOS */
