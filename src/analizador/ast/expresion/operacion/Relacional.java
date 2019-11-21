@@ -69,7 +69,15 @@ public class Relacional extends Operacion {
 
                 codigo += Comparacion(result, rsOp1, rsOp2, e);
 
-            } else { //comprobar otros tipos ---------------->
+            } else if (Op1.getTipo().IsNil() || Op2.getTipo().IsNil()) {
+               Tipo.setTipo(Type.BOOLEAN);
+               
+               codigo += rsOp1.getCodigo();
+               codigo += rsOp2.getCodigo();
+               
+               codigo += Comparacion(result, rsOp1, rsOp2, e);
+               
+            } else {
                 errores.add(new ErrorC("Semántico", Linea, Columna, "Error de tipos en operación relacional."));
             }
 
