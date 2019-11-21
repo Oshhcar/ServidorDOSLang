@@ -264,6 +264,7 @@ public class Metodo extends Instruccion {
                      */
                     if (Variables != null) {
                         for (VarDef variable : Variables) {
+                            variable.setAsignar(false);
                             Result rsVar = variable.GetCuadruplos(local, errores, global);
                             if (rsVar != null) {
                                 codigo += rsVar.getCodigo();
@@ -281,6 +282,19 @@ public class Metodo extends Instruccion {
                             tmpS.setRol(Rol.GLOBAL);
                             tmpS.setEntorno(sim.getEntorno());
                             local.Add(tmpS);
+                        }
+                    }
+                    
+                    /**
+                     * Ejecuto declaracion Variables
+                     */
+                    if (Variables != null) {
+                        for (VarDef variable : Variables) {
+                            variable.setSoloAsignar(true);
+                            Result rsVar = variable.GetCuadruplos(local, errores, global);
+                            if (rsVar != null) {
+                                codigo += rsVar.getCodigo();
+                            }
                         }
                     }
 
@@ -339,9 +353,9 @@ public class Metodo extends Instruccion {
                             //global.getSimbolos().addAll(s.getEntorno().getSimbolos());
                             for (Simbolo s2 : s.getEntorno().getSimbolos()) {
                                 if (s2.getRol() != Rol.FUNCION && s2.getRol() != Rol.METHOD) {
-                                    if(s2.getRol() != Rol.GLOBAL){
+                                    //if(s2.getRol() != Rol.GLOBAL){
                                         global.Add(s2);
-                                    }
+                                    //}
                                 }
                             }
                         }

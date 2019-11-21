@@ -30,6 +30,9 @@ public class VarDef extends Instruccion {
     private Tipo Tipo;
     private Expresion Expr;
     private boolean Constante;
+    private boolean Asignar;
+    private ArrayList<Boolean> Guardado;
+    private boolean SoloAsignar;
 
     public VarDef(ArrayList<String> Id, Tipo Tipo, int Linea, int Columna) {
         super(Linea, Columna);
@@ -37,6 +40,14 @@ public class VarDef extends Instruccion {
         this.Tipo = Tipo;
         this.Expr = null;
         this.Constante = false;
+        this.Asignar = true;
+
+        Guardado = new ArrayList<>();
+        Id.forEach((item) -> {
+            Guardado.add(false);
+        });
+
+        this.SoloAsignar = false;
     }
 
     public VarDef(ArrayList<String> Id, Tipo Tipo, Expresion Expr, int Linea, int Columna) {
@@ -45,6 +56,14 @@ public class VarDef extends Instruccion {
         this.Tipo = Tipo;
         this.Expr = Expr;
         this.Constante = false;
+        this.Asignar = true;
+
+        Guardado = new ArrayList<>();
+        Id.forEach((item) -> {
+            Guardado.add(false);
+        });
+
+        this.SoloAsignar = false;
     }
 
     @Override
@@ -52,210 +71,291 @@ public class VarDef extends Instruccion {
         Result result = new Result();
         String codigo = "";
 
-        //Si es un tipo definido
-        if (Tipo.getId() != null) {
-            Simbolo type = e.Get(Tipo.getId());
-            if (type == null) {
-                errores.add(new ErrorC("Semántico", Linea, Columna, "No se ha definido un tipo con el id: " + Tipo.getId() + "."));
-                return null;
-            } else {
-                if (type.getRol() == Rol.TYPE) {
-                    Tipo.setId(Tipo.getId().toLowerCase());
-                    Tipo.setTipoPadre(type.getTipo());
-                } else {
-                    errores.add(new ErrorC("Semántico", Linea, Columna, Tipo.getId() + " no es un tipo."));
+        if (!SoloAsignar) {
+            //Si es un tipo definido
+            if (Tipo.getId() != null) {
+                Simbolo type = e.Get(Tipo.getId());
+                if (type == null) {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "No se ha definido un tipo con el id: " + Tipo.getId() + "."));
                     return null;
-                }
-            }
-        } else {
-            if (Tipo.getLimiteInf() != null && Tipo.getLimiteSup() != null) {
-                Tipo.getLimiteInf().GetCuadruplos(e, errores);
-                Tipo.getLimiteSup().GetCuadruplos(e, errores);
-
-                if (Tipo.getLimiteInf().getTipo().IsNumeric() && Tipo.getLimiteSup().getTipo().IsNumeric()) {
-                    if (Tipo.getLimiteInf().getTipo().getTipo() == Tipo.getLimiteSup().getTipo().getTipo()) {
-                        Tipo.setTipo(Tipo.getLimiteInf().getTipo().getTipo());
+                } else {
+                    if (type.getRol() == Rol.TYPE) {
+                        Tipo.setId(Tipo.getId().toLowerCase());
+                        Tipo.setTipoPadre(type.getTipo());
                     } else {
-                        errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo del límite inferior no coincide con el del límite superior."));
+                        errores.add(new ErrorC("Semántico", Linea, Columna, Tipo.getId() + " no es un tipo."));
                         return null;
                     }
-                } else {
-                    errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo subrango solo acepta tipos numéricos y carácteres."));
-                    return null;
                 }
-            } else if (Tipo.getVariables() != null) {
-                Tipo.setIdRecord(this.hashCode());
-                Tipo.setEntorno(new Entorno("record", e));
-                Tipo.getVariables().forEach((variable) -> {
-                    variable.GetCuadruplos(Tipo.getEntorno(), errores, global);
-                });
-                Tipo.getEntorno().setSize(Tipo.getEntorno().getPos());
-                Tipo.getEntorno().setPadre(null);
-            } else if (Tipo.getDimensiones() != null) {
+            } else {
+                if (Tipo.getLimiteInf() != null && Tipo.getLimiteSup() != null) {
+                    Tipo.getLimiteInf().GetCuadruplos(e, errores);
+                    Tipo.getLimiteSup().GetCuadruplos(e, errores);
 
-                while (Tipo.getTipoArray().IsArray()) {
-                    Tipo.getDimensiones().addAll(Tipo.getTipoArray().getDimensiones());
-                    Tipo.setTipoArray(Tipo.getTipoArray().getTipoArray());
-                }
-
-                //Verifico el tipoArray
-                if (Tipo.getTipoArray().getId() != null) {
-                    Simbolo type = e.Get(Tipo.getTipoArray().getId());
-                    if (type == null) {
-                        errores.add(new ErrorC("Semántico", Linea, Columna, "No se ha definido un tipo con el id: " + Tipo.getTipoArray().getId() + "."));
-                        return null;
-                    } else {
-                        if (type.getRol() == Rol.TYPE) {
-
-                            if (type.getTipo().IsArray()) {
-                                Tipo tipSim = type.getTipo();
-
-                                while (tipSim.IsArray()) {
-                                    Tipo.getDimensiones().addAll(tipSim.getDimensiones());
-                                    tipSim = type.getTipo().getTipoArray();
-                                }
-                                Tipo.getTipoArray().setId(Tipo.getTipoArray().getId().toLowerCase());
-                                Tipo.getTipoArray().setTipoPadre(tipSim);
-                            } else {
-                                Tipo.getTipoArray().setId(Tipo.getTipoArray().getId().toLowerCase());
-                                Tipo.getTipoArray().setTipoPadre(type.getTipo());
-                            }
+                    if (Tipo.getLimiteInf().getTipo().IsNumeric() && Tipo.getLimiteSup().getTipo().IsNumeric()) {
+                        if (Tipo.getLimiteInf().getTipo().getTipo() == Tipo.getLimiteSup().getTipo().getTipo()) {
+                            Tipo.setTipo(Tipo.getLimiteInf().getTipo().getTipo());
                         } else {
-                            errores.add(new ErrorC("Semántico", Linea, Columna, Tipo.getTipoArray().getId() + " no es un tipo."));
+                            errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo del límite inferior no coincide con el del límite superior."));
                             return null;
                         }
+                    } else {
+                        errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo subrango solo acepta tipos numéricos y carácteres."));
+                        return null;
                     }
-                } else {
-                    if (Tipo.getTipoArray().getLimiteInf() != null && Tipo.getTipoArray().getLimiteSup() != null) {
-                        Tipo.getTipoArray().getLimiteInf().GetCuadruplos(e, errores);
-                        Tipo.getTipoArray().getLimiteSup().GetCuadruplos(e, errores);
+                } else if (Tipo.getVariables() != null) {
+                    Tipo.setIdRecord(this.hashCode());
+                    Tipo.setEntorno(new Entorno("record", e));
+                    Tipo.getVariables().forEach((variable) -> {
+                        variable.GetCuadruplos(Tipo.getEntorno(), errores, global);
+                    });
+                    Tipo.getEntorno().setSize(Tipo.getEntorno().getPos());
+                    Tipo.getEntorno().setPadre(null);
+                } else if (Tipo.getDimensiones() != null) {
 
-                        if (Tipo.getTipoArray().getLimiteInf().getTipo().IsNumeric() && Tipo.getTipoArray().getLimiteSup().getTipo().IsNumeric()) {
-                            if (Tipo.getTipoArray().getLimiteInf().getTipo().getTipo() == Tipo.getTipoArray().getLimiteSup().getTipo().getTipo()) {
-                                Tipo.getTipoArray().setTipo(Tipo.getTipoArray().getLimiteInf().getTipo().getTipo());
+                    while (Tipo.getTipoArray().IsArray()) {
+                        Tipo.getDimensiones().addAll(Tipo.getTipoArray().getDimensiones());
+                        Tipo.setTipoArray(Tipo.getTipoArray().getTipoArray());
+                    }
+
+                    //Verifico el tipoArray
+                    if (Tipo.getTipoArray().getId() != null) {
+                        Simbolo type = e.Get(Tipo.getTipoArray().getId());
+                        if (type == null) {
+                            errores.add(new ErrorC("Semántico", Linea, Columna, "No se ha definido un tipo con el id: " + Tipo.getTipoArray().getId() + "."));
+                            return null;
+                        } else {
+                            if (type.getRol() == Rol.TYPE) {
+
+                                if (type.getTipo().IsArray()) {
+                                    Tipo tipSim = type.getTipo();
+
+                                    while (tipSim.IsArray()) {
+                                        Tipo.getDimensiones().addAll(tipSim.getDimensiones());
+                                        tipSim = type.getTipo().getTipoArray();
+                                    }
+                                    Tipo.getTipoArray().setId(Tipo.getTipoArray().getId().toLowerCase());
+                                    Tipo.getTipoArray().setTipoPadre(tipSim);
+                                } else {
+                                    Tipo.getTipoArray().setId(Tipo.getTipoArray().getId().toLowerCase());
+                                    Tipo.getTipoArray().setTipoPadre(type.getTipo());
+                                }
                             } else {
-                                errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo del límite inferior no coincide con el del límite superior."));
+                                errores.add(new ErrorC("Semántico", Linea, Columna, Tipo.getTipoArray().getId() + " no es un tipo."));
                                 return null;
                             }
-                        } else {
-                            errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo subrango solo acepta tipos numéricos y carácteres."));
-                            return null;
                         }
-                    } else if (Tipo.getTipoArray().getVariables() != null) {
-                        Tipo.getTipoArray().setIdRecord(this.hashCode());
-                        Tipo.getTipoArray().setEntorno(new Entorno("record", e));
-                        Tipo.getTipoArray().getVariables().forEach((variable) -> {
-                            variable.GetCuadruplos(Tipo.getTipoArray().getEntorno(), errores, global);
-                        });
-                        Tipo.getTipoArray().getEntorno().setSize(Tipo.getTipoArray().getEntorno().getPos());
-                        Tipo.getTipoArray().getEntorno().setPadre(null);
-                    }
-                }
+                    } else {
+                        if (Tipo.getTipoArray().getLimiteInf() != null && Tipo.getTipoArray().getLimiteSup() != null) {
+                            Tipo.getTipoArray().getLimiteInf().GetCuadruplos(e, errores);
+                            Tipo.getTipoArray().getLimiteSup().GetCuadruplos(e, errores);
 
-                for (Dimension dimension : Tipo.getDimensiones()) {
-                    dimension.getLimiteInf().GetCuadruplos(e, errores);
-                    dimension.getLimiteSup().GetCuadruplos(e, errores);
-
-                    if (!dimension.getLimiteInf().getTipo().IsInteger()) {
-                        if (!dimension.getLimiteInf().getTipo().IsChar()) {
-                            errores.add(new ErrorC("Semántico", Linea, Columna, "La dimensión debe ser integer."));
-                            return null;
-                        }
-                    }
-
-                    if (!dimension.getLimiteSup().getTipo().IsInteger()) {
-                        if (!dimension.getLimiteSup().getTipo().IsChar()) {
-                            errores.add(new ErrorC("Semántico", Linea, Columna, "La dimensión debe ser integer."));
-                            return null;
+                            if (Tipo.getTipoArray().getLimiteInf().getTipo().IsNumeric() && Tipo.getTipoArray().getLimiteSup().getTipo().IsNumeric()) {
+                                if (Tipo.getTipoArray().getLimiteInf().getTipo().getTipo() == Tipo.getTipoArray().getLimiteSup().getTipo().getTipo()) {
+                                    Tipo.getTipoArray().setTipo(Tipo.getTipoArray().getLimiteInf().getTipo().getTipo());
+                                } else {
+                                    errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo del límite inferior no coincide con el del límite superior."));
+                                    return null;
+                                }
+                            } else {
+                                errores.add(new ErrorC("Semántico", Linea, Columna, "El tipo subrango solo acepta tipos numéricos y carácteres."));
+                                return null;
+                            }
+                        } else if (Tipo.getTipoArray().getVariables() != null) {
+                            Tipo.getTipoArray().setIdRecord(this.hashCode());
+                            Tipo.getTipoArray().setEntorno(new Entorno("record", e));
+                            Tipo.getTipoArray().getVariables().forEach((variable) -> {
+                                variable.GetCuadruplos(Tipo.getTipoArray().getEntorno(), errores, global);
+                            });
+                            Tipo.getTipoArray().getEntorno().setSize(Tipo.getTipoArray().getEntorno().getPos());
+                            Tipo.getTipoArray().getEntorno().setPadre(null);
                         }
                     }
 
+                    for (Dimension dimension : Tipo.getDimensiones()) {
+                        dimension.getLimiteInf().GetCuadruplos(e, errores);
+                        dimension.getLimiteSup().GetCuadruplos(e, errores);
+
+                        if (!dimension.getLimiteInf().getTipo().IsInteger()) {
+                            if (!dimension.getLimiteInf().getTipo().IsChar()) {
+                                errores.add(new ErrorC("Semántico", Linea, Columna, "La dimensión debe ser integer."));
+                                return null;
+                            }
+                        }
+
+                        if (!dimension.getLimiteSup().getTipo().IsInteger()) {
+                            if (!dimension.getLimiteSup().getTipo().IsChar()) {
+                                errores.add(new ErrorC("Semántico", Linea, Columna, "La dimensión debe ser integer."));
+                                return null;
+                            }
+                        }
+
+                    }
                 }
             }
-        }
 
-        for (String id : Id) {
-            if (e.GetLocal(id) == null) {
-                Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito());
-                s.setConstante(Constante);
+            for (int i = 0; i < Id.size(); i++) {
+                String id = Id.get(i);
 
-                if (Tipo.IsRecord()) {
-                    s.setEntorno(new Entorno(id));
-                    Tipo.getEntorno().getSimbolos().forEach((sim) -> {
-                        s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id, s));
-                    });
+                if (e.GetLocal(id) == null) {
+                    Simbolo s = new Simbolo(id, Tipo, e.getPos(), e.getAmbito());
+                    s.setConstante(Constante);
 
-                }
-
-                //Si es arreglo lo instancio
-                if (Tipo.IsArray()) {
-
-                    //Si es record guardo simbolos
-                    if (Tipo.getTipoArray().IsRecord()) {
+                    if (Tipo.IsRecord()) {
                         s.setEntorno(new Entorno(id));
-                        Tipo.getTipoArray().getEntorno().getSimbolos().forEach((sim) -> {
+                        Tipo.getEntorno().getSimbolos().forEach((sim) -> {
                             s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id, s));
                         });
+
                     }
 
-                    int tmp = NuevoTemporal();
-                    codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
-                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                    codigo += "=, t0, t" + tmp + ", stack\n";
+                    //Si es arreglo lo instancio
+                    if (Tipo.IsArray() && Asignar) {
 
-                    codigo += "=, t" + tmp + ", H, stack\n";
+                        //Si es record guardo simbolos
+                        if (Tipo.getTipoArray().IsRecord()) {
+                            s.setEntorno(new Entorno(id));
+                            Tipo.getTipoArray().getEntorno().getSimbolos().forEach((sim) -> {
+                                s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id, s));
+                            });
+                        }
 
-                    codigo += LlenarDimension(0, e, errores);
-                    //codigo += "+, H, t" + rsSuma.getValor() + ", H\n"; //reservo memoria
-                }
-
-                e.Add(s);
-
-                Identificador target;
-                Asignacion asigna;
-
-                if (Expr != null) {
-                    target = new Identificador(id, Linea, Columna);
-                    asigna = new Asignacion(target, Expr, Linea, Columna);
-                    asigna.setInicializacion(true);
-                    codigo += asigna.GetCuadruplos(e, errores, global).getCodigo();
-                } else {
-                    /*Valores por defecto*/
-                    if (Tipo.IsNumeric() || Tipo.IsEnum() || Tipo.IsBoolean()) {
                         int tmp = NuevoTemporal();
                         codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
                         codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
                         codigo += "=, t0, t" + tmp + ", stack\n";
-                        
-                        if(Tipo.getLimiteInf() == null){
-                            codigo += "=, t" + tmp + ", 0, stack\n";
+
+                        codigo += "=, t" + tmp + ", H, stack\n";
+
+                        codigo += LlenarDimension(0, e, errores);
+                        //codigo += "+, H, t" + rsSuma.getValor() + ", H\n"; //reservo memoria
+                    }
+
+                    e.Add(s);
+
+                    Guardado.set(i, true);
+
+                    if (Asignar) {
+                        Identificador target;
+                        Asignacion asigna;
+
+                        if (Expr != null) {
+                            target = new Identificador(id, Linea, Columna);
+                            asigna = new Asignacion(target, Expr, Linea, Columna);
+                            asigna.setInicializacion(true);
+                            codigo += asigna.GetCuadruplos(e, errores, global).getCodigo();
                         } else {
-                            Result rsLimite = Tipo.getLimiteInf().GetCuadruplos(e, errores);
-                            codigo += rsLimite.getCodigo();
-                            codigo += "=, t" + tmp + ", t" + rsLimite.getValor() + ", stack\n";
+                            /*Valores por defecto*/
+                            if (Tipo.IsNumeric() || Tipo.IsEnum() || Tipo.IsBoolean()) {
+                                int tmp = NuevoTemporal();
+                                codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
+                                codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmp + ", stack\n";
+
+                                if (Tipo.getLimiteInf() == null) {
+                                    codigo += "=, t" + tmp + ", 0, stack\n";
+                                } else {
+                                    Result rsLimite = Tipo.getLimiteInf().GetCuadruplos(e, errores);
+                                    codigo += rsLimite.getCodigo();
+                                    codigo += "=, t" + tmp + ", t" + rsLimite.getValor() + ", stack\n";
+                                }
+                            } else {
+                                if (Tipo.IsString() || Tipo.IsRecord()) {
+                                    int tmp = NuevoTemporal();
+                                    codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
+                                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                    codigo += "=, t0, t" + tmp + ", stack\n";
+
+                                    int tmpVal = NuevoTemporal();
+                                    codigo += "-, 0, 1, t" + tmpVal + "\n";
+                                    codigo += "+, P, " + (tmpVal - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                    codigo += "=, t0, t" + tmpVal + ", stack\n";
+
+                                    codigo += "=, t" + tmp + ", t" + tmpVal + ", stack\n";
+                                }
+                            }
                         }
-                    } else {
-                        if (Tipo.IsString() || Tipo.IsRecord()) {
+                    }
+
+                    //if(e.isGuardarGlobal()){
+                    //    global.Add(s);
+                    //}
+                } else {
+                    errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
+                }
+            }
+        } else {
+            for (int i = 0; i < Id.size(); i++) {
+                String id = Id.get(i);
+
+                if (Guardado.get(i)) {
+                    Simbolo s = e.GetLocal(id);
+
+                    if (s != null) {
+
+                        if (Tipo.IsArray()) {
+
+                            //Si es record guardo simbolos
+                            if (Tipo.getTipoArray().IsRecord()) {
+                                s.setEntorno(new Entorno(id));
+                                Tipo.getTipoArray().getEntorno().getSimbolos().forEach((sim) -> {
+                                    s.getEntorno().Add(new Simbolo(sim.getId(), sim.getTipo(), sim.getPos(), id, s));
+                                });
+                            }
+
                             int tmp = NuevoTemporal();
                             codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
                             codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
                             codigo += "=, t0, t" + tmp + ", stack\n";
 
-                            int tmpVal = NuevoTemporal();
-                            codigo += "-, 0, 1, t" + tmpVal + "\n";
-                            codigo += "+, P, " + (tmpVal - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                            codigo += "=, t0, t" + tmpVal + ", stack\n";
+                            codigo += "=, t" + tmp + ", H, stack\n";
 
-                            codigo += "=, t" + tmp + ", t" + tmpVal + ", stack\n";
+                            codigo += LlenarDimension(0, e, errores);
+                            //codigo += "+, H, t" + rsSuma.getValor() + ", H\n"; //reservo memoria
+                        }
+
+                        Identificador target;
+                        Asignacion asigna;
+
+                        if (Expr != null) {
+                            target = new Identificador(id, Linea, Columna);
+                            asigna = new Asignacion(target, Expr, Linea, Columna);
+                            asigna.setInicializacion(true);
+                            codigo += asigna.GetCuadruplos(e, errores, global).getCodigo();
+                        } else {
+                            /*Valores por defecto*/
+                            if (Tipo.IsNumeric() || Tipo.IsEnum() || Tipo.IsBoolean()) {
+                                int tmp = NuevoTemporal();
+                                codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
+                                codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                codigo += "=, t0, t" + tmp + ", stack\n";
+
+                                if (Tipo.getLimiteInf() == null) {
+                                    codigo += "=, t" + tmp + ", 0, stack\n";
+                                } else {
+                                    Result rsLimite = Tipo.getLimiteInf().GetCuadruplos(e, errores);
+                                    codigo += rsLimite.getCodigo();
+                                    codigo += "=, t" + tmp + ", t" + rsLimite.getValor() + ", stack\n";
+                                }
+                            } else {
+                                if (Tipo.IsString() || Tipo.IsRecord()) {
+                                    int tmp = NuevoTemporal();
+                                    codigo += "+, P, " + s.getPos() + ", t" + tmp + "\n";
+                                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                    codigo += "=, t0, t" + tmp + ", stack\n";
+
+                                    int tmpVal = NuevoTemporal();
+                                    codigo += "-, 0, 1, t" + tmpVal + "\n";
+                                    codigo += "+, P, " + (tmpVal - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                                    codigo += "=, t0, t" + tmpVal + ", stack\n";
+
+                                    codigo += "=, t" + tmp + ", t" + tmpVal + ", stack\n";
+                                }
+                            }
                         }
                     }
                 }
 
-                //if(e.isGuardarGlobal()){
-                //    global.Add(s);
-                //}
-            } else {
-                errores.add(new ErrorC("Semántico", Linea, Columna, "Ya se ha definido una variable con el id: " + id + "."));
             }
         }
 
@@ -395,6 +495,48 @@ public class VarDef extends Instruccion {
      */
     public void setConstante(boolean Constante) {
         this.Constante = Constante;
+    }
+
+    /**
+     * @return the Asignar
+     */
+    public boolean isAsignar() {
+        return Asignar;
+    }
+
+    /**
+     * @param Asignar the Asignar to set
+     */
+    public void setAsignar(boolean Asignar) {
+        this.Asignar = Asignar;
+    }
+
+    /**
+     * @return the Guardado
+     */
+    public ArrayList<Boolean> getGuardado() {
+        return Guardado;
+    }
+
+    /**
+     * @param Guardado the Guardado to set
+     */
+    public void setGuardado(ArrayList<Boolean> Guardado) {
+        this.Guardado = Guardado;
+    }
+
+    /**
+     * @return the SoloAsignar
+     */
+    public boolean isSoloAsignar() {
+        return SoloAsignar;
+    }
+
+    /**
+     * @param SoloAsignar the SoloAsignar to set
+     */
+    public void setSoloAsignar(boolean SoloAsignar) {
+        this.SoloAsignar = SoloAsignar;
     }
 
 }
