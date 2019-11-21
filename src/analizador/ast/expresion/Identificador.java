@@ -164,14 +164,12 @@ public class Identificador extends Expresion {
                 codigo += "=, t0, t" + result.getValor() + ", stack\n";
 
                 if (Acceso) {
-                    if (!(sim.getTipo().IsArray() || sim.getTipo().IsRecord())) {
-                        tmp = NuevoTemporal();
+                    tmp = NuevoTemporal();
 
-                        codigo += "=, stack, t" + result.getValor() + ", t" + tmp + "\n";
-                        codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                        codigo += "=, t0, t" + tmp + ", stack\n";
-                        result.setValor(tmp);
-                    }
+                    codigo += "=, stack, t" + result.getValor() + ", t" + tmp + "\n";
+                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + tmp + ", stack\n";
+                    result.setValor(tmp);
 
                 } else {
                     result.setEstructura("stack");

@@ -38,9 +38,9 @@ public class Atributo extends Expresion {
         String codigo = "";
 
         if (Target instanceof Identificador) {
-           //((Identificador) Target).setAcceso(false); //creo que aca solo necesito el simbolo
-            ((Identificador) Target).setObtenerSim(true);
-        } 
+            //((Identificador) Target).setAcceso(false); //creo que aca solo necesito el simbolo
+            //((Identificador) Target).setObtenerSim(true);
+        }
 //        else if (Target instanceof Atributo) {
 //            ((Atributo) Target).setAcceso(true);
 //        }
@@ -61,45 +61,20 @@ public class Atributo extends Expresion {
 
                 codigo += rsTarget.getCodigo();
 
-                if (Target instanceof Atributo || Target instanceof Acceso) { //si cambia el entorno
-                    int tmp = NuevoTemporal();
+                int tmp = NuevoTemporal();
 
-                    codigo += "+, t" + rsTarget.getValor() + ", " + sim.getPos() + ", t" + tmp + "\n";
-                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                    codigo += "=, t0, t" + tmp + ", stack\n";
+                codigo += "+, t" + rsTarget.getValor() + ", " + sim.getPos() + ", t" + tmp + "\n";
+                codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                codigo += "=, t0, t" + tmp + ", stack\n";
 
-                    if (Acceso) {
-                        result.setValor(NuevoTemporal());
-                        codigo += "=, heap, t" + tmp + ", t" + result.getValor() + "\n";
-                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
-                    } else {
-                        result.setEstructura("heap");
-                        result.setValor(tmp);
-                    }
-
+                if (Acceso) {
+                    result.setValor(NuevoTemporal());
+                    codigo += "=, heap, t" + tmp + ", t" + result.getValor() + "\n";
+                    codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + result.getValor() + ", stack\n";
                 } else {
-                    int tmp = NuevoTemporal();
-                    //Valor record
-                    codigo += "+, P, " + rsTarget.getSimbolo().getPos() + ", t" + tmp + "\n";
-                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                    codigo += "=, t0, t" + tmp + ", stack\n";
-
-                    int tmpValor = NuevoTemporal();
-                    codigo += "=, stack, t" + tmp + ", t" + tmpValor + "\n";
-                    codigo += "+, t" + tmpValor + ", " + sim.getPos() + ", t" + tmpValor + "\n";
-                    codigo += "+, P, " + (tmpValor - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                    codigo += "=, t0, t" + tmpValor + ", stack\n";
-
-                    if (Acceso) {
-                        result.setValor(NuevoTemporal());
-                        codigo += "=, heap, t" + tmpValor + ", t" + result.getValor() + "\n";
-                        codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
-                        codigo += "=, t0, t" + result.getValor() + ", stack\n";
-                    } else {
-                        result.setEstructura("heap");
-                        result.setValor(tmpValor);
-                    }
+                    result.setEstructura("heap");
+                    result.setValor(tmp);
                 }
 
             } else {
