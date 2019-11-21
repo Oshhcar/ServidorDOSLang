@@ -48,7 +48,19 @@ public class Atributo extends Expresion {
         Result rsTarget = Target.GetCuadruplos(e, errores);
 
         if (Target.getTipo().IsRecord()) {
-            Simbolo sim = rsTarget.getSimbolo().getEntorno().GetLocal(Id);
+            Simbolo sim;
+
+            if (rsTarget.getSimbolo().getEntorno() == null) {
+                sim = null;
+                Simbolo tipo = e.Get(rsTarget.getSimbolo().getTipo().toString());
+                if (tipo != null) {
+                    if (tipo.getTipo().getEntorno() != null) {
+                        sim = tipo.getTipo().getEntorno().GetLocal(Id);
+                    }
+                }
+            } else {
+                sim = rsTarget.getSimbolo().getEntorno().GetLocal(Id);
+            }
 
             if (sim != null) {
                 Tipo = sim.getTipo();
