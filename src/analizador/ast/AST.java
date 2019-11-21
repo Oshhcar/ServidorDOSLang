@@ -312,9 +312,9 @@ public class AST {
                 //global.getSimbolos().addAll(s.getEntorno().getSimbolos());
                 for(Simbolo s2: s.getEntorno().getSimbolos()){
                     if(s2.getRol() != Rol.FUNCION && s2.getRol() != Rol.METHOD){
-                        //if(s2.getRol() != Rol.GLOBAL){
+                        if(s2.getRol() != Rol.GLOBAL){
                             global.Add(s2);
-                        //}
+                        }
                     }
                 }
             }
