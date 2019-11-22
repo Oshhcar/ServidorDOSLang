@@ -193,7 +193,26 @@ public class SocketServidor extends Thread {
                     }
 
                     simObj.put("rol", s.getRol().name().toLowerCase());
-                    simObj.put("tipo", s.getTipo().toString());
+                    if(s.getTipo().IsArray()){
+                        if(s.getTipo().getDimensiones() != null){
+                            simObj.put("tipo", s.getTipo().toString() + " de " + s.getTipo().getDimensiones().size() + " dim");
+                        } else {
+                            simObj.put("tipo", s.getTipo().toString());
+                        }
+                    } else if(s.getTipo().IsRecord()){
+                        if(s.getTipo().getEntorno() != null){
+                            String rec = "record con ";
+                            
+                            for(Simbolo sRec: s.getTipo().getEntorno().getSimbolos()){
+                                rec += sRec.getId() + ":" + sRec.getTipo().toString() + "; ";
+                            }
+                            simObj.put("tipo", rec);
+                        } else {
+                            simObj.put("tipo", s.getTipo().toString());
+                        }
+                    } else {
+                        simObj.put("tipo", s.getTipo().toString());
+                    }
                     simObj.put("id", s.getId());
                     tableArray.add(simObj);
                 }
