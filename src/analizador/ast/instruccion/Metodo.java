@@ -281,6 +281,7 @@ public class Metodo extends Instruccion {
                             tmpS.setConstante(sim.isConstante());
                             tmpS.setRol(Rol.GLOBAL);
                             tmpS.setEntorno(sim.getEntorno());
+                            tmpS.setTipoParam(sim.getTipoParam());
                             local.Add(tmpS);
                         }
                     }

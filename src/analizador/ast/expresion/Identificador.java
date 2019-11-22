@@ -162,7 +162,16 @@ public class Identificador extends Expresion {
                 codigo += "=, stack, t" + tmp + ", t" + result.getValor() + "\n";
                 codigo += "+, P, " + (result.getValor() - e.getTmpInicio() + e.getSize()) + ", t0\n";
                 codigo += "=, t0, t" + result.getValor() + ", stack\n";
+                
+                if (sim.getTipoParam() == 0){
+                    tmp = NuevoTemporal();
 
+                    codigo += "=, stack, t" + result.getValor() + ", t" + tmp + "\n";
+                    codigo += "+, P, " + (tmp - e.getTmpInicio() + e.getSize()) + ", t0\n";
+                    codigo += "=, t0, t" + tmp + ", stack\n";
+                    result.setValor(tmp);
+                }
+                
                 if (Acceso) {
                     tmp = NuevoTemporal();
 
